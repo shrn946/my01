@@ -1,24 +1,74 @@
 import { getPrisma } from "@/lib/prisma";
 import { heroSlides, posts, projects, reviews } from "@/lib/seed-data";
 
-function normalizeProject(project: any) {
+type CategoryLike = string | { name: string } | null | undefined;
+
+type ProjectInput = {
+  title: string;
+  slug: string;
+  category?: CategoryLike;
+  description: string;
+  overview: string;
+  problem: string;
+  solution: string;
+  result: string;
+  tools: string[];
+  image: string;
+  gallery: string[];
+  liveUrl?: string | null;
+  featured: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export type ProjectItem = Omit<ProjectInput, "category"> & {
+  category: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type BlogPostInput = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  content: string;
+  author: string;
+  image: string;
+  category?: CategoryLike;
+  featured: boolean;
+  publishedAt?: Date;
+  readingTime?: string;
+};
+
+export type BlogPostItem = Omit<BlogPostInput, "category"> & {
+  category: string;
+  publishedAt: Date;
+};
+
+function normalizeCategory(category: CategoryLike, fallback = "WordPress") {
+  return typeof category === "string" ? category : category?.name ?? fallback;
+}
+
+function normalizeProject(project: ProjectInput): ProjectItem {
   return {
     ...project,
-    category: typeof project.category === "string" ? project.category : project.category?.name ?? "WordPress",
+    category: normalizeCategory(project.category),
     createdAt: project.createdAt ?? new Date(),
     updatedAt: project.updatedAt ?? new Date()
   };
 }
 
-function normalizePost(post: any) {
+function normalizePost(post: BlogPostInput): BlogPostItem {
   return {
     ...post,
-    category: typeof post.category === "string" ? post.category : post.category?.name ?? "WordPress",
+    category: normalizeCategory(post.category),
     publishedAt: post.publishedAt ?? new Date()
   };
 }
 
-export async function getProjects(featured = false) {
+export async function getProjects(featured = false): Promise<ProjectItem[]> {
   try {
     const prisma = getPrisma();
     const data = await prisma.project.findMany({
@@ -32,7 +82,7 @@ export async function getProjects(featured = false) {
   }
 }
 
-export async function getProjectBySlug(slug: string) {
+export async function getProjectBySlug(slug: string): Promise<ProjectItem | null> {
   try {
     const prisma = getPrisma();
     const project = await prisma.project.findUnique({ where: { slug }, include: { category: true } });
@@ -42,7 +92,7 @@ export async function getProjectBySlug(slug: string) {
   }
 }
 
-export async function getBlogPosts(featured = false) {
+export async function getBlogPosts(featured = false): Promise<BlogPostItem[]> {
   try {
     const prisma = getPrisma();
     const data = await prisma.blogPost.findMany({
@@ -56,7 +106,7 @@ export async function getBlogPosts(featured = false) {
   }
 }
 
-export async function getBlogPostBySlug(slug: string) {
+export async function getBlogPostBySlug(slug: string): Promise<BlogPostItem | null> {
   try {
     const prisma = getPrisma();
     const post = await prisma.blogPost.findUnique({ where: { slug }, include: { category: true } });
