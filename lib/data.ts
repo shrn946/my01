@@ -47,6 +47,23 @@ export type BlogPostItem = Omit<BlogPostInput, "category"> & {
   publishedAt: Date;
 };
 
+export type ReviewItem = {
+  id?: string;
+  client: string;
+  image?: string | null;
+  company: string;
+  country: string;
+  rating: number;
+  text: string;
+  platform: string;
+  service?: string | null;
+  featured: boolean;
+  active: boolean;
+  sortOrder: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
 function normalizeCategory(category: CategoryLike, fallback = "WordPress") {
   return typeof category === "string" ? category : category?.name ?? fallback;
 }
@@ -116,7 +133,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostItem | nu
   }
 }
 
-export async function getReviews(featured = false) {
+export async function getReviews(featured = false): Promise<ReviewItem[]> {
   try {
     const prisma = getPrisma();
     const data = await prisma.review.findMany({
