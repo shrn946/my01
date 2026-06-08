@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  description String
+  overview    String
+  problem     String
+  solution    String
+  result      String
+  tools       String[]
+  image       String
+  gallery     String[]
+  liveUrl     String?
+  featured    Boolean  @default(false)
+  tags        Tag[]    @relation("ProjectTags")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  metaTitle   String?
+  metaDescription String?
+  content     String
+  author      String
+  image       String
+  publishedAt DateTime @default(now())
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  featured    Boolean  @default(false)
+  tags        Tag[]    @relation("BlogTags")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  client    String
+  image     String?
+  company   String
+  country   String
+  rating    Int      @default(5)
+  text      String
+  platform  String
+  service   String?
+  featured  Boolean  @default(false)
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HeroSlide {
+  id         String   @id @default(cuid())
+  title      String
+  subtitle   String
+  buttonText String
+  buttonLink String
+  image      String
+  sortOrder  Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model InnerHeroSettings {
+  id                   String   @id @default(cuid())
+  fallbackImage        String
+  overlayColor         String   @default("#07111f")
+  overlayOpacity       Int      @default(65)
+  titleColor           String   @default("#ffffff")
+  breadcrumbColor      String   @default("#dbeafe")
+  heroHeight           Int      @default(360)
+  backgroundPosition   String   @default("center center")
+  backgroundAttachment String   @default("scroll")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  projectType String
+  budget      String
+  message     String
+  createdAt   DateTime @default(now())
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  fileName  String
+  url       String
+  mimeType  String
+  size      Int
+  alt       String?
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  projects  Project[]
+  blogPosts BlogPost[]
+  createdAt DateTime   @default(now())
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  projects  Project[]  @relation("ProjectTags")
+  blogPosts BlogPost[] @relation("BlogTags")
+  createdAt DateTime   @default(now())
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
