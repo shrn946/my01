@@ -312,12 +312,13 @@ function EditableCard({ title, id, deleteAction, children }: { title: string; id
   );
 }
 
-function BaseInput({ label, name, defaultValue = "", placeholder = "", required = false }: { label: string; name: string; defaultValue?: string; placeholder?: string; required?: boolean }) {
+function BaseInput({ label, name, defaultValue = "", placeholder = "", type = "text", required = false }: { label: string; name: string; defaultValue?: string; placeholder?: string; type?: string; required?: boolean }) {
   return (
     <label className="grid gap-3 text-sm font-bold text-ink">
       {label}
       <input 
         name={name} 
+        type={type}
         defaultValue={defaultValue} 
         placeholder={placeholder}
         required={required} 
