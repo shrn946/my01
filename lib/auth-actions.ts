@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { Prisma, type User } from "@prisma/client";
 import { createSession, destroySession, verifyPassword } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 
@@ -17,7 +18,20 @@ export async function loginAction(_: unknown, formData: FormData) {
     return { ok: false, message: "Email and password are required." };
   }
 
-  const user = await getPrisma().user.findUnique({ where: { email } });
+  let user: User | null;
+  try {
+    user = await getPrisma().user.findUnique({ where: { email } });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+      return {
+        ok: false,
+        message: "Database tables are missing. Run Prisma migrations and seed the admin user."
+      };
+    }
+
+    throw error;
+  }
+
   if (!user || !(await verifyPassword(password, user.password))) {
     return { ok: false, message: "Invalid email or password." };
   }
