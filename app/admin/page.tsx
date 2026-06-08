@@ -516,7 +516,7 @@ function UserForm({ user }: { user?: any }) {
           <option value="ADMIN">ADMIN</option>
         </select>
       </label>
-      <BaseInput label={user ? "New Password (leave blank to keep current)" : "Password"} name="password" type="password" />
+      <BaseInput label={user ? "New Password (leave blank to keep current)" : "Password"} name="password" type="password" required={!user} />
       <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-5 text-sm font-black text-white shadow-lg shadow-primary/20 transition-all hover:bg-blue-600">
         Save User Account
       </button>

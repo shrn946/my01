@@ -22,14 +22,32 @@ export async function loginAction(_: unknown, formData: FormData) {
   try {
     user = await getPrisma().user.findUnique({ where: { email } });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && ["P2021", "P2022"].includes(error.code)) {
       return {
         ok: false,
-        message: "Database tables are missing. Run Prisma migrations and seed the admin user."
+        message: "Database tables are missing or out of date. Run Prisma migrations and seed the admin user."
       };
     }
 
-    throw error;
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+      return {
+        ok: false,
+        message: "Database connection failed. Check DATABASE_URL, DIRECT_URL, and Supabase access."
+      };
+    }
+
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      return {
+        ok: false,
+        message: "Prisma configuration is invalid. Check prisma.config.ts and your .env file."
+      };
+    }
+
+    console.error("Login failed:", error);
+    return {
+      ok: false,
+      message: "Login failed because the server could not read the user database."
+    };
   }
 
   if (!user || !(await verifyPassword(password, user.password))) {

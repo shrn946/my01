@@ -238,10 +238,31 @@ export async function saveUser(formData: FormData) {
   const prisma = getPrisma();
   const id = readString(formData, "id");
   const password = readString(formData, "password");
-  const data: any = {
+  const email = readString(formData, "email").toLowerCase();
+  const role = readString(formData, "role") === "ADMIN" ? "ADMIN" : "CLIENT";
+
+  if (!email) {
+    throw new Error("Email address is required.");
+  }
+
+  if (!id && !password) {
+    throw new Error("Password is required when creating a new user.");
+  }
+
+  const duplicate = await prisma.user.findUnique({ where: { email } });
+  if (duplicate && duplicate.id !== id) {
+    throw new Error("A user with this email address already exists.");
+  }
+
+  const data: {
+    name: string | null;
+    email: string;
+    role: "ADMIN" | "CLIENT";
+    password?: string;
+  } = {
     name: readString(formData, "name") || null,
-    email: readString(formData, "email").toLowerCase(),
-    role: readString(formData, "role") === "ADMIN" ? "ADMIN" : "CLIENT"
+    email,
+    role
   };
 
   if (password) {
@@ -249,7 +270,7 @@ export async function saveUser(formData: FormData) {
   }
 
   if (id) await prisma.user.update({ where: { id }, data });
-  else await prisma.user.create({ data: { ...data, password: data.password ?? await hashPassword("client12345") } });
+  else await prisma.user.create({ data: { ...data, password: await hashPassword(password) } });
   revalidatePath("/admin");
 }
 
