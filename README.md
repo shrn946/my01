@@ -110,15 +110,23 @@ Important for deployment: Vercel's filesystem is not persistent for user uploads
    - Supabase: create a project, copy the direct PostgreSQL connection string from database settings.
 3. In Vercel, import the GitHub repository.
 4. Add these environment variables in Vercel Project Settings:
-   - `DATABASE_URL`
+   - `DATABASE_URL`: Copy the **Transaction Mode** (Pooled) connection string from Supabase (usually port 6543). **Append `?pgbouncer=true`** to the end of the URL.
+   - `DIRECT_URL`: Copy the **Session Mode** (Direct) connection string from Supabase (usually port 5432).
+   - `AUTH_SECRET`: A long random string for session encryption.
+   - `ADMIN_EMAIL`: Your admin login email.
+   - `ADMIN_PASSWORD`: Your admin login password.
    - `NEXT_PUBLIC_SITE_URL`
    - `NEXT_PUBLIC_WHATSAPP_NUMBER`
    - `NEXT_PUBLIC_CONTACT_EMAIL`
-5. Deploy once, then run the production migration from your local machine:
+5. Deploy once, then run the production migration from your local machine to set up the production database:
 
 ```bash
-npx prisma migrate deploy
-npm run db:seed
+# Temporarily set DATABASE_URL to your PRODUCTION direct connection string (Port 5432)
+# Windows (PowerShell):
+$env:DATABASE_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"; npx prisma migrate deploy; npm run db:seed
+
+# Mac/Linux:
+DATABASE_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres" npx prisma migrate deploy && npm run db:seed
 ```
 
 6. Redeploy from Vercel if needed.
