@@ -36,7 +36,11 @@ async function uniqueSlug(model: "project" | "blogPost", baseSlug: string, curre
   let index = 2;
 
   while (true) {
-    const existing = await prisma[model].findUnique({ where: { slug } });
+    const existing =
+      model === "project"
+        ? await prisma.project.findUnique({ where: { slug } })
+        : await prisma.blogPost.findUnique({ where: { slug } });
+
     if (!existing || existing.id === currentId) return slug;
     slug = `${cleanBase}-${index}`;
     index += 1;
