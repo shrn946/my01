@@ -5,3 +5,9 @@ node_modules
 dist
 coverage
 *.tsbuildinfo
+
+# Dynamic uploads and generated reports
+public/uploads/*
+!public/uploads/.gitkeep
+public/generated/*
+!public/generated/.gitkeep

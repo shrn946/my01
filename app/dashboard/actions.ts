@@ -203,11 +203,21 @@ export async function quickAnalyzeWebsite(url: string) {
       const apiKey = process.env.PAGESPEED_API_KEY;
       const urlWithKey = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodedUrl}${apiKey ? `&key=${apiKey}` : ""}&strategy=${strategy}&category=performance&category=accessibility&category=best-practices&category=seo`;
       
+      console.log(`Running PageSpeed (${strategy}) for: ${targetUrl}`);
       try {
         const psRes = await fetch(urlWithKey, { next: { revalidate: 0 } });
-        if (!psRes.ok) return null;
-        return await psRes.json();
-      } catch (e) {
+        if (!psRes.ok) {
+          const errorText = await psRes.text();
+          console.error(`PageSpeed API Error (${strategy}): ${psRes.status} ${psRes.statusText}`, errorText);
+          return null;
+        }
+        const data = await psRes.json();
+        if (!data.lighthouseResult) {
+          console.error(`PageSpeed API returned invalid data (${strategy}):`, JSON.stringify(data).substring(0, 500));
+        }
+        return data;
+      } catch (e: any) {
+        console.error(`PageSpeed Fetch Exception (${strategy}):`, e.message);
         return null;
       }
     };
