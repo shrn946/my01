@@ -125,8 +125,10 @@ export async function updateLead(id: string, data: any) {
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromium = (await import("@sparticuz/chromium")).default;
-    const { chromium: playwright } = await import("playwright-core");
+    const chromPkg = "@sparticuz/chromium";
+    const corePkg = "playwright-core";
+    const chromium = (await import(chromPkg)).default;
+    const { chromium: playwright } = await import(corePkg);
 
     browser = await playwright.launch({
       args: chromium.args,
@@ -346,8 +348,10 @@ export async function captureWebsiteScreenshot(leadId: string) {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const chromium = (await import("@sparticuz/chromium")).default;
-    const { chromium: playwright } = await import("playwright-core");
+    const chromPkg = "@sparticuz/chromium";
+    const corePkg = "playwright-core";
+    const chromium = (await import(chromPkg)).default;
+    const { chromium: playwright } = await import(corePkg);
 
     browser = await playwright.launch({
       args: chromium.args,
@@ -408,8 +412,10 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     // We'll pass the mode as a query param to the proposal page
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
-    const chromium = (await import("@sparticuz/chromium")).default;
-    const { chromium: playwright } = await import("playwright-core");
+    const chromPkg = "@sparticuz/chromium";
+    const corePkg = "playwright-core";
+    const chromium = (await import(chromPkg)).default;
+    const { chromium: playwright } = await import(corePkg);
 
     browser = await playwright.launch({
       args: chromium.args,
