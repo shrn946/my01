@@ -8,15 +8,15 @@ import { Resend } from "resend";
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromPkg = "@sparticuz/chromium";
-    const corePkg = "playwright-core";
-    const chromium = (await import(chromPkg)).default;
-    const { chromium: playwright } = await import(corePkg);
+    const chromTarget = "@sparticuz/chromium";
+    const coreTarget = "playwright-core";
+    const chromium = (await import(chromTarget)).default;
+    const { chromium: playwright } = await import(coreTarget);
 
     browser = await playwright.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: chromium.headless as any,
     });
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });

@@ -125,15 +125,15 @@ export async function updateLead(id: string, data: any) {
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromPkg = "@sparticuz/chromium";
-    const corePkg = "playwright-core";
-    const chromium = (await import(chromPkg)).default;
-    const { chromium: playwright } = await import(corePkg);
+    const chromTarget = "@sparticuz/chromium";
+    const coreTarget = "playwright-core";
+    const chromium = (await import(chromTarget)).default;
+    const { chromium: playwright } = await import(coreTarget);
 
     browser = await playwright.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: chromium.headless as any,
     });
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -348,15 +348,15 @@ export async function captureWebsiteScreenshot(leadId: string) {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const chromPkg = "@sparticuz/chromium";
-    const corePkg = "playwright-core";
-    const chromium = (await import(chromPkg)).default;
-    const { chromium: playwright } = await import(corePkg);
+    const chromTarget = "@sparticuz/chromium";
+    const coreTarget = "playwright-core";
+    const chromium = (await import(chromTarget)).default;
+    const { chromium: playwright } = await import(coreTarget);
 
     browser = await playwright.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: chromium.headless as any,
     });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -412,15 +412,15 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     // We'll pass the mode as a query param to the proposal page
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
-    const chromPkg = "@sparticuz/chromium";
-    const corePkg = "playwright-core";
-    const chromium = (await import(chromPkg)).default;
-    const { chromium: playwright } = await import(corePkg);
+    const chromTarget = "@sparticuz/chromium";
+    const coreTarget = "playwright-core";
+    const chromium = (await import(chromTarget)).default;
+    const { chromium: playwright } = await import(coreTarget);
 
     browser = await playwright.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: chromium.headless as any,
     });
     
     const page = await browser.newPage();
