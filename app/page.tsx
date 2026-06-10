@@ -10,8 +10,6 @@ import { ReviewsCarousel } from "@/components/reviews-carousel";
 import { getHeroSlides, getProjects, getBlogPosts, getReviews } from "@/lib/data";
 import { services } from "@/lib/seed-data";
 
-export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
   const [slides, featuredProjects, featuredPosts, featuredReviews] = await Promise.all([
     getHeroSlides(true),

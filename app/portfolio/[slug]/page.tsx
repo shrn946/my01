@@ -4,9 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
-import { getProjectBySlug } from "@/lib/data";
+import { getProjectBySlug, getProjects, getRelatedProjects } from "@/lib/data";
+import { ArrowLeft } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+  const projects = await getProjects();
+  return projects.map((project) => ({
+    slug: project.slug,
+  }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -18,6 +24,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
+
+  const related = await getRelatedProjects(slug, project.category);
 
   return (
     <article className="bg-white">
@@ -34,7 +42,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <div className="section-container">
           <div className="mb-12 flex items-center justify-between">
             <Link href="/portfolio" className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-primary">
-              <span>←</span> Back to Portfolio
+              <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> Back to Portfolio
             </Link>
             <div className="flex items-center gap-3">
               <span className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">

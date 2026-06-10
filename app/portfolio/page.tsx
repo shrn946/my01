@@ -24,8 +24,6 @@ export const metadata: Metadata = {
   description: "Explore my WordPress projects, custom Elementor designs, and WooCommerce developments."
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const { category } = await searchParams;
   const projects = await getProjects();

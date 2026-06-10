@@ -6,10 +6,16 @@ import { BlogContent } from "@/components/blog-content";
 import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
 import { BlogCard } from "@/components/blog-card";
-import { getBlogPostBySlug, getBlogPosts } from "@/lib/data";
+import { getBlogPostBySlug, getBlogPosts, getRelatedBlogPosts } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
+import { ArrowLeft, Share2 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+  const posts = await getBlogPosts();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -28,9 +34,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [post, posts] = await Promise.all([getBlogPostBySlug(slug), getBlogPosts()]);
+  const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
-  const related = posts.filter((item) => item.slug !== post.slug).slice(0, 3);
+  
+  const related = await getRelatedBlogPosts(slug, post.category);
 
   return (
     <article className="bg-white">
@@ -49,10 +56,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <FadeIn>
               <div className="mb-12 flex items-center justify-between">
                 <Link href="/blog" className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-primary">
-                  <span>←</span> Back to Blog
+                  <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> Back to Blog
                 </Link>
                 <button className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-500 transition-colors hover:bg-primary hover:text-white">
-                  <span className="text-xs">Share</span>
+                  <Share2 size={18} />
                 </button>
               </div>
 

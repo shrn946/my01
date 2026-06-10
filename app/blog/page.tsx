@@ -7,18 +7,16 @@ import { Search } from "lucide-react";
 import { getBlogPosts } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Blog & Insights | WordPress Developer Portfolio",
+  title: "Blog | WordPress Developer Portfolio",
   description: "Read my latest articles on WordPress development, Elementor design, and website optimization."
 };
-
-export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
   const posts = await getBlogPosts();
   
   return (
     <>
-      <InnerHero title="Insights & Blog" breadcrumbs={[{ label: "Blog" }]} />
+      <InnerHero title="Our Blog" breadcrumbs={[{ label: "Blog" }]} />
       
       <section className="section !py-12 lg:!py-24">
         <div className="section-container">

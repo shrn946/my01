@@ -114,6 +114,7 @@ export async function updateLead(id: string, data: any) {
       where: { id },
       data
     });
+    revalidatePath("/dashboard");
     revalidatePath("/admin/leads");
     revalidatePath(`/admin/leads/${id}`);
     revalidatePath(`/admin/audit?id=${id}`);
@@ -129,14 +130,34 @@ async function crawlDesignData(url: string) {
     const prisma = getPrisma();
     const chromTarget = ["@sparticuz", "chromium"].join("/");
     const coreTarget = ["playwright", "core"].join("-");
-    const chromium = (await import(chromTarget)).default;
-    const { chromium: playwright } = await import(coreTarget);
+    let chromium;
+    let playwright;
 
-    browser = await playwright.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless as any,
-    });
+    try {
+      chromium = (await import(chromTarget)).default;
+      const core = await import(coreTarget);
+      playwright = core.chromium;
+    } catch (e) {
+      console.error("Failed to load playwright-core or @sparticuz/chromium", e);
+      // Fallback for local development if sparticuz is not needed
+      const pw = await import("playwright");
+      playwright = pw.chromium;
+    }
+
+    const launchOptions: any = {
+      args: chromium?.args || [],
+      executablePath: chromium ? await chromium.executablePath() : undefined,
+      headless: chromium ? chromium.headless : true,
+    };
+
+    // If local development (executablePath is empty), launch normally
+    if (!launchOptions.executablePath) {
+      delete launchOptions.executablePath;
+      delete launchOptions.args;
+      launchOptions.headless = true;
+    }
+
+    browser = await playwright.launch(launchOptions);
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(url, { waitUntil: "networkidle" });
@@ -354,14 +375,34 @@ export async function captureWebsiteScreenshot(leadId: string) {
 
     const chromTarget = ["@sparticuz", "chromium"].join("/");
     const coreTarget = ["playwright", "core"].join("-");
-    const chromium = (await import(chromTarget)).default;
-    const { chromium: playwright } = await import(coreTarget);
+    let chromium;
+    let playwright;
 
-    browser = await playwright.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless as any,
-    });
+    try {
+      chromium = (await import(chromTarget)).default;
+      const core = await import(coreTarget);
+      playwright = core.chromium;
+    } catch (e) {
+      console.error("Failed to load playwright-core or @sparticuz/chromium", e);
+      // Fallback for local development if sparticuz is not needed
+      const pw = await import("playwright");
+      playwright = pw.chromium;
+    }
+
+    const launchOptions: any = {
+      args: chromium?.args || [],
+      executablePath: chromium ? await chromium.executablePath() : undefined,
+      headless: chromium ? chromium.headless : true,
+    };
+
+    // If local development (executablePath is empty), launch normally
+    if (!launchOptions.executablePath) {
+      delete launchOptions.executablePath;
+      delete launchOptions.args;
+      launchOptions.headless = true;
+    }
+
+    browser = await playwright.launch(launchOptions);
     const context = await browser.newContext();
     const page = await context.newPage();
     
@@ -375,7 +416,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     const desktopFullPath = path.join(process.cwd(), "public", "generated", "screenshots", desktopFileName);
     
     if (!fs.existsSync(path.dirname(desktopFullPath))) fs.mkdirSync(path.dirname(desktopFullPath), { recursive: true });
-    await page.screenshot({ path: desktopFullPath });
+    await page.screenshot({ path: desktopFullPath, fullPage: true });
 
     // 2. Mobile Screenshot (iPhone 13 style)
     await page.setViewportSize({ width: 390, height: 844 });
@@ -387,7 +428,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     const mobilePublicPath = `/generated/screenshots/${mobileFileName}`;
     const mobileFullPath = path.join(process.cwd(), "public", "generated", "screenshots", mobileFileName);
     
-    await page.screenshot({ path: mobileFullPath });
+    await page.screenshot({ path: mobileFullPath, fullPage: true });
 
     await prisma.lead.update({
       where: { id: leadId },
@@ -419,14 +460,34 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
 
     const chromTarget = ["@sparticuz", "chromium"].join("/");
     const coreTarget = ["playwright", "core"].join("-");
-    const chromium = (await import(chromTarget)).default;
-    const { chromium: playwright } = await import(coreTarget);
+    let chromium;
+    let playwright;
 
-    browser = await playwright.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless as any,
-    });
+    try {
+      chromium = (await import(chromTarget)).default;
+      const core = await import(coreTarget);
+      playwright = core.chromium;
+    } catch (e) {
+      console.error("Failed to load playwright-core or @sparticuz/chromium", e);
+      // Fallback for local development if sparticuz is not needed
+      const pw = await import("playwright");
+      playwright = pw.chromium;
+    }
+
+    const launchOptions: any = {
+      args: chromium?.args || [],
+      executablePath: chromium ? await chromium.executablePath() : undefined,
+      headless: chromium ? chromium.headless : true,
+    };
+
+    // If local development (executablePath is empty), launch normally
+    if (!launchOptions.executablePath) {
+      delete launchOptions.executablePath;
+      delete launchOptions.args;
+      launchOptions.headless = true;
+    }
+
+    browser = await playwright.launch(launchOptions);
     
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1200, height: 1600 });

@@ -180,7 +180,10 @@ export default function DashboardPage() {
       if (field === "desktopImage") {
         setOptions(prev => ({ ...prev, autoScreenshot: false }));
       }
-      toast({ title: "Image updated successfully" });
+      if (field === "proposalImage") {
+        setOptions(prev => ({ ...prev, generateDesign: false }));
+      }
+      toast({ title: "Image updated and saved to lead record" });
     }
   };
 
@@ -209,7 +212,14 @@ export default function DashboardPage() {
 
       if (options.autoScreenshot) {
         setReportState(s => ({ ...s, step: ++currentStep }));
-        await actionCaptureScreenshot(result.leadId);
+        const res = await actionCaptureScreenshot(result.leadId);
+        if (res.success && res.desktopPath) {
+          setResult((prev: any) => ({ 
+            ...prev, 
+            desktopImage: res.desktopPath, 
+            mobileImage: res.mobilePath 
+          }));
+        }
       }
       
       setReportState(s => ({ ...s, step: ++currentStep }));
@@ -226,12 +236,18 @@ export default function DashboardPage() {
       
       if (options.generateDesign) {
         setReportState(s => ({ ...s, step: ++currentStep }));
-        await actionProposalPng(result.leadId);
+        const designRes = await actionProposalPng(result.leadId);
+        if (designRes.success && designRes.path) {
+          setResult((prev: any) => ({ ...prev, proposalImage: designRes.path }));
+        }
       }
 
       if (options.generateTech) {
         setReportState(s => ({ ...s, step: ++currentStep }));
-        await actionProposalPngTech(result.leadId);
+        const techRes = await actionProposalPngTech(result.leadId);
+        if (techRes.success && techRes.path) {
+          setResult((prev: any) => ({ ...prev, proposalImageTech: techRes.path }));
+        }
       }
       
       setReportState(s => ({ ...s, step: ++currentStep }));
@@ -240,16 +256,21 @@ export default function DashboardPage() {
       setReportState(s => ({ ...s, step: ++currentStep }));
       await actionPrepareEmail(result.leadId);
       
-      // Re-fetch final lead data to get generated image paths
+      // Final re-fetch for safety
       const updatedLead = await getLeadAction(result.leadId);
       if (updatedLead) {
-        setResult((prev: any) => ({ ...prev, ...updatedLead, reportStatus: "Generated" }));
+        setResult((prev: any) => ({ 
+          ...prev, 
+          ...updatedLead, 
+          leadId: updatedLead.id, 
+          reportStatus: "Generated" 
+        }));
       } else {
         setResult((prev: any) => ({ ...prev, reportStatus: "Generated" }));
       }
       
       setReportState(s => ({ ...s, active: false, completed: true }));
-      toast({ title: "Report Generated", description: "All assets have been successfully created." });
+      toast({ title: "Report Generated", description: "All assets have been successfully created and saved." });
     } catch (err) {
       console.error("Report generation error:", err);
       toast({ title: "Error", description: "Failed to generate report", variant: "destructive" });
@@ -492,16 +513,41 @@ export default function DashboardPage() {
                     <div className="space-y-2">
                       <Label className="flex justify-between items-center">
                         Main Screenshot
-                        <Badge variant={options.autoScreenshot ? "default" : "outline"} className="text-[10px] h-4 cursor-pointer" onClick={() => setOptions(o => ({ ...o, autoScreenshot: !o.autoScreenshot }))}>
-                          {options.autoScreenshot ? "Auto-capture ON" : "Manual Select"}
+                        <Badge variant={options.autoScreenshot ? "default" : "outline"} className="text-[10px] h-4">
+                          {options.autoScreenshot ? "Auto-capture ON" : "Capture OFF"}
                         </Badge>
                       </Label>
-                      <MediaSelector 
-                        currentImage={result.desktopImage} 
-                        media={media} 
-                        onSelect={(url) => handleSelectImage("desktopImage", url)} 
-                        label="Desktop Screenshot"
-                      />
+                      <div className="group relative aspect-video rounded-xl border overflow-hidden bg-muted/20 flex items-center justify-center">
+                        {result.desktopImage ? (
+                          <img 
+                            src={`${result.desktopImage}?v=${new Date().getTime()}`} 
+                            alt="Main Screenshot" 
+                            className="w-full h-full object-cover object-top" 
+                            onError={(e) => {
+                              // If image fails to load, maybe it's not ready yet or path is wrong
+                              console.error("Image load error", e);
+                            }}
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 p-4 text-center">
+                            {reportState.active && reportState.step === 1 && options.autoScreenshot ? (
+                              <>
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <p className="text-xs text-primary font-bold animate-pulse">Capturing Live Website...</p>
+                              </>
+                            ) : (
+                              <>
+                                <div className="p-3 bg-muted rounded-full">
+                                  <FileImage className="h-6 w-6 text-muted-foreground opacity-40" />
+                                </div>
+                                <p className="text-xs text-muted-foreground font-medium max-w-[150px]">
+                                  {result.reportStatus === "Generated" ? "Screenshot failed to load" : "Screenshot will appear after generation"}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Before / After Image</Label>
@@ -513,7 +559,7 @@ export default function DashboardPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Proposal Image (Manual)</Label>
+                      <Label>Proposal Image (Auto-generated)</Label>
                       <MediaSelector 
                         currentImage={result.proposalImage} 
                         media={media} 
