@@ -3,7 +3,6 @@
 import * as cheerio from "cheerio";
 import { prisma } from "./prisma";
 import { revalidatePath } from "next/cache";
-import { chromium } from "playwright";
 import sharp from "sharp";
 import path from "path";
 import fs from "fs";
@@ -124,8 +123,14 @@ export async function updateLead(id: string, data: any) {
 }
 
 async function crawlDesignData(url: string) {
+  if (process.env.VERCEL) {
+    console.log("Crawl skipped: Chromium is not supported on Vercel serverless functions.");
+    return null;
+  }
+
   let browser;
   try {
+    const { chromium } = await import("playwright");
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -335,11 +340,17 @@ export async function runPageSpeed(leadId: string) {
 }
 
 export async function captureWebsiteScreenshot(leadId: string) {
+  if (process.env.VERCEL) {
+    console.log("Screenshot skipped: Chromium is not supported on Vercel serverless functions.");
+    return { success: false, error: "Chromium is not supported on Vercel." };
+  }
+
   let browser;
   try {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
+    const { chromium } = await import("playwright");
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -386,6 +397,11 @@ export async function captureWebsiteScreenshot(leadId: string) {
 }
 
 export async function generateProposalPng(leadId: string, mode: "design" | "tech" = "design") {
+  if (process.env.VERCEL) {
+    console.log("PNG Generation skipped: Chromium is not supported on Vercel serverless functions.");
+    return { success: false, error: "Chromium is not supported on Vercel." };
+  }
+
   let browser;
   try {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
@@ -395,6 +411,7 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     // We'll pass the mode as a query param to the proposal page
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
+    const { chromium } = await import("playwright");
     browser = await chromium.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]

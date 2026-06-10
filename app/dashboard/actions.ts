@@ -4,17 +4,16 @@ import * as cheerio from "cheerio";
 import { getPrisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
-import { chromium } from "playwright";
 
 async function crawlDesignData(url: string) {
+  if (process.env.VERCEL) {
+    console.log("Crawl skipped: Chromium is not supported on Vercel serverless functions.");
+    return null;
+  }
+
   let browser;
   try {
-    // Vercel does not support launching a browser in serverless functions
-    if (process.env.VERCEL) {
-      console.log("Crawl skipped: Chromium is not supported on Vercel serverless functions.");
-      return null;
-    }
-
+    const { chromium } = await import("playwright");
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
