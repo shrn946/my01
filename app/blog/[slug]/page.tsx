@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Share2, User, Calendar, Clock } from "lucide-react";
 import { BlogContent } from "@/components/blog-content";
 import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
@@ -49,26 +48,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <FadeIn>
               <div className="mb-12 flex items-center justify-between">
                 <Link href="/blog" className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-primary">
-                  <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> Back to Blog
+                  <span>←</span> Back to Blog
                 </Link>
                 <button className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-500 transition-colors hover:bg-primary hover:text-white">
-                  <Share2 size={18} />
+                  <span className="text-xs">Share</span>
                 </button>
               </div>
 
               <div className="mb-12 flex flex-wrap items-center gap-6 text-sm font-bold text-slate-400">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <User size={14} />
-                  </div>
                   <span className="text-ink">{post.author}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar size={16} className="text-primary" />
                   {formatDate(post.publishedAt)}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-primary" />
                   {post.readingTime || "5 min read"}
                 </div>
               </div>
@@ -115,7 +109,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <div className="mb-12 flex items-end justify-between">
               <h2 className="text-3xl font-black text-ink">Related Articles</h2>
               <Link href="/blog" className="group flex items-center gap-2 font-bold text-primary">
-                View All <ArrowLeft size={18} className="rotate-180 transition-transform group-hover:translate-x-1" />
+                View All <span>→</span>
               </Link>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
