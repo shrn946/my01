@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 import { BlogCard } from "@/components/blog-card";
-import { InnerHero } from "@/components/inner-hero";
-import { SectionHeading } from "@/components/section-heading";
-import { FadeIn } from "@/components/fade-in";
-import { getBlogPosts } from "@/lib/data";
-import { Search } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Blog",
-  description: "WordPress, Elementor, WooCommerce, plugin development, speed, and maintenance articles."
-};
+export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
   const posts = await getBlogPosts();

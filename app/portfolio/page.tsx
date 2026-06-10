@@ -1,33 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BriefcaseBusiness, Gauge, Grid3X3, LayoutTemplate, LifeBuoy, MonitorCog, Plug, ShoppingCart, Truck, Wrench, Search } from "lucide-react";
-import { InnerHero } from "@/components/inner-hero";
-import { ProjectCard } from "@/components/project-card";
-import { SectionHeading } from "@/components/section-heading";
-import { FadeIn } from "@/components/fade-in";
-import { getProjects } from "@/lib/data";
-import { slugify } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "WordPress, Elementor, WooCommerce, and custom plugin project case studies."
-};
-
-function CategoryIcon({ category }: { category: string }) {
-  const normalized = slugify(category);
-  const className = "h-4 w-4";
-
-  if (normalized.includes("woocommerce")) return <ShoppingCart className={className} />;
-  if (normalized.includes("elementor")) return <LayoutTemplate className={className} />;
-  if (normalized.includes("plugin")) return <Plug className={className} />;
-  if (normalized.includes("performance")) return <Gauge className={className} />;
-  if (normalized.includes("landing")) return <MonitorCog className={className} />;
-  if (normalized.includes("maintenance")) return <LifeBuoy className={className} />;
-  if (normalized.includes("migration")) return <Truck className={className} />;
-  if (normalized.includes("custom")) return <Wrench className={className} />;
-  if (normalized.includes("business")) return <BriefcaseBusiness className={className} />;
-  return <Grid3X3 className={className} />;
-}
+export const dynamic = "force-dynamic";
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const { category } = await searchParams;

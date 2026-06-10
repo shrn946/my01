@@ -1,9 +1,10 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import EmailTemplatesClient from "./templates-client";
 
 export const dynamic = "force-dynamic";
 
 export default async function EmailTemplatesPage() {
+  const prisma = getPrisma();
   const templates = await prisma.emailTemplate.findMany({
     orderBy: { createdAt: "desc" }
   });

@@ -1,12 +1,11 @@
 import { Suspense } from "react";
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import AuditClient from "./audit-client";
+import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const { id } = await searchParams;
+  const prisma = getPrisma();
 
   if (!id) {
     return (

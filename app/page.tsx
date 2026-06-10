@@ -1,17 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Star, Users, Briefcase, Zap, Rocket, Shield, Cpu, Layout } from "lucide-react";
-import { BlogCard } from "@/components/blog-card";
-import { FadeIn } from "@/components/fade-in";
-import { HeroSlider } from "@/components/hero-slider";
-import { ProjectCard } from "@/components/project-card";
-import { ReviewsCarousel } from "@/components/reviews-carousel";
-import { SectionHeading } from "@/components/section-heading";
-import { ServiceIcon } from "@/components/service-icon";
-import { Counter } from "@/components/counter";
-import { Magnetic } from "@/components/magnetic";
-import { getBlogPosts, getHeroSlides, getProjects, getReviews } from "@/lib/data";
-import { profile } from "@/lib/profile";
-import { services } from "@/lib/seed-data";
+
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [slides, featuredProjects, featuredPosts, featuredReviews] = await Promise.all([

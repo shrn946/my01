@@ -1,10 +1,11 @@
 "use server";
 
-import { prisma } from "./prisma";
+import { getPrisma } from "./prisma";
 import { revalidatePath } from "next/cache";
 
 export async function saveTemplate(data: { id?: string, name: string, subject: string, body: string }) {
   try {
+    const prisma = getPrisma();
     if (data.id) {
       await prisma.emailTemplate.update({
         where: { id: data.id },
@@ -24,6 +25,7 @@ export async function saveTemplate(data: { id?: string, name: string, subject: s
 
 export async function deleteTemplate(id: string) {
   try {
+    const prisma = getPrisma();
     await prisma.emailTemplate.delete({ where: { id } });
     revalidatePath("/admin/email-templates");
     return { success: true };

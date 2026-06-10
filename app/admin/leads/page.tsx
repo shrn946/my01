@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Eye, Plus } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function LeadsPage() {
+  const prisma = getPrisma();
   const leads = await prisma.lead.findMany({
     orderBy: { createdAt: "desc" }
   });

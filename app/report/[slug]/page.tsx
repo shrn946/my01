@@ -1,8 +1,7 @@
 import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, ArrowRight, Monitor, Zap, Search, Layout, Target, AlertCircle, BarChart3, TrendingUp, ShieldCheck, Palette, Type, Terminal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+export const dynamic = "force-dynamic";
 
 export default async function ReportPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

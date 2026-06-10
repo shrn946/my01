@@ -1,14 +1,11 @@
 "use server";
 
 import * as cheerio from "cheerio";
-import { prisma } from "./prisma";
-import { revalidatePath } from "next/cache";
-import sharp from "sharp";
-import path from "path";
-import fs from "fs";
+import { getPrisma } from "./prisma";
 
 export async function extractWebsiteInfo(url: string, data: { businessName: string, source: string, category: string, city: string, notes: string }) {
   try {
+    const prisma = getPrisma();
     const normalizeUrl = (u: string) => {
       if (!u.startsWith("http://") && !u.startsWith("https://")) {
         return "https://" + u;
@@ -109,6 +106,7 @@ export async function extractWebsiteInfo(url: string, data: { businessName: stri
 
 export async function updateLead(id: string, data: any) {
   try {
+    const prisma = getPrisma();
     const lead = await prisma.lead.update({
       where: { id },
       data
@@ -125,6 +123,7 @@ export async function updateLead(id: string, data: any) {
 async function crawlDesignData(url: string) {
   let browser;
   try {
+    const prisma = getPrisma();
     const chromTarget = ["@sparticuz", "chromium"].join("/");
     const coreTarget = ["playwright", "core"].join("-");
     const chromium = (await import(chromTarget)).default;
@@ -209,6 +208,7 @@ async function crawlDesignData(url: string) {
 
 export async function analyzeWebsite(leadId: string) {
   try {
+    const prisma = getPrisma();
     console.log(`Starting PageSpeed analysis for lead: ${leadId}`);
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
@@ -345,6 +345,7 @@ export async function runPageSpeed(leadId: string) {
 export async function captureWebsiteScreenshot(leadId: string) {
   let browser;
   try {
+    const prisma = getPrisma();
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
@@ -405,6 +406,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
 export async function generateProposalPng(leadId: string, mode: "design" | "tech" = "design") {
   let browser;
   try {
+    const prisma = getPrisma();
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 

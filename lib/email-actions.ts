@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "./prisma";
+import { getPrisma } from "./prisma";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 
@@ -8,6 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY || "dummy_key_for_build");
 
 export async function sendLeadEmail(leadId: string, templateId: string | null, customBody: string, subject: string, toEmail: string) {
   try {
+    const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
     const baseUrl = settings?.portfolioUrl || "";
 
@@ -86,6 +87,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
 
 export async function sendTestEmail() {
   try {
+    const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
     const latestLead = await prisma.lead.findFirst({
       orderBy: { createdAt: "desc" }

@@ -7,13 +7,8 @@ import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
 import { BlogCard } from "@/components/blog-card";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/data";
-import { formatDate } from "@/lib/utils";
-import { ArrowLeft, Share2, Calendar, Clock, User } from "lucide-react";
 
-export async function generateStaticParams() {
-  const posts = await getBlogPosts();
-  return posts.map((post) => ({ slug: post.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

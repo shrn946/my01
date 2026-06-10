@@ -5,12 +5,9 @@ import { notFound } from "next/navigation";
 import { ExternalLink, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
-import { getProjectBySlug, getProjects } from "@/lib/data";
+import { getProjectBySlug } from "@/lib/data";
 
-export async function generateStaticParams() {
-  const projects = await getProjects();
-  return projects.map((project) => ({ slug: project.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
