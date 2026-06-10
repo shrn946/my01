@@ -200,7 +200,7 @@ export async function quickAnalyzeWebsite(url: string) {
 
     const encodedUrl = encodeURIComponent(targetUrl);
     const runScore = async (strategy: "mobile" | "desktop") => {
-      const apiKey = process.env.PAGESPEED_API_KEY || "AIzaSyBdGMF3x17MyRlU5jHy_wQd6U9O-XPf7A0";
+      const apiKey = process.env.PAGESPEED_API_KEY;
       const urlWithKey = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodedUrl}${apiKey ? `&key=${apiKey}` : ""}&strategy=${strategy}&category=performance&category=accessibility&category=best-practices&category=seo`;
       
       try {
