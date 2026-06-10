@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { getPrisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import AuditClient from "./audit-client";
 
 export const dynamic = "force-dynamic";
 
