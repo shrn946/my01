@@ -10,14 +10,23 @@ let prismaInstance: PrismaClient | undefined;
 export function getPrisma() {
   if (prismaInstance) return prismaInstance;
 
-  if (process.env.NODE_ENV === "production") {
-    if (!process.env.DATABASE_URL) {
-      console.error("DATABASE_URL is missing. Please add it to your environment variables.");
-    }
+  const dbUrl = process.env.DATABASE_URL;
+
+  if (!dbUrl || !dbUrl.startsWith("postgres")) {
+    console.error("Critical: DATABASE_URL is invalid or missing!", {
+      exists: !!dbUrl,
+      length: dbUrl?.length,
+      prefix: dbUrl?.substring(0, 10)
+    });
   }
 
   prismaInstance = globalForPrisma.prisma ??
     new PrismaClient({
+      datasources: {
+        db: {
+          url: dbUrl,
+        },
+      },
       log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
     });
 
