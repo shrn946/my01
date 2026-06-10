@@ -10,7 +10,9 @@ let prismaInstance: PrismaClient | undefined;
 export function getPrisma() {
   if (prismaInstance) return prismaInstance;
 
-  const dbUrl = process.env.DATABASE_URL;
+  // Strip potential quotes that might be added in deployment UIs
+  const dbUrl = process.env.DATABASE_URL?.replace(/^["']|["']$/g, '');
+  const directUrl = process.env.DIRECT_URL?.replace(/^["']|["']$/g, '');
 
   if (!dbUrl || !dbUrl.startsWith("postgres")) {
     console.error("Critical: DATABASE_URL is invalid or missing!", {
