@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import AuditClient from "./audit-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function AuditPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const { id } = await searchParams;
 
