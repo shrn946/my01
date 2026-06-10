@@ -146,6 +146,17 @@ export async function getReviews(featured = false): Promise<ReviewItem[]> {
   }
 }
 
+export async function getPortfolioExamples() {
+  try {
+    const prisma = getPrisma();
+    return await prisma.portfolioExample.findMany({
+      orderBy: { createdAt: "desc" }
+    });
+  } catch {
+    return [];
+  }
+}
+
 export async function getHeroSlides(activeOnly = true) {
   try {
     const prisma = getPrisma();

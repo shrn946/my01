@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Star, Users, Briefcase, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle2, Star, Users, Briefcase, Zap, Rocket, Shield, Cpu, Layout } from "lucide-react";
 import { BlogCard } from "@/components/blog-card";
 import { FadeIn } from "@/components/fade-in";
 import { HeroSlider } from "@/components/hero-slider";
@@ -7,6 +7,8 @@ import { ProjectCard } from "@/components/project-card";
 import { ReviewsCarousel } from "@/components/reviews-carousel";
 import { SectionHeading } from "@/components/section-heading";
 import { ServiceIcon } from "@/components/service-icon";
+import { Counter } from "@/components/counter";
+import { Magnetic } from "@/components/magnetic";
 import { getBlogPosts, getHeroSlides, getProjects, getReviews } from "@/lib/data";
 import { profile } from "@/lib/profile";
 import { services } from "@/lib/seed-data";
@@ -23,37 +25,74 @@ export default async function HomePage() {
     <>
       <HeroSlider slides={slides} />
 
-      {/* Services Section */}
-      <section className="section overflow-hidden">
-        <SectionHeading 
-          eyebrow="Services" 
-          title="WordPress solutions for modern businesses" 
-          text="Transforming your vision into a high-performance reality with expert WordPress development, custom Elementor designs, and robust WooCommerce systems." 
-        />
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {services.slice(0, 8).map((service, index) => (
-            <FadeIn key={service.title} delay={index * 0.05} className="group relative rounded-3xl border border-black/5 bg-white p-8 shadow-soft transition-all hover:-translate-y-2 hover:shadow-premium">
-              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                <ServiceIcon title={service.title} />
+      {/* Services Section - Bento Grid */}
+      <section className="section relative overflow-hidden bg-white">
+        <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none">
+          <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-primary blur-[120px]" />
+        </div>
+
+        <div className="section-container relative z-10">
+          <SectionHeading 
+            eyebrow="Expertise" 
+            title="WordPress solutions for modern businesses" 
+            text="Transforming your vision into a high-performance reality with expert WordPress development, custom Elementor designs, and robust WooCommerce systems." 
+            outlineText="SOLUTIONS"
+          />
+          <div className="grid gap-6 md:grid-cols-4 lg:grid-rows-2">
+            {/* Main Service - Large Card - Now Light with Primary Accents */}
+            <FadeIn className="md:col-span-2 md:row-span-2 bento-card bg-slate-50 overflow-hidden group border-primary/10">
+              <div className="relative z-10 flex h-full flex-col justify-between p-2">
+                <div>
+                  <div className="mb-8 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
+                    <Rocket size={32} />
+                  </div>
+                  <h3 className="text-4xl font-black leading-tight text-ink">{services[0].title}</h3>
+                  <p className="mt-6 text-lg leading-relaxed text-slate-600">
+                    {services[0].description}
+                  </p>
+                  <ul className="mt-8 space-y-4">
+                    {["Custom Theme Dev", "Speed Optimization", "Security Audits"].map((item) => (
+                      <li key={item} className="flex items-center gap-3 text-sm font-bold text-slate-500">
+                        <CheckCircle2 size={18} className="text-primary" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Link href="/services" className="group mt-12 inline-flex items-center gap-2 font-black text-primary transition-all hover:gap-4">
+                  Explore Solutions <ArrowRight size={20} />
+                </Link>
               </div>
-              <h3 className="text-xl font-black text-ink">{service.title}</h3>
-              <p className="mt-4 text-sm leading-relaxed text-slate-500">{service.description}</p>
-              <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                Learn More <ArrowRight size={14} />
-              </div>
+              <div className="absolute -right-20 -bottom-20 h-80 w-80 rounded-full bg-primary/5 blur-[80px] transition-all duration-700 group-hover:bg-primary/10 group-hover:scale-125" />
             </FadeIn>
-          ))}
+
+            {/* Secondary Services */}
+            {[
+              { ...services[1], icon: Layout, color: "bg-blue-500/10 text-blue-500" },
+              { ...services[2], icon: Shield, color: "bg-emerald-500/10 text-emerald-500" },
+              { ...services[3], icon: Cpu, color: "bg-purple-500/10 text-purple-500" },
+              { ...services[4], icon: Zap, color: "bg-amber-500/10 text-amber-500" },
+            ].map((service, index) => (
+              <FadeIn key={service.title} delay={index * 0.1} className="bento-card group hover:border-primary/20 bg-white">
+                <div className={`mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl ${service.color} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                  <service.icon size={24} />
+                </div>
+                <h3 className="text-xl font-black text-ink transition-colors group-hover:text-primary">{service.title}</h3>
+                <p className="mt-4 text-sm leading-relaxed text-slate-500">{service.description}</p>
+              </FadeIn>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="relative overflow-hidden bg-coal py-24 lg:py-32">
-        <div className="absolute inset-0 z-0 opacity-20">
-          <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-primary/30 blur-3xl" />
-          <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
+      {/* Stats Section - Now Light */}
+      <section className="relative overflow-hidden bg-slate-50 py-24 lg:py-32">
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-primary/30 blur-[100px]" />
+          <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-blue-600/20 blur-[100px]" />
         </div>
         
-        <div className="container relative z-10 mx-auto px-6">
+        <div className="section-container relative z-10">
           <div className="grid gap-12 text-center md:grid-cols-3">
             {[
               { label: "Projects Completed", value: "500+", icon: Briefcase },
@@ -61,12 +100,14 @@ export default async function HomePage() {
               { label: "Years Experience", value: "8+", icon: Zap },
             ].map((stat, index) => (
               <FadeIn key={stat.label} delay={index * 0.1}>
-                <div className="flex flex-col items-center">
-                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-primary backdrop-blur-sm">
-                    <stat.icon size={32} />
+                <div className="flex flex-col items-center group">
+                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white text-primary shadow-soft border border-black/5 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-primary group-hover:text-white">
+                    <stat.icon size={36} />
                   </div>
-                  <span className="text-5xl font-black text-white sm:text-6xl">{stat.value}</span>
-                  <span className="mt-3 text-sm font-bold uppercase tracking-widest text-slate-400">{stat.label}</span>
+                  <span className="text-6xl font-black text-ink sm:text-7xl tracking-tight">
+                    <Counter value={stat.value} />
+                  </span>
+                  <span className="mt-4 text-xs font-bold uppercase tracking-[0.3em] text-slate-400 group-hover:text-primary transition-colors">{stat.label}</span>
                 </div>
               </FadeIn>
             ))}
@@ -75,84 +116,73 @@ export default async function HomePage() {
       </section>
 
       {/* Portfolio Section */}
-      <section className="section bg-slate-50/50">
-        <div className="flex flex-col items-end justify-between gap-6 md:flex-row md:items-center">
-          <SectionHeading 
-            align="left"
-            eyebrow="Portfolio" 
-            title="Featured Case Studies" 
-            text="Explore my latest WordPress projects, from custom enterprise sites to complex WooCommerce builds."
-          />
-          <Link href="/portfolio" className="group mb-16 inline-flex items-center gap-2 font-bold text-primary">
-            View All Projects <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-        <div className="grid gap-8 lg:grid-cols-3">
-          {featuredProjects.slice(0, 3).map((project, index) => (
-            <FadeIn key={project.slug} delay={index * 0.1}>
-              <ProjectCard project={project} />
-            </FadeIn>
-          ))}
+      <section className="section bg-white">
+        <div className="section-container">
+          <div className="flex flex-col items-end justify-between gap-8 md:flex-row md:items-center mb-16">
+            <SectionHeading 
+              align="left"
+              eyebrow="Portfolio" 
+              title="Featured Case Studies" 
+              text="Explore my latest WordPress projects, from custom enterprise sites to complex WooCommerce builds."
+              outlineText="PROJECTS"
+              className="mb-0"
+            />
+            <Magnetic>
+              <Link href="/portfolio" className="group inline-flex items-center gap-3 rounded-full bg-slate-50 px-8 py-4 text-sm font-bold text-ink shadow-sm border border-black/5 hover:border-primary/20 hover:shadow-soft transition-all">
+                View All Projects <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Magnetic>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {featuredProjects.slice(0, 3).map((project, index) => (
+              <ProjectCard key={project.slug} project={project} />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Reviews Section */}
-      <section className="section">
-        <SectionHeading 
-          eyebrow="Reviews" 
-          title="What my clients are saying" 
-          text="Trusted by businesses worldwide to deliver reliable, high-performing WordPress solutions."
-        />
-        <ReviewsCarousel reviews={featuredReviews} />
-      </section>
-
-      {/* Blog Section */}
       <section className="section bg-slate-50/50">
-        <div className="flex flex-col items-end justify-between gap-6 md:flex-row md:items-center">
+        <div className="section-container">
           <SectionHeading 
-            align="left"
-            eyebrow="Insights" 
-            title="Latest from the blog" 
-            text="Tips, tricks and deep dives into WordPress development and digital growth."
+            eyebrow="Testimonials" 
+            title="What my clients are saying" 
+            text="Trusted by businesses worldwide to deliver reliable, high-performing WordPress solutions."
+            outlineText="TRUSTED"
           />
-          <Link href="/blog" className="group mb-16 inline-flex items-center gap-2 font-bold text-primary">
-            Read More Articles <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-        <div className="grid gap-8 lg:grid-cols-3">
-          {featuredPosts.slice(0, 3).map((post, index) => (
-            <FadeIn key={post.slug} delay={index * 0.1}>
-              <BlogCard post={post} />
-            </FadeIn>
-          ))}
+          <ReviewsCarousel reviews={featuredReviews} />
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="section">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-ink px-8 py-20 text-center lg:py-32">
-          <div className="absolute inset-0 z-0 opacity-30">
-            <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-primary blur-3xl" />
-            <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-blue-600 blur-3xl" />
-          </div>
-          
-          <div className="relative z-10 mx-auto max-w-3xl">
-            <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground/80 backdrop-blur-sm">
-              Ready to grow?
-            </span>
-            <h2 className="mt-8 text-4xl font-black text-white sm:text-6xl leading-[1.1]">
-              Let's build something <span className="text-primary">extraordinary</span> together.
-            </h2>
-            <p className="mt-8 text-lg text-slate-300">
-              Whether you need a new build, a performance boost, or ongoing maintenance, I'm here to help your WordPress site succeed.
-            </p>
-            <div className="mt-12 flex flex-wrap justify-center gap-4">
-              <Link href="/contact" className="group inline-flex items-center gap-2 rounded-full bg-primary px-10 py-5 text-sm font-bold text-white transition-all hover:bg-blue-600 hover:shadow-xl hover:shadow-primary/25">
-                Start My Project <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link href="/about" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-10 py-5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/10">
-                Learn More About Me
-              </Link>
+      {/* CTA Section - Keeping Primary Blue for high impact */}
+      <section className="section overflow-hidden">
+        <div className="section-container">
+          <div className="relative overflow-hidden rounded-[3rem] bg-primary px-8 py-20 text-center lg:py-32 shadow-2xl shadow-primary/20">
+            <div className="absolute inset-0 z-0 opacity-40">
+              <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-white/20 blur-3xl animate-pulse" />
+              <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-blue-950/20 blur-3xl animate-pulse" />
+            </div>
+            
+            <div className="relative z-10 mx-auto max-w-3xl">
+              <span className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur-md">
+                Ready to grow?
+              </span>
+              <h2 className="mt-8 text-4xl font-black text-white sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight">
+                Let's build something <span className="text-blue-950">extraordinary</span> together.
+              </h2>
+              <p className="mt-8 text-lg text-white/80 max-w-2xl mx-auto">
+                Whether you need a new build, a performance boost, or ongoing maintenance, I'm here to help your WordPress site succeed.
+              </p>
+              <div className="mt-12 flex flex-wrap justify-center gap-6">
+                <Magnetic>
+                  <Link href="/contact" className="group inline-flex items-center gap-3 rounded-full bg-white px-10 py-5 text-sm font-bold text-primary transition-all hover:scale-105 active:scale-95 shadow-xl">
+                    Start My Project <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Magnetic>
+                <Link href="/about" className="inline-flex items-center gap-3 rounded-full border border-white/30 bg-white/10 px-10 py-5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20">
+                  Learn More About Me
+                </Link>
+              </div>
             </div>
           </div>
         </div>

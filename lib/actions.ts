@@ -183,6 +183,30 @@ export async function deleteReview(formData: FormData) {
   revalidatePath("/admin");
 }
 
+export async function savePortfolioExample(formData: FormData) {
+  await requireRole("ADMIN");
+  const prisma = getPrisma();
+  const id = readString(formData, "id");
+  const data = {
+    category: readString(formData, "category"),
+    title: readString(formData, "title"),
+    url: readString(formData, "url"),
+    thumbnail: readString(formData, "thumbnail"),
+    description: readString(formData, "description")
+  };
+
+  if (id) await prisma.portfolioExample.update({ where: { id }, data });
+  else await prisma.portfolioExample.create({ data });
+  revalidatePath("/admin");
+}
+
+export async function deletePortfolioExample(formData: FormData) {
+  await requireRole("ADMIN");
+  const prisma = getPrisma();
+  await prisma.portfolioExample.delete({ where: { id: readString(formData, "id") } });
+  revalidatePath("/admin");
+}
+
 export async function saveHeroSlide(formData: FormData) {
   await requireRole("ADMIN");
   const prisma = getPrisma();

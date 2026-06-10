@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ScrollProgressBar } from "@/components/scroll-progress-bar";
+import { PageTransition } from "@/components/page-transition";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -28,11 +31,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={jakarta.variable}>
-      <body className="font-sans antialiased">
+    <html lang="en" className={jakarta.variable} suppressHydrationWarning>
+      <body className="font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground">
+        <ScrollProgressBar />
         <SiteHeader />
-        <main>{children}</main>
+        <main className="min-h-screen">
+          <PageTransition>
+            {children}
+          </PageTransition>
+        </main>
         <SiteFooter />
+        <Toaster />
       </body>
     </html>
   );

@@ -6,6 +6,8 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
+import { Magnetic } from "./magnetic";
+
 const navItems = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
@@ -54,12 +56,14 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Link 
-            href="/contact" 
-            className="hidden rounded-full bg-ink px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary hover:shadow-lg hover:shadow-primary/25 lg:inline-flex"
-          >
-            Hire Me
-          </Link>
+          <Magnetic>
+            <Link 
+              href="/contact" 
+              className="hidden rounded-full bg-ink px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary hover:shadow-lg hover:shadow-primary/25 lg:inline-flex"
+            >
+              Hire Me
+            </Link>
+          </Magnetic>
           
           <button 
             className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-ink transition-colors hover:bg-slate-200 lg:hidden" 
@@ -104,3 +108,4 @@ export function SiteHeader() {
     </header>
   );
 }
+

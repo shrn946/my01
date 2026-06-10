@@ -9,11 +9,10 @@ datasource db {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  slug        String   @unique
+  slug        String    @unique
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   description String
   overview    String
   problem     String
@@ -23,46 +22,47 @@ model Project {
   image       String
   gallery     String[]
   liveUrl     String?
-  featured    Boolean  @default(false)
-  tags        Tag[]    @relation("ProjectTags")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  featured    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
+  tags        Tag[]     @relation("ProjectTags")
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  excerpt     String
-  metaTitle   String?
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  excerpt         String
+  content         String
+  author          String
+  image           String
+  publishedAt     DateTime  @default(now())
+  categoryId      String?
+  featured        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   metaDescription String?
-  content     String
-  author      String
-  image       String
-  publishedAt DateTime @default(now())
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  featured    Boolean  @default(false)
-  tags        Tag[]    @relation("BlogTags")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  metaTitle       String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  tags            Tag[]     @relation("BlogTags")
 }
 
 model Review {
   id        String   @id @default(cuid())
   client    String
-  image     String?
   company   String
   country   String
   rating    Int      @default(5)
   text      String
   platform  String
-  service   String?
   featured  Boolean  @default(false)
-  active    Boolean  @default(true)
-  sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  active    Boolean  @default(true)
+  image     String?
+  service   String?
+  sortOrder Int      @default(0)
 }
 
 model HeroSlide {
@@ -117,18 +117,18 @@ model Category {
   id        String     @id @default(cuid())
   name      String
   slug      String     @unique
-  projects  Project[]
-  blogPosts BlogPost[]
   createdAt DateTime   @default(now())
+  blogPosts BlogPost[]
+  projects  Project[]
 }
 
 model Tag {
   id        String     @id @default(cuid())
   name      String
   slug      String     @unique
-  projects  Project[]  @relation("ProjectTags")
-  blogPosts BlogPost[] @relation("BlogTags")
   createdAt DateTime   @default(now())
+  blogPosts BlogPost[] @relation("BlogTags")
+  projects  Project[]  @relation("ProjectTags")
 }
 
 model User {
@@ -139,6 +139,95 @@ model User {
   role      Role     @default(CLIENT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id                     String     @id @default(cuid())
+  businessName           String?
+  website                String
+  email                  String?
+  phone                  String?
+  address                String?
+  city                   String?
+  category               String?
+  source                 String?
+  status                 String     @default("New")
+  leadScore              Int?
+  websiteScore           Int?
+  performanceScore       Int?
+  seoScore               Int?
+  accessibilityScore     Int?
+  bestPracticesScore     Int?
+  mobileScore            Int?
+  desktopScore           Int?
+  topIssues              String?
+  notes                  String?
+  followUpDate           DateTime?
+  lastContactedAt        DateTime?
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  beforeAfterImage       String?
+  conversionScore        Int?
+  designScore            Int?
+  desktopImage           String?
+  improvementProposals   String[]
+  mobileImage            String?
+  pageSpeedAccessibility Int?
+  pageSpeedBestPractices Int?
+  pageSpeedPerformance   Int?
+  pageSpeedSeo           Int?
+  proposalImage          String?
+  reportStatus           String     @default("Not Generated")
+  proposalImageTech      String?
+  designAnalysis         Json?
+  developerComments      String?
+  emailLogs              EmailLog[]
+}
+
+model PortfolioExample {
+  id          String   @id @default(cuid())
+  category    String
+  title       String
+  url         String
+  thumbnail   String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EmailTemplate {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  subject   String
+  body      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  emailLogs EmailLog[]
+}
+
+model EmailLog {
+  id           String         @id @default(cuid())
+  leadId       String
+  templateId   String?
+  toEmail      String
+  subject      String
+  body         String
+  status       String
+  errorMessage String?
+  sentAt       DateTime       @default(now())
+  lead         Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  template     EmailTemplate? @relation(fields: [templateId], references: [id])
+}
+
+model Settings {
+  id              String   @id @default("default")
+  senderName      String?
+  senderEmail     String?
+  resendApiKey    String?
+  companyName     String?
+  portfolioUrl    String?
+  demoWebsiteUrls String?
+  updatedAt       DateTime @updatedAt
 }
 
 enum Role {

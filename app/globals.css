@@ -34,36 +34,6 @@
 
     --radius: 0.75rem;
   }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-  }
 }
 
 @layer base {
@@ -85,7 +55,11 @@ html {
 }
 
 .section {
-  @apply mx-auto w-full max-w-7xl px-6 py-20 lg:py-32;
+  @apply w-full py-20 lg:py-32;
+}
+
+.section-container {
+  @apply mx-auto w-full max-w-7xl px-6;
 }
 
 .eyebrow {
@@ -94,8 +68,19 @@ html {
 
 .glass {
   @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
 }
 
 .gradient-text {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600;
+}
+
+.bento-card {
+  @apply relative overflow-hidden rounded-[2.5rem] border border-black/5 bg-white p-8 shadow-soft transition-all hover:shadow-premium;
+}
+
+.noise-overlay {
+  @apply absolute inset-0 z-0 pointer-events-none opacity-[0.03];
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
