@@ -12,8 +12,14 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
+function getBaseUrl() {
+  const url = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  if (url.startsWith("http")) return new URL(url);
+  return new URL(`https://${url}`);
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: getBaseUrl(),
   title: {
     default: "Hassan Naqvi - WordPress Developer & Elementor Expert",
     template: "%s | WordPress Developer Portfolio"
