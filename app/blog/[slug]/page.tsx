@@ -7,6 +7,7 @@ import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
 import { BlogCard } from "@/components/blog-card";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/data";
+import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
 import { getProjectBySlug } from "@/lib/data";
@@ -35,7 +34,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <div className="section-container">
           <div className="mb-12 flex items-center justify-between">
             <Link href="/portfolio" className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-primary">
-              <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> Back to Portfolio
+              <span>←</span> Back to Portfolio
             </Link>
             <div className="flex items-center gap-3">
               <span className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
@@ -121,7 +120,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                           target="_blank" 
                           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all hover:bg-blue-600 hover:shadow-xl"
                         >
-                          Visit Live Website <ExternalLink size={16} />
+                          Visit Live Website <span>↗</span>
                         </a>
                       </div>
                     )}
@@ -133,7 +132,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                   <ul className="mt-6 space-y-4">
                     {["Performance Optimized", "Fully Responsive", "SEO Ready", "Custom Designed"].map((item) => (
                       <li key={item} className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                        <CheckCircle2 size={18} className="text-primary" /> {item}
+                        <span className="text-primary font-bold">✓</span> {item}
                       </li>
                     ))}
                   </ul>
