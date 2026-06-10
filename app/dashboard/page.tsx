@@ -104,12 +104,13 @@ export default function DashboardPage() {
     
     try {
       const res = await quickAnalyzeWebsite(url);
-      if (res.success) {
+      if (res.success && res.data) {
         setResult(res.data);
         localStorage.setItem("lastLeadId", res.data.leadId); // Persist the new lead ID
         setEditEmail(res.data.email || "");
         setEditName(res.data.businessName || "");
         setEditComments("");
+        // @ts-ignore - handled in action update next
         setEditProposals(res.data.improvementProposals || [
           "Modern Hero Section",
           "Better Typography",
@@ -122,7 +123,7 @@ export default function DashboardPage() {
         ]);
         toast({ title: "Analysis Complete", description: "Website data extracted successfully." });
       } else {
-        toast({ title: "Analysis Failed", description: res.error, variant: "destructive" });
+        toast({ title: "Analysis Failed", description: res.error || "Unknown error", variant: "destructive" });
       }
     } catch (error) {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
@@ -769,7 +770,7 @@ function MediaSelector({ currentImage, media, onSelect, label }: { currentImage:
             >
               <img src={asset.url} alt={asset.fileName} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                <Button variant="secondary" size="xs">Select</Button>
+                <Button variant="secondary" size="sm">Select</Button>
               </div>
               <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-1">
                 <p className="text-[10px] text-white truncate">{asset.fileName}</p>
