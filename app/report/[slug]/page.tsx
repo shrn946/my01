@@ -1,5 +1,23 @@
 import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { 
+  Zap, 
+  Search, 
+  ShieldCheck, 
+  TrendingUp, 
+  Target, 
+  Layout, 
+  Monitor, 
+  Terminal, 
+  Palette, 
+  Type, 
+  CheckCircle2, 
+  AlertCircle, 
+  ArrowRight,
+  BarChart3
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 

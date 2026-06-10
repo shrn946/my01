@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
 import { BlogCard } from "@/components/blog-card";
+import { InnerHero } from "@/components/inner-hero";
+import { SectionHeading } from "@/components/section-heading";
+import { FadeIn } from "@/components/fade-in";
+import { Search } from "lucide-react";
+import { getBlogPosts } from "@/lib/data";
+
+export const metadata: Metadata = {
+  title: "Blog & Insights | WordPress Developer Portfolio",
+  description: "Read my latest articles on WordPress development, Elementor design, and website optimization."
+};
 
 export const dynamic = "force-dynamic";
 

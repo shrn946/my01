@@ -1,6 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BriefcaseBusiness, Gauge, Grid3X3, LayoutTemplate, LifeBuoy, MonitorCog, Plug, ShoppingCart, Truck, Wrench, Search } from "lucide-react";
+import { InnerHero } from "@/components/inner-hero";
+import { SectionHeading } from "@/components/section-heading";
+import { ProjectCard } from "@/components/project-card";
+import { FadeIn } from "@/components/fade-in";
+import { getProjects } from "@/lib/data";
+import { slugify } from "@/lib/utils";
+
+// Custom Icon Mapper for Categories
+function CategoryIcon({ category, size = 14 }: { category: string; size?: number }) {
+  const c = category.toLowerCase();
+  if (c.includes("ecommerce") || c.includes("woo")) return <ShoppingCart size={size} />;
+  if (c.includes("elementor") || c.includes("landing")) return <LayoutTemplate size={size} />;
+  if (c.includes("plugin") || c.includes("dev")) return <Plug size={size} />;
+  if (c.includes("speed") || c.includes("performance")) return <Gauge size={size} />;
+  if (c.includes("maintenance") || c.includes("support")) return <LifeBuoy size={size} />;
+  return <BriefcaseBusiness size={size} />;
+}
+
+export const metadata: Metadata = {
+  title: "Portfolio | WordPress Developer Case Studies",
+  description: "Explore my WordPress projects, custom Elementor designs, and WooCommerce developments."
+};
 
 export const dynamic = "force-dynamic";
 
