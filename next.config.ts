@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" }
     ]
-  }
+  },
+  serverExternalPackages: ["playwright", "playwright-core"]
 };
 
 export default nextConfig;
