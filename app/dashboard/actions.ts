@@ -6,15 +6,16 @@ import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 
 async function crawlDesignData(url: string) {
-  if (process.env.VERCEL) {
-    console.log("Crawl skipped: Chromium is not supported on Vercel serverless functions.");
-    return null;
-  }
-
   let browser;
   try {
-    const { chromium } = await import("playwright");
-    browser = await chromium.launch({ headless: true });
+    const chromium = (await import("@sparticuz/chromium")).default;
+    const { chromium: playwright } = await import("playwright-core");
+
+    browser = await playwright.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(url, { waitUntil: "networkidle" });
