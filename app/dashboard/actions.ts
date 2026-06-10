@@ -9,6 +9,12 @@ import { chromium } from "playwright";
 async function crawlDesignData(url: string) {
   let browser;
   try {
+    // Vercel does not support launching a browser in serverless functions
+    if (process.env.VERCEL) {
+      console.log("Crawl skipped: Chromium is not supported on Vercel serverless functions.");
+      return null;
+    }
+
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
