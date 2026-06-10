@@ -230,7 +230,7 @@ export async function analyzeWebsite(leadId: string) {
     // 4. PageSpeed API Scores
     const urlEncoded = encodeURIComponent(lead.website);
     const runScore = async (strategy: "mobile" | "desktop") => {
-      const apiKey = process.env.PAGESPEED_API_KEY || "AIzaSyBdGMF3x17MyRlU5jHy_wQd6U9O-XPf7A0";
+      const apiKey = process.env.PAGESPEED_API_KEY || "";
       const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlEncoded}&strategy=${strategy}&category=performance&category=accessibility&category=best-practices&category=seo${apiKey ? `&key=${apiKey}` : ""}`;
       try {
         const controller = new AbortController();
