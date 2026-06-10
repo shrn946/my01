@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" }
     ]
   },
-  serverExternalPackages: ["playwright", "playwright-core", "@sparticuz/chromium"]
+  serverExternalPackages: ["playwright-core", "@sparticuz/chromium"]
 };
 
 export default nextConfig;
