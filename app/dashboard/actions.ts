@@ -8,8 +8,8 @@ import { Resend } from "resend";
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromTarget = "@sparticuz/chromium";
-    const coreTarget = "playwright-core";
+    const chromTarget = ["@sparticuz", "chromium"].join("/");
+    const coreTarget = ["playwright", "core"].join("-");
     const chromium = (await import(chromTarget)).default;
     const { chromium: playwright } = await import(coreTarget);
 

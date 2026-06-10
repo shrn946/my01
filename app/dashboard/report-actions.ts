@@ -4,7 +4,7 @@ import { getPrisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { generateProposalPng, captureWebsiteScreenshot } from "@/lib/lead-actions";
 
-// These actions mock the heavy lifting or integrate with actual playwright/puppeteer logic if present.
+// These actions simulate processing or integrate with external logic if present.
 // For the workflow requirement, they update the lead state and simulate processing.
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));

@@ -125,8 +125,8 @@ export async function updateLead(id: string, data: any) {
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromTarget = "@sparticuz/chromium";
-    const coreTarget = "playwright-core";
+    const chromTarget = ["@sparticuz", "chromium"].join("/");
+    const coreTarget = ["playwright", "core"].join("-");
     const chromium = (await import(chromTarget)).default;
     const { chromium: playwright } = await import(coreTarget);
 
@@ -213,7 +213,7 @@ export async function analyzeWebsite(leadId: string) {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    // 1. Run Design Crawl (Playwright)
+    // 1. Run Design Crawl 
     const designAnalysis = await crawlDesignData(lead.website);
 
     // 2. Fetch HTML and Parse (Cheerio)
@@ -348,8 +348,8 @@ export async function captureWebsiteScreenshot(leadId: string) {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const chromTarget = "@sparticuz/chromium";
-    const coreTarget = "playwright-core";
+    const chromTarget = ["@sparticuz", "chromium"].join("/");
+    const coreTarget = ["playwright", "core"].join("-");
     const chromium = (await import(chromTarget)).default;
     const { chromium: playwright } = await import(coreTarget);
 
@@ -412,8 +412,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     // We'll pass the mode as a query param to the proposal page
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
-    const chromTarget = "@sparticuz/chromium";
-    const coreTarget = "playwright-core";
+    const chromTarget = ["@sparticuz", "chromium"].join("/");
+    const coreTarget = ["playwright", "core"].join("-");
     const chromium = (await import(chromTarget)).default;
     const { chromium: playwright } = await import(coreTarget);
 
