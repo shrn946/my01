@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Share2, User, Calendar, Clock } from "lucide-react";
 import { BlogContent } from "@/components/blog-content";
 import { InnerHero } from "@/components/inner-hero";
 import { FadeIn } from "@/components/fade-in";
