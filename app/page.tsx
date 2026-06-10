@@ -1,5 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Star, Users, Briefcase, Zap, Rocket, Shield, Cpu, Layout } from "lucide-react";
+import { HeroSlider } from "@/components/hero-slider";
+import { SectionHeading } from "@/components/section-heading";
+import { FadeIn } from "@/components/fade-in";
+import { Counter } from "@/components/counter";
+import { Magnetic } from "@/components/magnetic";
+import { ProjectCard } from "@/components/project-card";
+import { ReviewsCarousel } from "@/components/reviews-carousel";
+import { getHeroSlides, getProjects, getBlogPosts, getReviews } from "@/lib/data";
+import { services } from "@/lib/seed-data";
 
 export const dynamic = "force-dynamic";
 
