@@ -20,15 +20,19 @@ export function getPrisma() {
       length: dbUrl?.length,
       prefix: dbUrl?.substring(0, 10)
     });
+    
+    // If we're in a build environment or don't have a URL, we can return a dummy or wait
+    // But for the client to at least instantiate, we need a valid-looking string if we pass it
+    // Alternatively, we can let Prisma use the environment variable directly which it handles better if missing (throws on usage instead of constructor)
   }
 
   prismaInstance = globalForPrisma.prisma ??
     new PrismaClient({
-      datasources: {
+      datasources: dbUrl ? {
         db: {
           url: dbUrl,
         },
-      },
+      } : undefined,
       log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
     });
 

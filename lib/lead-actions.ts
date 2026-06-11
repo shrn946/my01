@@ -85,6 +85,11 @@ export async function extractWebsiteInfo(url: string, data: { businessName: stri
       }
     }
 
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl || dbUrl.includes("[REF]") || dbUrl.includes("[PASSWORD]")) {
+      throw new Error("DATABASE_URL is not configured. Please set a valid PostgreSQL connection string in your .env file to save leads.");
+    }
+
     const lead = await prisma.lead.create({
       data: {
         businessName: data.businessName,
@@ -127,7 +132,6 @@ export async function updateLead(id: string, data: any) {
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const prisma = getPrisma();
     const chromTarget = ["@sparticuz", "chromium"].join("/");
     const coreTarget = ["playwright", "core"].join("-");
     let chromium;
@@ -138,30 +142,32 @@ async function crawlDesignData(url: string) {
       const core = await import(coreTarget);
       playwright = core.chromium;
     } catch (e) {
-      console.error("Failed to load playwright-core or @sparticuz/chromium", e);
-      // Fallback for local development if sparticuz is not needed
       const pw = await import("playwright");
       playwright = pw.chromium;
     }
 
+    const isDev = process.env.NODE_ENV !== "production";
     const launchOptions: any = {
       args: chromium?.args || [],
-      executablePath: chromium ? await chromium.executablePath() : undefined,
-      headless: chromium ? chromium.headless : true,
+      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
+      headless: true,
     };
 
-    // If local development (executablePath is empty), launch normally
     if (!launchOptions.executablePath) {
       delete launchOptions.executablePath;
       delete launchOptions.args;
-      launchOptions.headless = true;
     }
 
     browser = await playwright.launch(launchOptions);
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(url, { waitUntil: "networkidle" });
-    await page.waitForTimeout(2000);
+    
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
+      await page.waitForTimeout(2000);
+    } catch (e) {
+      console.warn("Design crawl navigation timed out, attempting analysis anyway");
+    }
 
     const analysis = await page.evaluate(() => {
       const getStyles = (el: Element) => window.getComputedStyle(el);
@@ -383,52 +389,58 @@ export async function captureWebsiteScreenshot(leadId: string) {
       const core = await import(coreTarget);
       playwright = core.chromium;
     } catch (e) {
-      console.error("Failed to load playwright-core or @sparticuz/chromium", e);
-      // Fallback for local development if sparticuz is not needed
       const pw = await import("playwright");
       playwright = pw.chromium;
     }
 
+    const isDev = process.env.NODE_ENV !== "production";
     const launchOptions: any = {
       args: chromium?.args || [],
-      executablePath: chromium ? await chromium.executablePath() : undefined,
-      headless: chromium ? chromium.headless : true,
+      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
+      headless: true,
     };
 
-    // If local development (executablePath is empty), launch normally
     if (!launchOptions.executablePath) {
       delete launchOptions.executablePath;
       delete launchOptions.args;
-      launchOptions.headless = true;
     }
 
     browser = await playwright.launch(launchOptions);
-    const context = await browser.newContext();
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
     const page = await context.newPage();
     
     // 1. Desktop Screenshot
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto(lead.website, { waitUntil: "networkidle" });
-    await page.waitForTimeout(3000);
+    try {
+      await page.goto(lead.website, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await page.waitForTimeout(5000); // Wait for animations
+    } catch (e) {
+      console.warn("Desktop navigation timed out, attempting screenshot anyway");
+    }
     
     const desktopFileName = `desktop-${leadId}.png`;
     const desktopPublicPath = `/generated/screenshots/${desktopFileName}`;
     const desktopFullPath = path.join(process.cwd(), "public", "generated", "screenshots", desktopFileName);
     
     if (!fs.existsSync(path.dirname(desktopFullPath))) fs.mkdirSync(path.dirname(desktopFullPath), { recursive: true });
-    await page.screenshot({ path: desktopFullPath, fullPage: true });
+    await page.screenshot({ path: desktopFullPath, fullPage: false });
 
-    // 2. Mobile Screenshot (iPhone 13 style)
+    // 2. Mobile Screenshot
     await page.setViewportSize({ width: 390, height: 844 });
-    // Some sites need a reload or specific UA for mobile view, but usually viewport is enough
-    await page.goto(lead.website, { waitUntil: "networkidle" });
-    await page.waitForTimeout(3000);
+    try {
+      await page.goto(lead.website, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await page.waitForTimeout(5000);
+    } catch (e) {
+      console.warn("Mobile navigation timed out, attempting screenshot anyway");
+    }
     
     const mobileFileName = `mobile-${leadId}.png`;
     const mobilePublicPath = `/generated/screenshots/${mobileFileName}`;
     const mobileFullPath = path.join(process.cwd(), "public", "generated", "screenshots", mobileFileName);
     
-    await page.screenshot({ path: mobileFullPath, fullPage: true });
+    await page.screenshot({ path: mobileFullPath, fullPage: false });
 
     await prisma.lead.update({
       where: { id: leadId },
@@ -455,7 +467,6 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     if (!lead) throw new Error("Lead not found");
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    // We'll pass the mode as a query param to the proposal page
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
     const chromTarget = ["@sparticuz", "chromium"].join("/");
@@ -468,32 +479,34 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
       const core = await import(coreTarget);
       playwright = core.chromium;
     } catch (e) {
-      console.error("Failed to load playwright-core or @sparticuz/chromium", e);
-      // Fallback for local development if sparticuz is not needed
       const pw = await import("playwright");
       playwright = pw.chromium;
     }
 
+    const isDev = process.env.NODE_ENV !== "production";
     const launchOptions: any = {
       args: chromium?.args || [],
-      executablePath: chromium ? await chromium.executablePath() : undefined,
-      headless: chromium ? chromium.headless : true,
+      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
+      headless: true,
     };
 
-    // If local development (executablePath is empty), launch normally
     if (!launchOptions.executablePath) {
       delete launchOptions.executablePath;
       delete launchOptions.args;
-      launchOptions.headless = true;
     }
 
     browser = await playwright.launch(launchOptions);
+    const context = await browser.newContext({
+      viewport: { width: 1200, height: 1600 }
+    });
+    const page = await context.newPage();
     
-    const page = await browser.newPage();
-    await page.setViewportSize({ width: 1200, height: 1600 });
-    
-    await page.goto(proposalUrl, { waitUntil: "networkidle" });
-    await page.waitForTimeout(5000);
+    try {
+      await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 60000 });
+      await page.waitForTimeout(5000);
+    } catch (e) {
+      console.warn("Proposal generation navigation timed out, attempting screenshot anyway");
+    }
 
     const fileName = `proposal-${mode}-${leadId}.png`;
     const publicPath = `/generated/proposals/${fileName}`;

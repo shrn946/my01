@@ -10,18 +10,40 @@ async function crawlDesignData(url: string) {
   try {
     const chromTarget = ["@sparticuz", "chromium"].join("/");
     const coreTarget = ["playwright", "core"].join("-");
-    const chromium = (await import(chromTarget)).default;
-    const { chromium: playwright } = await import(coreTarget);
+    let chromium;
+    let playwright;
 
-    browser = await playwright.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless as any,
-    });
+    try {
+      chromium = (await import(chromTarget)).default;
+      const core = await import(coreTarget);
+      playwright = core.chromium;
+    } catch (e) {
+      const pw = await import("playwright");
+      playwright = pw.chromium;
+    }
+
+    const isDev = process.env.NODE_ENV !== "production";
+    const launchOptions: any = {
+      args: chromium?.args || [],
+      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
+      headless: true,
+    };
+
+    if (!launchOptions.executablePath) {
+      delete launchOptions.executablePath;
+      delete launchOptions.args;
+    }
+
+    browser = await playwright.launch(launchOptions);
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(url, { waitUntil: "networkidle" });
-    await page.waitForTimeout(2000);
+    
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
+      await page.waitForTimeout(2000);
+    } catch (e) {
+      console.warn("Design crawl navigation timed out, attempting analysis anyway");
+    }
 
     const analysis = await page.evaluate(() => {
       const getStyles = (el: Element) => window.getComputedStyle(el);
@@ -311,6 +333,12 @@ export async function quickAnalyzeWebsite(url: string) {
       status: leadStatus,
       topIssues: `Performance: ${perfScore}%\nSEO: ${seoScore}%\nAccessibility: ${accScore}%\nBest Practices: ${bpScore}%`
     };
+
+    // Check for valid DATABASE_URL before creating
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl || dbUrl.includes("[REF]") || dbUrl.includes("[PASSWORD]")) {
+      throw new Error("DATABASE_URL is not configured. Please set a valid PostgreSQL connection string in your .env file to save leads.");
+    }
 
     const lead = await prisma.lead.create({
       data: {
