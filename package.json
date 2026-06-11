@@ -11,7 +11,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "backup": "git add . && git commit -m \"backup update\" && git push origin main"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
