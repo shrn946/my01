@@ -3,9 +3,8 @@
 import * as cheerio from "cheerio";
 import { getPrisma } from "./prisma";
 import { auditWebsiteHtml } from "./site-audit";
+import { storeGeneratedImage } from "./generated-image-storage";
 import { revalidatePath } from "next/cache";
-import path from "path";
-import fs from "fs";
 
 export async function extractWebsiteInfo(url: string, data: { businessName: string, source: string, category: string, city: string, notes: string }) {
   try {
@@ -401,12 +400,13 @@ export async function captureWebsiteScreenshot(leadId: string) {
       console.warn("Desktop navigation timed out, attempting screenshot anyway");
     }
     
-    const desktopFileName = `desktop-${leadId}.png`;
-    const desktopPublicPath = `/generated/screenshots/${desktopFileName}`;
-    const desktopFullPath = path.join(process.cwd(), "public", "generated", "screenshots", desktopFileName);
-    
-    if (!fs.existsSync(path.dirname(desktopFullPath))) fs.mkdirSync(path.dirname(desktopFullPath), { recursive: true });
-    await page.screenshot({ path: desktopFullPath, fullPage: false });
+    const captureId = Date.now();
+    const desktopFileName = `desktop-${leadId}-${captureId}.png`;
+    const desktopImage = await page.screenshot({ fullPage: false });
+    const desktopPublicPath = await storeGeneratedImage(
+      desktopImage,
+      `screenshots/${desktopFileName}`,
+    );
 
     // 2. Mobile Screenshot
     await page.setViewportSize({ width: 390, height: 844 });
@@ -417,11 +417,12 @@ export async function captureWebsiteScreenshot(leadId: string) {
       console.warn("Mobile navigation timed out, attempting screenshot anyway");
     }
     
-    const mobileFileName = `mobile-${leadId}.png`;
-    const mobilePublicPath = `/generated/screenshots/${mobileFileName}`;
-    const mobileFullPath = path.join(process.cwd(), "public", "generated", "screenshots", mobileFileName);
-    
-    await page.screenshot({ path: mobileFullPath, fullPage: false });
+    const mobileFileName = `mobile-${leadId}-${captureId}.png`;
+    const mobileImage = await page.screenshot({ fullPage: false });
+    const mobilePublicPath = await storeGeneratedImage(
+      mobileImage,
+      `screenshots/${mobileFileName}`,
+    );
 
     await prisma.lead.update({
       where: { id: leadId },
@@ -447,7 +448,11 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const vercelHost =
+      process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
     const chromTarget = ["@sparticuz", "chromium"].join("/");
@@ -489,19 +494,15 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
       console.warn("Proposal generation navigation timed out, attempting screenshot anyway");
     }
 
-    const fileName = `proposal-${mode}-${leadId}.png`;
-    const publicPath = `/generated/proposals/${fileName}`;
-    const fullPath = path.join(process.cwd(), "public", "generated", "proposals", fileName);
-
-    if (!fs.existsSync(path.dirname(fullPath))) {
-      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-    }
-
-    await page.screenshot({
-      path: fullPath,
+    const fileName = `proposal-${mode}-${leadId}-${Date.now()}.png`;
+    const proposalImage = await page.screenshot({
       fullPage: true,
       animations: "disabled"
     });
+    const publicPath = await storeGeneratedImage(
+      proposalImage,
+      `proposals/${fileName}`,
+    );
 
     const updateData: any = {};
     if (mode === "design") updateData.proposalImage = publicPath;

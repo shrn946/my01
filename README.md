@@ -139,3 +139,21 @@ npm run build
 npm run start
 npm run prisma:studio
 ```
+
+## Generated images on Vercel
+
+Runtime files written to `public/` are not persistent on Vercel. Website
+screenshots and proposal PNGs therefore use Supabase Storage in production.
+
+Add these environment variables in Vercel:
+
+```env
+NEXT_PUBLIC_SITE_URL="https://your-production-domain.com"
+NEXT_PUBLIC_SUPABASE_URL="https://YOUR_PROJECT_REF.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="YOUR_SUPABASE_SERVICE_ROLE_KEY"
+SUPABASE_STORAGE_BUCKET="generated-images"
+```
+
+The service-role key is server-only and must never use a `NEXT_PUBLIC_` prefix.
+The application creates the configured public bucket when the first image is
+generated. Local development continues to save images under `public/generated`.

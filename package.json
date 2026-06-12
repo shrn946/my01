@@ -12,6 +12,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:local:up": "docker compose up -d postgres",
+    "db:local:setup": "prisma migrate deploy && npm run db:seed",
+    "db:local:down": "docker compose down",
     "backup": "git add . && git commit -m \"backup update\" && git push origin main"
   },
   "dependencies": {
