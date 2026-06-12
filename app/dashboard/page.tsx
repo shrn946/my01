@@ -237,17 +237,19 @@ export default function DashboardPage() {
       if (options.generateDesign) {
         setReportState(s => ({ ...s, step: ++currentStep }));
         const designRes = await actionProposalPng(result.leadId);
-        if (designRes.success && designRes.path) {
-          setResult((prev: any) => ({ ...prev, proposalImage: designRes.path }));
+        if (!designRes.success || !designRes.path) {
+          throw new Error(designRes.error || "Design proposal PNG generation failed");
         }
+        setResult((prev: any) => ({ ...prev, proposalImage: designRes.path }));
       }
 
       if (options.generateTech) {
         setReportState(s => ({ ...s, step: ++currentStep }));
         const techRes = await actionProposalPngTech(result.leadId);
-        if (techRes.success && techRes.path) {
-          setResult((prev: any) => ({ ...prev, proposalImageTech: techRes.path }));
+        if (!techRes.success || !techRes.path) {
+          throw new Error(techRes.error || "Speed & SEO PNG generation failed");
         }
+        setResult((prev: any) => ({ ...prev, proposalImageTech: techRes.path }));
       }
       
       setReportState(s => ({ ...s, step: ++currentStep }));
@@ -273,7 +275,11 @@ export default function DashboardPage() {
       toast({ title: "Report Generated", description: "All assets have been successfully created and saved." });
     } catch (err) {
       console.error("Report generation error:", err);
-      toast({ title: "Error", description: "Failed to generate report", variant: "destructive" });
+      toast({
+        title: "Generation failed",
+        description: err instanceof Error ? err.message : "Failed to generate report",
+        variant: "destructive"
+      });
       setReportState({ active: false, step: 0, completed: false, totalSteps: 9 });
       setResult((prev: any) => ({ ...prev, reportStatus: "Not Generated" }));
     }
@@ -621,18 +627,26 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
                   <div className="grid grid-cols-1 gap-2">
-                    {result.proposalImage && (
+                    {result.proposalImage ? (
                       <Button variant="outline" className="justify-start text-xs h-10" asChild>
                         <a href={result.proposalImage} target="_blank" rel="noreferrer">
                           <ImageIcon className="mr-2 h-4 w-4" /> Design Proposal PNG
                         </a>
                       </Button>
+                    ) : (
+                      <Button variant="outline" className="justify-start text-xs h-10" disabled>
+                        <ImageIcon className="mr-2 h-4 w-4" /> Design Proposal PNG: Not generated
+                      </Button>
                     )}
-                    {result.proposalImageTech && (
+                    {result.proposalImageTech ? (
                       <Button variant="outline" className="justify-start text-xs h-10" asChild>
                         <a href={result.proposalImageTech} target="_blank" rel="noreferrer">
                           <ImageIcon className="mr-2 h-4 w-4" /> Speed & SEO PNG
                         </a>
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="justify-start text-xs h-10" disabled>
+                        <ImageIcon className="mr-2 h-4 w-4" /> Speed & SEO PNG: Not generated
                       </Button>
                     )}
                     {result.beforeAfterImage && (
