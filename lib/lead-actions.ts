@@ -2,6 +2,7 @@
 
 import * as cheerio from "cheerio";
 import { getPrisma } from "./prisma";
+import { auditWebsiteHtml } from "./site-audit";
 import { revalidatePath } from "next/cache";
 import path from "path";
 import fs from "fs";
@@ -239,7 +240,7 @@ async function crawlDesignData(url: string) {
 export async function analyzeWebsite(leadId: string) {
   try {
     const prisma = getPrisma();
-    console.log(`Starting PageSpeed analysis for lead: ${leadId}`);
+    console.log(`Starting website analysis for lead: ${leadId}`);
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
@@ -265,32 +266,12 @@ export async function analyzeWebsite(leadId: string) {
     const links = $("a").length;
     const ctas = $("button, a.btn, a.button, [class*='button'], [class*='btn']").length;
 
-    // 4. PageSpeed API Scores
-    const urlEncoded = encodeURIComponent(lead.website);
-    const runScore = async (strategy: "mobile" | "desktop") => {
-      const apiKey = process.env.PAGESPEED_API_KEY;
-      const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${urlEncoded}&strategy=${strategy}&category=performance&category=accessibility&category=best-practices&category=seo${apiKey ? `&key=${apiKey}` : ""}`;
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000); 
-        const res = await fetch(apiUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (!res.ok) return null;
-        return await res.json();
-      } catch (e) {
-        return null;
-      }
-    };
-
-    const [mobileData, desktopData] = await Promise.all([
-      runScore("mobile"),
-      runScore("desktop")
-    ]);
-
-    const perfScore = Math.round((mobileData?.lighthouseResult?.categories?.performance?.score || 0) * 100) || 50;
-    const seoScore = Math.round((mobileData?.lighthouseResult?.categories?.seo?.score || 0) * 100) || 60;
-    const mobilePerf = Math.round((mobileData?.lighthouseResult?.categories?.performance?.score || 0) * 100) || 50;
-    const desktopPerf = Math.round((desktopData?.lighthouseResult?.categories?.performance?.score || 0) * 100) || 70;
+    // 4. Estimate scores from the fetched document without an external API.
+    const audit = auditWebsiteHtml(html, lead.website);
+    const perfScore = audit.performanceScore;
+    const seoScore = audit.seoScore;
+    const mobilePerf = audit.mobileScore;
+    const desktopPerf = audit.desktopScore;
 
     // 5. Heuristic Scores
     let designScore = 70;
@@ -339,12 +320,12 @@ export async function analyzeWebsite(leadId: string) {
         businessName: businessName,
         performanceScore: perfScore,
         seoScore: seoScore,
-        accessibilityScore: mobileData?.lighthouseResult?.categories?.accessibility?.score ? Math.round(mobileData.lighthouseResult.categories.accessibility.score * 100) : 0,
-        bestPracticesScore: mobileData?.lighthouseResult?.categories?.["best-practices"]?.score ? Math.round(mobileData.lighthouseResult.categories["best-practices"].score * 100) : 0,
+        accessibilityScore: audit.accessibilityScore,
+        bestPracticesScore: audit.bestPracticesScore,
         pageSpeedPerformance: perfScore,
         pageSpeedSeo: seoScore,
-        pageSpeedAccessibility: mobileData?.lighthouseResult?.categories?.accessibility?.score ? Math.round(mobileData.lighthouseResult.categories.accessibility.score * 100) : 0,
-        pageSpeedBestPractices: mobileData?.lighthouseResult?.categories?.["best-practices"]?.score ? Math.round(mobileData.lighthouseResult.categories["best-practices"].score * 100) : 0,
+        pageSpeedAccessibility: audit.accessibilityScore,
+        pageSpeedBestPractices: audit.bestPracticesScore,
         designScore: designScore,
         conversionScore: conversionScore,
         mobileScore: mobilePerf,
@@ -352,7 +333,7 @@ export async function analyzeWebsite(leadId: string) {
         websiteScore: Math.round((perfScore + seoScore + designScore + conversionScore) / 4),
         leadScore: Math.round(((perfScore + seoScore + designScore + conversionScore) / 4) * 0.8 + 20),
         improvementProposals: proposals,
-        topIssues: `H1: ${headings.h1}, H2: ${headings.h2}, H3: ${headings.h3}\nImages: ${images} (Missing Alt: ${imagesWithoutAlt})\nLinks: ${links}, CTAs: ${ctas}`,
+        topIssues: [...audit.issues, ...proposals].slice(0, 8).join("\n"),
         designAnalysis: designAnalysis as any,
         status: "Analyzed"
       }

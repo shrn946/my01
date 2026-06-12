@@ -2,6 +2,7 @@
 
 import * as cheerio from "cheerio";
 import { getPrisma } from "@/lib/prisma";
+import { auditWebsiteHtml } from "@/lib/site-audit";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 
@@ -106,6 +107,7 @@ export async function quickAnalyzeWebsite(url: string) {
     let metaDescription = "";
     let address = "";
     let contactPageUrl = "";
+    let pageHtml = "";
 
     try {
       const controller = new AbortController();
@@ -123,6 +125,7 @@ export async function quickAnalyzeWebsite(url: string) {
       
       if (res.ok) {
         const html = await res.text();
+        pageHtml = html;
         const $ = cheerio.load(html);
 
         title = $("title").text().trim();
@@ -228,54 +231,13 @@ export async function quickAnalyzeWebsite(url: string) {
       console.error("Extraction failed, but continuing to PageSpeed:", e);
     }
 
-    const encodedUrl = encodeURIComponent(targetUrl);
-    const runScore = async (strategy: "mobile" | "desktop") => {
-      const apiKey = process.env.PAGESPEED_API_KEY;
-      const urlWithKey = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodedUrl}${apiKey ? `&key=${apiKey}` : ""}&strategy=${strategy}&category=performance&category=accessibility&category=best-practices&category=seo`;
-      
-      console.log(`Running PageSpeed (${strategy}) for: ${targetUrl}`);
-      try {
-        const psRes = await fetch(urlWithKey, { next: { revalidate: 0 } });
-        if (!psRes.ok) {
-          const errorText = await psRes.text();
-          console.error(`PageSpeed API Error (${strategy}): ${psRes.status} ${psRes.statusText}`, errorText);
-          return null;
-        }
-        const data = await psRes.json();
-        if (!data.lighthouseResult) {
-          console.error(`PageSpeed API returned invalid data (${strategy}):`, JSON.stringify(data).substring(0, 500));
-        }
-        return data;
-      } catch (e: any) {
-        console.error(`PageSpeed Fetch Exception (${strategy}):`, e.message);
-        return null;
-      }
-    };
-
-    const [mobileData, desktopData] = await Promise.all([
-      runScore("mobile"),
-      runScore("desktop")
-    ]);
-
-    const mCats = mobileData?.lighthouseResult?.categories || {};
-    const dCats = desktopData?.lighthouseResult?.categories || {};
-    
-    const getScore = (cat: string) => {
-      const m = mCats[cat]?.score;
-      const d = dCats[cat]?.score;
-      if (m !== undefined && d !== undefined) return Math.round(((m + d) / 2) * 100);
-      if (m !== undefined) return Math.round(m * 100);
-      if (d !== undefined) return Math.round(d * 100);
-      return 0;
-    };
-
-    const perfScore = getScore("performance");
-    const seoScore = getScore("seo");
-    const accScore = getScore("accessibility");
-    const bpScore = getScore("best-practices");
-    
-    const mScore = Math.round((mCats.performance?.score || 0) * 100);
-    const dScore = Math.round((dCats.performance?.score || 0) * 100);
+    const audit = auditWebsiteHtml(pageHtml, targetUrl);
+    const perfScore = audit.performanceScore;
+    const seoScore = audit.seoScore;
+    const accScore = audit.accessibilityScore;
+    const bpScore = audit.bestPracticesScore;
+    const mScore = audit.mobileScore;
+    const dScore = audit.desktopScore;
     
     const overallScore = Math.round((perfScore + seoScore + accScore + bpScore) / 4);
 
@@ -331,7 +293,9 @@ export async function quickAnalyzeWebsite(url: string) {
       desktopScore: dScore,
       leadScore,
       status: leadStatus,
-      topIssues: `Performance: ${perfScore}%\nSEO: ${seoScore}%\nAccessibility: ${accScore}%\nBest Practices: ${bpScore}%`
+      topIssues: audit.issues.length > 0
+        ? audit.issues.join("\n")
+        : "No major HTML-level issues detected"
     };
 
     // Check for valid DATABASE_URL before creating
