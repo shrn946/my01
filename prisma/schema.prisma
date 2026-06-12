@@ -197,7 +197,7 @@ model PortfolioExample {
 
 model EmailTemplate {
   id        String     @id @default(cuid())
-  name      String     @unique
+  name      String
   subject   String
   body      String
   createdAt DateTime   @default(now())
