@@ -7,12 +7,30 @@ const globalForPrisma = globalThis as unknown as {
 
 let prismaInstance: PrismaClient | undefined;
 
+function getDatabaseUrl() {
+  const value = process.env.DATABASE_URL?.trim().replace(/^["']|["']$/g, "");
+  if (!value) return undefined;
+
+  try {
+    const url = new URL(value);
+    const usesTransactionPooler =
+      url.hostname.endsWith(".pooler.supabase.com") && url.port === "6543";
+
+    if (usesTransactionPooler) {
+      url.searchParams.set("pgbouncer", "true");
+      url.searchParams.set("connection_limit", "1");
+    }
+
+    return url.toString();
+  } catch {
+    return value;
+  }
+}
+
 export function getPrisma() {
   if (prismaInstance) return prismaInstance;
 
-  // Strip potential quotes that might be added in deployment UIs
-  const dbUrl = process.env.DATABASE_URL?.replace(/^["']|["']$/g, '');
-  const directUrl = process.env.DIRECT_URL?.replace(/^["']|["']$/g, '');
+  const dbUrl = getDatabaseUrl();
 
   if (!dbUrl || !dbUrl.startsWith("postgres")) {
     console.error("Critical: DATABASE_URL is invalid or missing!", {
@@ -20,10 +38,6 @@ export function getPrisma() {
       length: dbUrl?.length,
       prefix: dbUrl?.substring(0, 10)
     });
-    
-    // If we're in a build environment or don't have a URL, we can return a dummy or wait
-    // But for the client to at least instantiate, we need a valid-looking string if we pass it
-    // Alternatively, we can let Prisma use the environment variable directly which it handles better if missing (throws on usage instead of constructor)
   }
 
   prismaInstance = globalForPrisma.prisma ??
