@@ -15,7 +15,8 @@
     "db:local:up": "docker compose up -d postgres",
     "db:local:setup": "prisma migrate deploy && npm run db:seed",
     "db:local:down": "docker compose down",
-    "backup": "git add . && git commit -m \"backup update\" && git push origin main"
+    "github:update": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/github-update.ps1",
+    "backup": "npm run github:update -- \"Backup update\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
