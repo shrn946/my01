@@ -3,39 +3,14 @@
 import * as cheerio from "cheerio";
 import { getPrisma } from "@/lib/prisma";
 import { auditWebsiteHtml } from "@/lib/site-audit";
+import { launchBrowser } from "@/lib/browser";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromTarget = ["@sparticuz", "chromium"].join("/");
-    const coreTarget = ["playwright", "core"].join("-");
-    let chromium;
-    let playwright;
-
-    try {
-      chromium = (await import(chromTarget)).default;
-      const core = await import(coreTarget);
-      playwright = core.chromium;
-    } catch (e) {
-      const pw = await import("playwright");
-      playwright = pw.chromium;
-    }
-
-    const isDev = process.env.NODE_ENV !== "production";
-    const launchOptions: any = {
-      args: chromium?.args || [],
-      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
-      headless: true,
-    };
-
-    if (!launchOptions.executablePath) {
-      delete launchOptions.executablePath;
-      delete launchOptions.args;
-    }
-
-    browser = await playwright.launch(launchOptions);
+    browser = await launchBrowser();
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
     

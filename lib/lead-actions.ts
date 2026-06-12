@@ -3,6 +3,7 @@
 import * as cheerio from "cheerio";
 import { getPrisma } from "./prisma";
 import { auditWebsiteHtml } from "./site-audit";
+import { launchBrowser } from "./browser";
 import { storeGeneratedImage } from "./generated-image-storage";
 import { revalidatePath } from "next/cache";
 
@@ -132,33 +133,7 @@ export async function updateLead(id: string, data: any) {
 async function crawlDesignData(url: string) {
   let browser;
   try {
-    const chromTarget = ["@sparticuz", "chromium"].join("/");
-    const coreTarget = ["playwright", "core"].join("-");
-    let chromium;
-    let playwright;
-
-    try {
-      chromium = (await import(chromTarget)).default;
-      const core = await import(coreTarget);
-      playwright = core.chromium;
-    } catch (e) {
-      const pw = await import("playwright");
-      playwright = pw.chromium;
-    }
-
-    const isDev = process.env.NODE_ENV !== "production";
-    const launchOptions: any = {
-      args: chromium?.args || [],
-      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
-      headless: true,
-    };
-
-    if (!launchOptions.executablePath) {
-      delete launchOptions.executablePath;
-      delete launchOptions.args;
-    }
-
-    browser = await playwright.launch(launchOptions);
+    browser = await launchBrowser();
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 800 });
     
@@ -359,33 +334,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const chromTarget = ["@sparticuz", "chromium"].join("/");
-    const coreTarget = ["playwright", "core"].join("-");
-    let chromium;
-    let playwright;
-
-    try {
-      chromium = (await import(chromTarget)).default;
-      const core = await import(coreTarget);
-      playwright = core.chromium;
-    } catch (e) {
-      const pw = await import("playwright");
-      playwright = pw.chromium;
-    }
-
-    const isDev = process.env.NODE_ENV !== "production";
-    const launchOptions: any = {
-      args: chromium?.args || [],
-      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
-      headless: true,
-    };
-
-    if (!launchOptions.executablePath) {
-      delete launchOptions.executablePath;
-      delete launchOptions.args;
-    }
-
-    browser = await playwright.launch(launchOptions);
+    browser = await launchBrowser();
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -455,33 +404,7 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
       (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
-    const chromTarget = ["@sparticuz", "chromium"].join("/");
-    const coreTarget = ["playwright", "core"].join("-");
-    let chromium;
-    let playwright;
-
-    try {
-      chromium = (await import(chromTarget)).default;
-      const core = await import(coreTarget);
-      playwright = core.chromium;
-    } catch (e) {
-      const pw = await import("playwright");
-      playwright = pw.chromium;
-    }
-
-    const isDev = process.env.NODE_ENV !== "production";
-    const launchOptions: any = {
-      args: chromium?.args || [],
-      executablePath: (chromium && !isDev) ? await chromium.executablePath() : undefined,
-      headless: true,
-    };
-
-    if (!launchOptions.executablePath) {
-      delete launchOptions.executablePath;
-      delete launchOptions.args;
-    }
-
-    browser = await playwright.launch(launchOptions);
+    browser = await launchBrowser();
     const context = await browser.newContext({
       viewport: { width: 1200, height: 1600 }
     });
