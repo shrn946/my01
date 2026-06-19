@@ -29,6 +29,37 @@ export default function DashboardPage() {
   const [result, setResult] = useState<any>(null);
   const [afterUrl, setAfterUrl] = useState("");
   const [isCapturingAfter, setIsCapturingAfter] = useState(false);
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage
+} from "lucide-react";
+import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead } from "./actions";
+import { getFinderLeads } from "./lead-finder/actions";
+import { 
+  setReportGenerating, actionCaptureScreenshot, actionRecommendations,
+  actionProposalPng, actionPublicReport, actionPrepareEmail, saveReportEdits,
+  uploadLeadReportMedia, removeLeadReportMedia, lockAfterImage, generateSocialOutreachProposal
+} from "./report-actions";
+import { AUDIT_CATEGORIES, type AuditCategory } from "@/lib/audit-categories";
+import { updateLead } from "@/lib/lead-actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+export default function DashboardPage() {
+  const [url, setUrl] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [afterUrl, setAfterUrl] = useState("");
+  const [isCapturingAfter, setIsCapturingAfter] = useState(false);
   const [isCapturingBefore, setIsCapturingBefore] = useState(false);
   const [socialProposal, setSocialProposal] = useState("");
   const [isShowingProposal, setIsShowingProposal] = useState(false);
@@ -38,6 +69,12 @@ export default function DashboardPage() {
   const [isLoadingLead, setIsLoadingLead] = useState(false);
   const [deleteConfirmLeadId, setDeleteConfirmLeadId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Email States
+  const [isEditingEmailContent, setIsEditingEmailContent] = useState(false);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const handleCaptureAfter = async () => {
     if (!afterUrl || !result?.leadId) return;
@@ -304,6 +341,35 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSendEmail = async () => {
+    if (!result?.leadId || !result?.email) {
+      toast({ title: "No Email", description: "This lead needs an email address first.", variant: "destructive" });
+      return;
+    }
+    
+    setIsSendingEmail(true);
+    try {
+      const { sendLeadEmailFromDashboard } = await import("./leads/actions");
+      const res = await sendLeadEmailFromDashboard(
+        result.leadId,
+        emailSubject || result.aiAnalysis?.proposal_content?.email_subject || "Proposal",
+        emailBody || result.aiAnalysis?.proposal_content?.email_body || "",
+        result.email
+      );
+      
+      if (res.success) {
+        toast({ title: "Email Sent", description: "Proposal has been sent successfully." });
+        setIsEditingEmailContent(false);
+      } else {
+        toast({ title: "Send Failed", description: res.error, variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
@@ -459,658 +525,6 @@ export default function DashboardPage() {
           setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
         }
       }
-
-      setResult((prev: any) => ({
-        ...prev,
-        beforeAfterImage: beforeImage || prev.beforeAfterImage,
-        desktopImage: screenshotRes.desktopPath || prev.desktopImage,
-        mobileImage: screenshotRes.mobilePath || prev.mobileImage,
-      }));
-
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      const aiRes = await actionRecommendations(result.leadId, selectedCategories);
-      if (!aiRes.success) {
-        throw new Error("Focused AI analysis failed");
-      }
-
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      const proposalRes = await actionProposalPng(result.leadId);
-      if (!proposalRes.success || !proposalRes.path) {
-        throw new Error(proposalRes.error || "Proposal image generation failed");
-      }
-      setResult((prev: any) => ({ ...prev, proposalImage: proposalRes.path }));
-      
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      const reportRes = await actionPublicReport(result.leadId);
-      if (!reportRes.success) {
-        throw new Error(reportRes.error || "PDF and PNG report generation failed");
-      }
-      setResult((prev: any) => ({
-        ...prev,
-        reportPdf: reportRes.reportPdf,
-        reportImage: reportRes.reportImage,
-        proposalPdf: reportRes.proposalPdf,
-      }));
-      
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      await actionPrepareEmail(result.leadId);
-      
-      // Final re-fetch for safety
-      const updatedLead = await getLeadAction(result.leadId);
-      if (updatedLead) {
-        setResult((prev: any) => ({ 
-          ...prev, 
-          ...updatedLead, 
-          leadId: updatedLead.id, 
-          reportStatus: "Generated" 
-        }));
-        const aiComments = (updatedLead.aiAnalysis as any)?.developer_comments
-          ?.map((comment: any) => `${comment.heading}: ${comment.finding}\nRecommendation: ${comment.recommendation}`)
-          .join("\n\n") || "";
-        const aiRecommendations = (updatedLead.aiAnalysis as any)?.recommendations
-          ?.map((item: any) => item.recommendation) || [];
-        setEditComments((updatedLead.reportContent as any)?.developerComments || aiComments);
-        setEditProposals((updatedLead.reportContent as any)?.recommendations?.length
-          ? (updatedLead.reportContent as any).recommendations
-          : aiRecommendations);
-        setReportMedia((updatedLead.reportMedia as any[]) || []);
-      } else {
-        setResult((prev: any) => ({ ...prev, reportStatus: "Generated" }));
-      }
-      
-      setReportState(s => ({ ...s, active: false, completed: true }));
-      toast({ title: "Report Generated", description: "All assets have been successfully created and saved." });
-    } catch (err) {
-      console.error("Report generation error:", err);
-      toast({
-        title: "Generation failed",
-        description: err instanceof Error ? err.message : "Failed to generate report",
-        variant: "destructive"
-      });
-      setReportState({ active: false, step: 0, completed: false, totalSteps: 5 });
-      setResult((prev: any) => ({ ...prev, reportStatus: "Not Generated" }));
-    }
-  };
-
-  const activeSteps = [
-    "Capturing Homepage Screenshot",
-    "Generating Selected Category Analysis",
-    "Creating Proposal Image",
-    "Building Focused PNG Report",
-    "Preparing Email Template"
-  ];
-
-  return (
-    <div className="space-y-8 pb-10 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Lead Generation Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Step 1: Analyze website to extract data. Step 2: Generate comprehensive proposal report.</p>
-      </div>
-
-      {/* Statistics Widgets */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="p-4 border-primary/10 shadow-sm flex flex-col justify-center">
-          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Searches Used Today</span>
-          <span className="text-2xl font-black text-primary mt-1">{stats.searchesUsed} / 40</span>
-        </Card>
-        <Card className="p-4 border-muted shadow-sm flex flex-col justify-center">
-          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Remaining Searches</span>
-          <span className="text-2xl font-black text-foreground mt-1">{stats.remainingSearches}</span>
-        </Card>
-        <Card className="p-4 border-muted shadow-sm flex flex-col justify-center">
-          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Total Leads Found</span>
-          <span className="text-2xl font-black text-foreground mt-1">{stats.totalLeads}</span>
-        </Card>
-        <Card className="p-4 border-primary/10 shadow-sm flex flex-col justify-center bg-primary/5">
-          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Leads Saved</span>
-          <span className="text-2xl font-black text-primary mt-1">{stats.leadsSaved}</span>
-        </Card>
-        <Card className="p-4 border-muted shadow-sm flex flex-col justify-center col-span-2 md:col-span-1">
-          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">Emails Sent</span>
-          <span className="text-2xl font-black text-foreground mt-1">{stats.emailsSent}</span>
-        </Card>
-      </div>
-
-      {/* Analysis Input */}
-      <Card className="border-primary/20 shadow-sm">
-        <CardContent className="pt-6">
-          <form onSubmit={handleAnalyze} className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input 
-                placeholder="Enter website URL (e.g., https://example.com)" 
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="pl-10 h-12 text-lg"
-                disabled={isAnalyzing || reportState.active}
-              />
-            </div>
-            <Button type="submit" disabled={isAnalyzing || !url || reportState.active} className="h-12 px-8 text-md">
-              {isAnalyzing ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Analyzing...</>
-              ) : (
-                <><Search className="mr-2 h-5 w-5" /> Analyze Website</>
-              )}
-            </Button>
-          </form>
-
-          {recentLeads.length > 0 && (
-            <div className="mt-4 pt-4 border-t flex flex-col gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                <Clock className="h-3.5 w-3.5" /> Recent Saved Leads
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {recentLeads.map((lead) => (
-                  <Button 
-                    key={lead.id} 
-                    variant="outline" 
-                    size="sm" 
-                    className={`h-8 text-xs font-bold rounded-lg ${result?.leadId === lead.id ? "border-primary bg-primary/5 text-primary" : ""}`}
-                    onClick={() => handleSelectLead(lead.id)}
-                    disabled={isAnalyzing || isLoadingLead}
-                  >
-                    {isLoadingLead && result?.leadId === lead.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    ) : null}
-                    {lead.businessName}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {recentFinderLeads.length > 0 && (
-            <div className="mt-4 pt-4 border-t flex flex-col gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                <Search className="h-3.5 w-3.5 text-primary" /> Latest Discovered from Lead Finder
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {recentFinderLeads.map((lead) => (
-                  <Button 
-                    key={lead.id} 
-                    variant="outline" 
-                    size="sm" 
-                    className={`h-8 text-xs font-bold rounded-lg ${result?.leadId === lead.id ? "border-primary bg-primary/5 text-primary" : ""}`}
-                    onClick={() => handleSelectLead(lead.id)}
-                    disabled={isAnalyzing || isLoadingLead}
-                  >
-                    {isLoadingLead && result?.leadId === lead.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    ) : null}
-                    {lead.businessName} ({lead.website.replace(/^https?:\/\//, "").split("/")[0]})
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Recent Leads Main Grid (welcoming state if no lead is loaded) */}
-      {!result && !isAnalyzing && (
-        <div className="space-y-4 pt-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            Recent Saved Leads
-            {recentLeads.length > 0 && <Badge variant="secondary" className="font-bold">{recentLeads.length}</Badge>}
-          </h2>
-          {recentLeads.length === 0 ? (
-            <Card className="p-8 border-dashed text-center">
-              <p className="text-muted-foreground">
-                No saved leads in your database yet. Navigate to the{" "}
-                <a href="/dashboard/lead-finder" className="text-primary hover:underline font-bold">
-                  Lead Finder
-                </a>{" "}
-                to discover and save prospects.
-              </p>
-            </Card>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {recentLeads.map((lead) => (
-                <Card key={lead.id} className="hover:shadow-md transition-shadow border-muted flex flex-col justify-between">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-sm font-bold truncate" title={lead.businessName}>
-                        {lead.businessName}
-                      </CardTitle>
-                      <Badge variant="outline" className="text-[9px] uppercase font-bold px-1.5 py-0 border-primary/20 bg-primary/5 text-primary">
-                        {lead.status}
-                      </Badge>
-                    </div>
-                    <CardDescription className="truncate text-[11px]" title={lead.website}>
-                      {lead.website}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-3 pt-0 text-xs text-muted-foreground space-y-1">
-                    <p className="truncate"><strong>Email:</strong> {lead.email || "Not found"}</p>
-                    <p className="truncate"><strong>Phone:</strong> {lead.phone || "Not found"}</p>
-                    <p className="truncate"><strong>Location:</strong> {[lead.city, lead.country].filter(Boolean).join(", ") || "Unknown"}</p>
-                  </CardContent>
-                  <CardFooter className="pt-0 border-t bg-muted/5 flex justify-between items-center p-2.5">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
-                      onClick={() => setDeleteConfirmLeadId(lead.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="text-xs font-bold text-primary hover:text-primary-focus h-8"
-                      onClick={() => handleSelectLead(lead.id)}
-                      disabled={isLoadingLead}
-                    >
-                      {isLoadingLead ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <ArrowRight className="h-3.5 w-3.5 mr-1" />}
-                      Analyze & Redesign
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Results & Actions Container */}
-      <AnimatePresence>
-        {result && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            className="grid lg:grid-cols-3 gap-6"
-          >
-            {/* Left Column: Data */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-xl">Business Information</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => { setIsEditingEmail(true); setIsEditingName(true); }}>
-                    <Edit3 className="h-4 w-4 mr-2" /> Edit Info
-                  </Button>
-                </CardHeader>
-                <CardContent className="grid sm:grid-cols-2 gap-4">
-                  <InfoItem icon={<Globe />} label="Website URL" value={result.website} />
-                  <InfoItem icon={<Zap />} label="Technology" value={result.designAnalysis?.technology || "Not Detected"} />
-                  
-                  <div className="flex flex-col p-3 rounded-lg border bg-card/50">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Business Name</p>
-                    {isEditingName ? (
-                      <div className="flex gap-2">
-                        <Input size={1} value={editName} onChange={e => setEditName(e.target.value)} className="h-8" />
-                        <Button size="icon" className="h-8 w-8" onClick={handleUpdateName}><Save className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditingName(false)}><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
-                      <p className="text-sm font-medium truncate flex items-center justify-between">
-                        {result.businessName}
-                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100" onClick={() => setIsEditingName(true)} />
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col p-3 rounded-lg border bg-card/50">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Email Address</p>
-                    {isEditingEmail ? (
-                      <div className="flex gap-2">
-                        <Input size={1} value={editEmail} onChange={e => setEditEmail(e.target.value)} className="h-8" />
-                        <Button size="icon" className="h-8 w-8" onClick={handleUpdateEmail}><Save className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
-                      <p className="text-sm font-medium truncate flex items-center justify-between">
-                        {result.email || "Not Found"}
-                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100" onClick={() => setIsEditingEmail(true)} />
-                      </p>
-                    )}
-                  </div>
-
-                  <InfoItem icon={<Phone />} label="Phone" value={result.phone || "Not Found"} />
-                  <InfoItem icon={<MapPin />} label="Address" value={result.address || "Not Found"} />
-                  
-                  <div className="flex flex-col p-3 rounded-lg border bg-card/50">
-                    <div className="flex items-center justify-between mb-2">
-                       <p className="text-xs font-semibold text-muted-foreground uppercase">Social Links</p>
-                       <Button 
-                         variant="ghost" 
-                         size="sm" 
-                         className="h-6 text-xs font-bold text-primary hover:bg-primary/10" 
-                         onClick={handleGenerateSocialProposal}
-                         disabled={!result.leadId}
-                       >
-                         <Zap className="h-3 w-3 mr-1" /> Proposal
-                       </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {(() => {
-                        // Handle new structured object format {facebook, instagram, linkedin, twitter, youtube, tiktok}
-                        if (result.socialLinks && typeof result.socialLinks === 'object' && !Array.isArray(result.socialLinks)) {
-                          const entries = Object.entries(result.socialLinks).filter(([, v]) => v);
-                          if (entries.length === 0) return <span className="text-xs text-muted-foreground">None Found</span>;
-                          return entries.map(([platform, url]) => {
-                            const colors: Record<string, string> = {
-                              facebook: "bg-blue-600", instagram: "bg-pink-600",
-                              linkedin: "bg-sky-700", twitter: "bg-slate-900",
-                              youtube: "bg-red-600", tiktok: "bg-slate-800"
-                            };
-                            const labels: Record<string, string> = {
-                              facebook: "fb", instagram: "IG", linkedin: "in",
-                              twitter: "X", youtube: "YT", tiktok: "TT"
-                            };
-                            return (
-                              <a key={platform} href={url as string} target="_blank" rel="noreferrer" className="relative group" title={url as string}>
-                                <div className={`h-6 px-2 ${colors[platform] || "bg-muted"} rounded flex items-center justify-center text-white text-[10px] font-black gap-1`}>
-                                  {labels[platform] || platform}
-                                </div>
-                                <span className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                  {(url as string).replace(/^https?:\/\//, "").split("/")[0]}
-                                </span>
-                              </a>
-                            );
-                          });
-                        }
-                        // Handle old comma-separated string format for backward compatibility
-                        if (result.socialLinks && result.socialLinks !== "None Found" && typeof result.socialLinks === 'string') {
-                          return result.socialLinks.split(',').map((link: string, i: number) => {
-                            const url = link.trim();
-                            const icon = url.includes("linkedin") ? <div className="h-6 px-2 bg-sky-700 rounded flex items-center justify-center text-white text-[10px] font-black">in</div> : 
-                                         url.includes("instagram") ? <div className="h-6 px-2 bg-pink-600 rounded flex items-center justify-center text-white text-[10px] font-black">IG</div> :
-                                         url.includes("facebook") ? <div className="h-6 px-2 bg-blue-600 rounded flex items-center justify-center text-white text-[10px] font-black">fb</div> :
-                                         url.includes("twitter") || url.includes("x.com") ? <div className="h-6 px-2 bg-slate-900 rounded flex items-center justify-center text-white text-[10px] font-black">X</div> :
-                                         url.includes("youtube") ? <div className="h-6 px-2 bg-red-600 rounded flex items-center justify-center text-white text-[10px] font-black">YT</div> :
-                                         <Globe className="h-4 w-4" />;
-                            return (
-                              <a key={i} href={url} target="_blank" rel="noreferrer" className="relative group" title={url}>
-                                {icon}
-                                <span className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                  {url.replace(/^https?:\/\//, "").split("/")[0]}
-                                </span>
-                              </a>
-                            );
-                          });
-                        }
-                        return <span className="text-xs text-muted-foreground">None Found</span>;
-                      })()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {result.designAnalysis && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Design Identity</CardTitle>
-                    <CardDescription>Visual patterns and structure detected on the website.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Detected Fonts</p>
-                        <div className="flex flex-wrap gap-2">
-                          {result.designAnalysis.fonts?.map((font: string) => (
-                            <Badge key={font} variant="secondary" className="font-bold">{font}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Color Palette</p>
-                        <div className="flex gap-2">
-                          {result.designAnalysis.colors?.background?.map((color: string, i: number) => (
-                            <div key={i} className="w-8 h-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} title={color} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <StructureBadge label="Navbar" active={result.designAnalysis.structure?.hasNavbar} />
-                      <StructureBadge label="Hero Section" active={result.designAnalysis.structure?.hasHero} />
-                      <StructureBadge label="Footer" active={result.designAnalysis.structure?.hasFooter} />
-                      <div className="p-3 rounded-xl border bg-card/50 text-center">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">CTAs</p>
-                        <p className="text-xl font-bold">{result.designAnalysis.structure?.ctaCount || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card className="border-indigo-100 shadow-sm overflow-hidden mb-6">
-                <div className="p-6 bg-indigo-50/50 border-b border-indigo-100">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 bg-indigo-500 rounded-lg text-white">
-                        <ImageIcon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">Before / After Preview</CardTitle>
-                        <CardDescription>Comparison of the existing site vs. the proposed redesign</CardDescription>
-                      </div>
-                    </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-0">
-                  {/* Before Image */}
-                  <div className="p-6 border-r border-indigo-100">
-                    <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Before (Existing)</p>
-                    <div className="flex gap-2 mb-3">
-                      <Button size="sm" onClick={async () => {
-                          setIsCapturingBefore(true);
-                          const res = await actionCaptureScreenshot(result.leadId);
-                          if (res.success && res.desktopPath) {
-                            handleSelectImage("beforeAfterImage", res.desktopPath);
-                            toast({title: "Before Image Captured"});
-                          }
-                          setIsCapturingBefore(false);
-                      }} disabled={isCapturingBefore}>
-                        {isCapturingBefore ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fetch Before"}
-                      </Button>
-                    </div>
-                    <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
-                      {result.beforeAfterImage ? (
-                        <img 
-                          src={`${result.beforeAfterImage}?v=${new Date().getTime()}`} 
-                          alt="Before Screenshot" 
-                          className="w-full h-full object-cover object-top" 
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center gap-2 p-4 text-center">
-                          <FileImage className="h-8 w-8 text-indigo-200" />
-                          <p className="text-sm font-medium text-indigo-400">No Before Image</p>
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                        <MediaSelector 
-                          currentImage={result.beforeAfterImage} 
-                          media={media} 
-                          onSelect={(url) => handleSelectImage("beforeAfterImage", url)} 
-                          label="Before"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* After Image */}
-                   <div className="p-6">
-                     <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">After (Proposed / Preview)</p>
-                     <div className="flex gap-2 mb-3">
-                       <Input 
-                         placeholder="Enter URL to fetch After screenshot..." 
-                         value={afterUrl}
-                         onChange={(e) => setAfterUrl(e.target.value)}
-                         className="h-9"
-                       />
-                       <Button size="sm" onClick={handleCaptureAfter} disabled={isCapturingAfter || !afterUrl}>
-                         {isCapturingAfter ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fetch After"}
-                       </Button>
-                       <Button 
-                         size="sm" 
-                         variant="secondary" 
-                         onClick={handleLockAfter} 
-                         disabled={!result.reportContent?.afterImage || result.reportContent?.isAfterImageLocked}
-                       >
-                         {result.reportContent?.isAfterImageLocked ? "Locked" : <Save className="h-4 w-4" />}
-                       </Button>
-                     </div>
-                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center">
-                       {result.reportContent?.afterImage ? (
-                         <img 
-                           src={`${result.reportContent.afterImage}?v=${new Date().getTime()}`} 
-                           alt="After / Proposed Screenshot" 
-                           className="w-full h-full object-cover object-top" 
-                         />
-                       ) : (
-                         <div className="flex flex-col items-center gap-2 p-4 text-center">
-                           <FileImage className="h-8 w-8 text-indigo-200" />
-                           <p className="text-sm font-medium text-indigo-400">Enter a URL above and click "Fetch After"</p>
-                           <p className="text-xs text-indigo-300">Or generate the report — After image appears here after URL is provided</p>
-                         </div>
-                       )}
-                     </div>
-                   </div>
-                </div>
-              </Card>
-
-              <Card className="border-indigo-100 shadow-sm overflow-hidden">
-                <CardHeader className="bg-indigo-50/50 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 bg-indigo-500 rounded-lg text-white">
-                        <Edit3 className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">Developer Comments</CardTitle>
-                        <CardDescription>AI-generated, evidence-based findings prioritized for the client.</CardDescription>
-                      </div>
-                    </div>
-                    {isEditingComments ? (
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleSaveComments} className="bg-indigo-600 hover:bg-indigo-700">
-                          <Save className="h-4 w-4 mr-2" /> Save Comments
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setIsEditingComments(false)}>Cancel</Button>
-                      </div>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => setIsEditingComments(true)} className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                        <Edit3 className="h-4 w-4 mr-2" /> Edit Comments
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  {isEditingComments ? (
-                    <div className="space-y-4">
-                      <div className="rounded-xl border-2 border-indigo-100 overflow-hidden focus-within:border-indigo-500 transition-colors bg-white">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border-b border-indigo-100">
-                           <div className="flex gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                              <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                              <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                           </div>
-                           <div className="h-4 w-px bg-indigo-200 mx-2" />
-                           <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Advanced Developer Editor</p>
-                        </div>
-                        <Textarea 
-                          value={editComments} 
-                          onChange={e => setEditComments(e.target.value)}
-                          placeholder="Type your professional audit comments here... (e.g., 'Your website has a strong foundation, but the hero section lacks a clear call to action...')"
-                          className="min-h-[200px] border-0 focus-visible:ring-0 text-md leading-relaxed p-6"
-                        />
-                      </div>
-                      <p className="text-[10px] text-muted-foreground italic">Markdown is supported for basic formatting. These comments will appear on the final PNG and Web reports.</p>
-                      <p className="text-[10px] text-muted-foreground">The original AI analysis remains preserved. Saved revisions: {result.reportContent?.history?.length || 0}</p>
-                    </div>
-                  ) : (
-                    <div className="relative group">
-                      {result.reportContent?.developerComments ? (
-                        <div className="space-y-4">
-                          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed whitespace-pre-line">
-                            {result.reportContent.developerComments}
-                          </div>
-                          <details className="rounded-xl border">
-                            <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
-                            <div className="border-t p-4 space-y-3">
-                              {result.aiAnalysis?.developer_comments?.map((comment: any) => (
-                                <p key={comment.heading} className="text-sm text-muted-foreground"><strong>{comment.heading}:</strong> {comment.finding}</p>
-                              ))}
-                            </div>
-                          </details>
-                        </div>
-                      ) : result.aiAnalysis?.developer_comments?.length ? (
-                        <div className="space-y-4">
-                          {result.aiAnalysis.developer_comments.map((comment: any) => (
-                            <div key={`${comment.category}-${comment.heading}`} className="rounded-2xl border bg-slate-50 p-5">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <Badge variant="outline">{comment.category}</Badge>
-                                <Badge className={
-                                  comment.priority === "critical" || comment.priority === "high"
-                                    ? "bg-red-100 text-red-700 hover:bg-red-100"
-                                    : "bg-amber-100 text-amber-700 hover:bg-amber-100"
-                                }>{comment.priority}</Badge>
-                                {comment.strength && <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Strength</Badge>}
-                              </div>
-                              <h3 className="font-black text-slate-900">{comment.heading}</h3>
-                              <p className="mt-2 text-sm text-slate-700">{comment.finding}</p>
-                              <p className="mt-3 text-sm font-semibold text-indigo-800">Action: {comment.recommendation}</p>
-                              <p className="mt-2 text-xs text-muted-foreground">Evidence: {comment.evidence}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : result.developerComments ? (
-                        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed whitespace-pre-line">
-                          {result.developerComments}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400">
-                           <FileText className="h-10 w-10 mb-2 opacity-20" />
-                           <p className="text-sm font-medium">No developer comments added yet.</p>
-                           <Button variant="link" size="sm" onClick={() => setIsEditingComments(true)} className="text-indigo-600">Click to add technical insights</Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {result.aiAnalysis && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Focused Proposal Content</CardTitle>
-                    <CardDescription>Generated only for the selected service categories.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-wrap gap-2">
-                      {result.aiAnalysis.selected_categories?.map((category: AuditCategory) => (
-                        <Badge key={category}>{AUDIT_CATEGORIES.find((item) => item.value === category)?.label}</Badge>
-                      ))}
-                    </div>
-                    <h3 className="font-black">{result.aiAnalysis.proposal_content?.title}</h3>
-                    <p className="text-sm text-muted-foreground">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
-                    <ul className="space-y-2">
-                      {result.aiAnalysis.proposal_content?.scope?.map((item: string) => (
-                        <li key={item} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-
-              {result.aiAnalysis && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Ready-to-Send Email</CardTitle>
-                    <CardDescription>Personalized to the selected proposal scope.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="rounded-xl border p-4">
-                      <p className="text-sm font-black">{result.aiAnalysis.proposal_content?.email_subject}</p>
-                      <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground leading-relaxed">{result.aiAnalysis.proposal_content?.email_body}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Report Screenshots & References</CardTitle>
-                  <CardDescription>Upload issue screenshots, competitors, branding references, and before/after examples. Captions are shared with AI during generation.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <form action={handleReportMediaUpload} className="grid md:grid-cols-2 gap-4 rounded-2xl border bg-slate-50 p-5">
