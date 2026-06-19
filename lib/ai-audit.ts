@@ -499,7 +499,7 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
 
 function formatPrompt(input: AuditInput, pages: CrawledPage[]) {
   const selected = input.selectedCategories.map((category) => `${category}: ${categoryLabel(category)}`);
-  return `You are an expert digital agency strategist and senior UX/UI designer creating a professional website redesign and optimization proposal for a client. Your primary goal is to convince the client of the value of a redesign, optimization, maintenance plan, or SEO improvements.
+  return `You are an elite digital agency strategist, senior UX/UI designer, and conversion rate optimization expert creating a highly persuasive, premium website proposal. Your primary goal is to convince the client of the immense business value, ROI, and competitive advantage of your recommended services. Make the proposal sound authoritative, compelling, and actionable.
 
 SELECTED CATEGORIES:
 ${selected.join("\n")}
@@ -514,9 +514,13 @@ Crucial Requirements:
 
 Category boundaries:
 - redesign: design modernization, visual hierarchy, UX/UI, navigation, mobile layout, branding, trust, calls to action, conversion.
-- fix_issues: technical problems, broken functionality, accessibility, security, browser/device issues, forms, links, stability.
+- fix_issues: technical problems, broken functionality, security, browser/device issues, forms, links, stability.
 - loading_speed: loading performance, Core Web Vitals, images, scripts, CSS, caching, server response, mobile speed.
 - seo: rankings, on-page SEO, technical SEO, metadata, headings, content, internal links, indexing, search visibility.
+- ecommerce: product pages, cart abandonment, checkout flows, payment gateways, AOV optimization, upselling, conversion rates.
+- lead_gen: landing pages, lead magnets, forms, CRM integrations, email capture, compelling CTAs, conversion funnels.
+- accessibility: ADA compliance, WCAG guidelines, screen readers, contrast ratios, keyboard navigation, inclusive design.
+- custom_dev: custom features, complex APIs, web apps, interactive dashboards, advanced integrations, specialized backend logic.
 - maintenance: WordPress core/plugin/theme updates, security, malware, backups, uptime, performance optimization, monthly checks, technical support, and a maintenance pricing section.
 
 Use only the supplied evidence and the visual screenshots. Do not invent technologies, traffic, rankings, revenue, or visual details. Keep language professional, persuasive, actionable, and client-friendly. The proposal and email must reference the attached full audit report and PNG proposal summary.

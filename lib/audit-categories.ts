@@ -6,6 +6,10 @@ export const auditCategorySchema = z.enum([
   "loading_speed",
   "seo",
   "maintenance",
+  "ecommerce",
+  "lead_gen",
+  "accessibility",
+  "custom_dev"
 ]);
 
 export type AuditCategory = z.infer<typeof auditCategorySchema>;
@@ -15,9 +19,13 @@ export const AUDIT_CATEGORIES: Array<{
   label: string;
   description: string;
 }> = [
-  { value: "redesign", label: "Re-Design", description: "Modern design, UX, mobile layout, branding, trust, and conversion." },
-  { value: "fix_issues", label: "Fix Issues", description: "Technical problems, accessibility, broken functionality, and stability." },
-  { value: "loading_speed", label: "Fix Loading Speed", description: "Performance, Core Web Vitals, images, scripts, caching, and responsiveness." },
-  { value: "seo", label: "SEO Improvements", description: "On-page SEO, technical SEO, search visibility, content, and metadata." },
-  { value: "maintenance", label: "Website Maintenance", description: "Updates, backups, security, uptime, optimization, monthly checks, and support." },
+  { value: "redesign", label: "Complete Re-Design", description: "Transform outdated aesthetics into a modern, high-converting experience with premium UI/UX, responsive layouts, and strong brand alignment." },
+  { value: "fix_issues", label: "Bug Fixes & UX Repair", description: "Resolve layout breaks, technical glitches, broken links, and friction points that cause visitors to bounce." },
+  { value: "loading_speed", label: "Performance & Speed Optimization", description: "Drastically reduce load times, optimize Core Web Vitals, compress assets, and implement advanced caching for lightning-fast speeds." },
+  { value: "seo", label: "SEO & Search Visibility", description: "Dominate search rankings through on-page SEO, schema markup, technical metadata, and semantic content structuring." },
+  { value: "ecommerce", label: "E-Commerce Optimization", description: "Increase average order value and reduce cart abandonment by optimizing product pages, checkout flows, and payment integrations." },
+  { value: "lead_gen", label: "Lead Generation & Conversion", description: "Build high-converting landing pages, compelling CTAs, magnetic forms, and seamlessly integrate them into your CRM." },
+  { value: "accessibility", label: "ADA & Accessibility Compliance", description: "Protect against lawsuits and expand your audience by ensuring screen-reader compatibility, contrast ratios, and keyboard navigation." },
+  { value: "custom_dev", label: "Custom Feature Development", description: "Build complex interactive tools, custom API integrations, dynamic dashboards, and specialized backend functionality." },
+  { value: "maintenance", label: "Ongoing Maintenance & Security", description: "Ensure complete peace of mind with regular updates, hardened security, automated backups, and guaranteed uptime monitoring." },
 ];
