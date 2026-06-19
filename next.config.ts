@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     "playwright",
     "playwright-core"
   ],
+  outputFileTracingIncludes: {
+    "/**/*": ["./node_modules/playwright-core/browsers.json"]
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" }
