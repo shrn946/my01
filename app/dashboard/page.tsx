@@ -318,7 +318,7 @@ export default function DashboardPage() {
     
     setIsSendingEmail(true);
     try {
-      const { sendLeadEmailFromDashboard } = await import("./leads/actions");
+      const { sendLeadEmailFromDashboard } = await import("./actions");
       const res = await sendLeadEmailFromDashboard(
         result.leadId,
         emailSubject || result.aiAnalysis?.proposal_content?.email_subject || "Proposal",

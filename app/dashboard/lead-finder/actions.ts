@@ -743,7 +743,7 @@ export async function searchAndAnalyzeLeads(
           opportunityScore: analysis.opportunityScore,
           contactPageUrl: analysis.contactPageUrl,
           socialLinks: analysis.socialLinks,
-          isSaved: status !== "Finder"
+          isSaved: true
         };
       });
 
