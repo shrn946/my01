@@ -117,7 +117,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
     const resend = new Resend(settings?.resendApiKey || process.env.RESEND_API_KEY || "dummy_key_for_build");
-    const baseUrl = settings?.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || "";
+    const baseUrl = settings?.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found.");
     const aiFields = await getLeadAiFields(prisma, leadId);
