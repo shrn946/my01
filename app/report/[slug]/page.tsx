@@ -44,7 +44,7 @@ export default async function ReportPage({
     AUDIT_CATEGORIES.find((item) => item.value === category)?.label || category;
   const reportContent = getReportContent(aiFields.reportContent);
   const reportMedia = getReportMedia(aiFields.reportMedia);
-  const mainDesktopScreenshot = lead.desktopImage || reportMedia.find(m => m.id === 'main')?.url;
+  const mainDesktopScreenshot = lead.beforeAfterImage || lead.desktopImage || reportMedia.find(m => m.id === 'main')?.url;
   const mediaFor = (section: string) => reportMedia.filter((item) => item.section === section);
   const finalComments = reportContent.developerComments || aiAudit.developer_comments
     .map((comment) => `${comment.heading}: ${comment.finding}\nRecommendation: ${comment.recommendation}`)
@@ -80,8 +80,8 @@ export default async function ReportPage({
               {/* Desktop Frame */}
               <div className="relative w-[75%] -mr-[5%] z-0">
                 <div className="relative overflow-hidden rounded-t-[2rem] border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
-                  {lead.desktopImage ? (
-                    <img src={lead.desktopImage} alt="Website desktop view" className="w-full h-full object-cover object-top" />
+                  {mainDesktopScreenshot ? (
+                    <img src={mainDesktopScreenshot} alt="Website desktop view" className="w-full h-full object-cover object-top" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
                   )}
