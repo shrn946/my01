@@ -149,32 +149,9 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     const imageToUse = lead.proposalImage || lead.desktopImage;
     
     let inlineImageUrl = "";
-    const emailAttachments: any[] = [];
     
     if (imageToUse) {
-      const isLocalPath = imageToUse.startsWith("/");
-      
-      try {
-        if (isLocalPath) {
-          const attachmentPath = path.join(process.cwd(), "public", imageToUse);
-          const fileBuffer = fs.readFileSync(attachmentPath);
-          emailAttachments.push({
-            filename: "preview-summary.png",
-            content: fileBuffer,
-            content_id: "preview-summary-image"
-          });
-        } else {
-          // If it's a remote URL, Resend allows passing it as path, but we must ensure it has http/https
-          emailAttachments.push({
-            filename: "preview-summary.png",
-            path: imageToUse,
-            content_id: "preview-summary-image"
-          });
-        }
-        inlineImageUrl = "cid:preview-summary-image";
-      } catch (err) {
-        console.error("Failed to attach preview summary image", err);
-      }
+      inlineImageUrl = absoluteUrl(baseUrl, imageToUse);
     }
 
     const htmlBody = professionalEmailHtml({
@@ -198,7 +175,6 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
           subject: subject,
           html: htmlBody,
           text: customBody.replace(/<[^>]*>?/gm, ''), // Plain text fallback
-          attachments: emailAttachments.length > 0 ? emailAttachments : undefined,
         });
         
         if (error) {
