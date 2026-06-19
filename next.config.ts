@@ -7,7 +7,10 @@ const nextConfig: NextConfig = {
     "playwright-core"
   ],
   outputFileTracingIncludes: {
-    "/**/*": ["./node_modules/playwright-core/browsers.json"]
+    "/**/*": [
+      "./node_modules/playwright-core/browsers.json",
+      "./node_modules/@sparticuz/chromium/bin/**/*"
+    ]
   },
   images: {
     remotePatterns: [
