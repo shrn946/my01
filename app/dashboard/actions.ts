@@ -509,7 +509,33 @@ export async function getLeads(filters?: { search?: string; status?: string; cat
 
     return await prisma.lead.findMany({
       where,
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        businessName: true,
+        website: true,
+        email: true,
+        phone: true,
+        address: true,
+        city: true,
+        category: true,
+        source: true,
+        status: true,
+        leadScore: true,
+        websiteScore: true,
+        performanceScore: true,
+        seoScore: true,
+        pageSpeedPerformance: true,
+        pageSpeedSeo: true,
+        accessibilityScore: true,
+        bestPracticesScore: true,
+        desktopScore: true,
+        mobileScore: true,
+        topIssues: true,
+        notes: true,
+        createdAt: true,
+        updatedAt: true
+      }
     });
   } catch (error) {
     console.error("GET_LEADS_ERROR:", error);

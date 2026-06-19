@@ -628,17 +628,16 @@ export default function LeadsPage() {
             </div>
 
             {/* Leads Rows */}
-            <AnimatePresence>
+            <div className="space-y-4">
               {paginatedLeads.map((lead, idx) => {
                 const hasEmail = lead.email && lead.email.trim() !== "";
                 const isSelected = selectedLeads.includes(lead.id);
 
                 return (
-                  <motion.div
+                  <div
                     key={lead.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.03 }}
+                    className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                    style={{ animationFillMode: "both", animationDelay: `${idx * 30}ms` }}
                   >
                     <Card className={`overflow-hidden border transition-all bg-card ${isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-muted hover:shadow-md hover:border-primary/25'}`}>
                       {/* Responsive Card Body */}
@@ -977,10 +976,10 @@ export default function LeadsPage() {
                         </div>
                       </div>
                     </Card>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </AnimatePresence>
+            </div>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
