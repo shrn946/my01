@@ -399,11 +399,11 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const vercelHost =
-      process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    let siteUrl = settings?.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
+    siteUrl = siteUrl.trim().replace(/\/$/, "");
+    if (!siteUrl.startsWith("http")) siteUrl = `https://${siteUrl}`;
     const proposalUrl = `${siteUrl}/proposal/${leadId}?mode=${mode}`;
 
     browser = await launchBrowser();
@@ -458,11 +458,11 @@ export async function generateAuditExports(leadId: string) {
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
 
-    const vercelHost =
-      process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    let siteUrl = settings?.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
+    siteUrl = siteUrl.trim().replace(/\/$/, "");
+    if (!siteUrl.startsWith("http")) siteUrl = `https://${siteUrl}`;
     const fullReportUrl = `${siteUrl}/report/${leadId}?export=1&format=full`;
     const pngReportUrl = `${siteUrl}/report/${leadId}?export=1&format=png`;
     const proposalUrl = `${siteUrl}/proposal/${leadId}`;
