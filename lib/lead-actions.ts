@@ -338,7 +338,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     browser = await launchBrowser();
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
-      deviceScaleFactor: 1,
+      deviceScaleFactor: 2, // Retina quality
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     });
     const page = await context.newPage();
@@ -409,7 +409,7 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     browser = await launchBrowser();
     const context = await browser.newContext({
       viewport: { width: 1200, height: 1600 },
-      deviceScaleFactor: 1,
+      deviceScaleFactor: 2, // Retina quality
     });
     const page = await context.newPage();
     

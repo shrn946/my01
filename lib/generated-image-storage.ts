@@ -82,19 +82,17 @@ export async function storeGeneratedImage(
   const optimized = await sharp(image)
     .rotate()
     .resize({
-      width: MAX_GENERATED_PNG_WIDTH,
-      height: MAX_GENERATED_PNG_HEIGHT,
+      width: MAX_GENERATED_PNG_WIDTH * 2, // Support retina resolutions
+      height: MAX_GENERATED_PNG_HEIGHT * 2,
       fit: "inside",
       withoutEnlargement: true,
     })
-    .png({
-      compressionLevel: 9,
-      adaptiveFiltering: true,
-      palette: true,
-      colors: 128,
-      effort: 10,
+    .webp({
+      quality: 85,
+      effort: 6,
+      smartSubsample: true
     })
     .toBuffer();
 
-  return storeGeneratedFile(optimized, objectPath, "image/png");
+  return storeGeneratedFile(optimized, objectPath.replace(/\.png$/, '.webp'), "image/webp");
 }
