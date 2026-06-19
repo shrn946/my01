@@ -400,8 +400,8 @@ export default async function ReportPage({
             {/* Before */}
             <div className="space-y-4">
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
-              {lead.beforeAfterImage ? (
-                <img src={lead.beforeAfterImage} alt="Before" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
+              {(lead.beforeAfterImage || lead.desktopImage) ? (
+                <img src={lead.beforeAfterImage || lead.desktopImage!} alt="Before" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
               ) : (
                 <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No before image</div>
               )}
@@ -409,8 +409,8 @@ export default async function ReportPage({
             {/* After */}
             <div className="space-y-4">
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
-              {((lead.reportContent as any)?.afterImage || lead.desktopImage) ? (
-                <img src={(lead.reportContent as any)?.afterImage || lead.desktopImage!} alt="After" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
+              {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
+                <img src={(lead.reportContent as any)?.afterImage || lead.proposalImage!} alt="After" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
               ) : (
                 <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
               )}

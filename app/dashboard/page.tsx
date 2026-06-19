@@ -948,9 +948,9 @@ export default function DashboardPage() {
                       </Button>
                     </div>
                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
-                      {result.beforeAfterImage ? (
+                      {(result.beforeAfterImage || result.desktopImage) ? (
                         <img 
-                          src={`${result.beforeAfterImage}?v=${new Date().getTime()}`} 
+                          src={`${result.beforeAfterImage || result.desktopImage}?v=${new Date().getTime()}`} 
                           alt="Before Screenshot" 
                           className="w-full h-full object-cover object-top" 
                         />
@@ -994,9 +994,9 @@ export default function DashboardPage() {
                        </Button>
                      </div>
                      <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center">
-                       {result.reportContent?.afterImage ? (
+                       {(result.reportContent?.afterImage || result.proposalImage) ? (
                          <img 
-                           src={`${result.reportContent.afterImage}?v=${new Date().getTime()}`} 
+                           src={`${result.reportContent?.afterImage || result.proposalImage}?v=${new Date().getTime()}`} 
                            alt="After / Proposed Screenshot" 
                            className="w-full h-full object-cover object-top" 
                          />
