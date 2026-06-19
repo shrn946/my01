@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { AlertCircle, ArrowRight, CheckCircle2, Monitor, ShieldCheck, Target, Terminal, Zap } from "lucide-react";
-import { ScrollableImage } from "@/components/scrollable-image";
 
 import { AUDIT_CATEGORIES } from "@/lib/audit-categories";
 import { getAiAudit } from "@/lib/ai-audit";
@@ -402,7 +401,7 @@ export default async function ReportPage({
             <div className="space-y-4">
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
               {lead.beforeAfterImage ? (
-                <ScrollableImage src={lead.beforeAfterImage} alt="Before" />
+                <img src={lead.beforeAfterImage} alt="Before" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
               ) : (
                 <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No before image</div>
               )}
@@ -411,7 +410,7 @@ export default async function ReportPage({
             <div className="space-y-4">
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
               {((lead.reportContent as any)?.afterImage || lead.desktopImage) ? (
-                <ScrollableImage src={(lead.reportContent as any)?.afterImage || lead.desktopImage!} alt="After" />
+                <img src={(lead.reportContent as any)?.afterImage || lead.desktopImage!} alt="After" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
               ) : (
                 <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
               )}
