@@ -84,6 +84,14 @@ export default function LeadDetailClient({ lead, templates, settings, portfolioE
 
   useEffect(() => {
     if (selectedTemplate) {
+      if (selectedTemplate === "ai-focused") {
+        const proposal = lead.aiAnalysis?.proposal_content;
+        if (proposal) {
+          setSubject(proposal.email_subject);
+          setBody(proposal.email_body.replace(/\n/g, "<br/>"));
+        }
+        return;
+      }
       const template = templates.find(t => t.id === selectedTemplate);
       if (template) {
         setSubject(parseTemplate(template.subject));
@@ -97,14 +105,16 @@ export default function LeadDetailClient({ lead, templates, settings, portfolioE
       toast({ title: "Error", description: "Recipient email is required.", variant: "destructive" });
       return;
     }
-    if (lead.emailLogs?.some((l: any) => l.status === "Sent")) {
-      const confirmed = window.confirm("An email has already been sent to this lead. Send again?");
+    const sentEmailCount = lead.emailLogs?.filter((log: any) => log.status === "Sent").length || 0;
+    if (sentEmailCount >= 5) {
+      const confirmed = window.confirm(`${sentEmailCount} emails have already been sent to this lead. Send again?`);
       if (!confirmed) return;
     }
 
     setLoading(true);
     try {
-      const result = await sendLeadEmail(lead.id, selectedTemplate || null, body, subject, toEmail);
+      const templateId = selectedTemplate === "ai-focused" ? null : (selectedTemplate || null);
+      const result = await sendLeadEmail(lead.id, templateId, body, subject, toEmail);
       if (result.success) {
         toast({ title: "Email Sent", description: "The proposal has been sent successfully." });
         router.refresh();
@@ -414,6 +424,9 @@ export default function LeadDetailClient({ lead, templates, settings, portfolioE
                       <SelectValue placeholder="Select a template..." />
                     </SelectTrigger>
                     <SelectContent>
+                      {lead.aiAnalysis?.proposal_content && (
+                        <SelectItem value="ai-focused">AI · Focused Category Proposal</SelectItem>
+                      )}
                       {templates.map(t => (
                         <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                       ))}

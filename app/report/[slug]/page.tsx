@@ -1,422 +1,475 @@
-import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { 
-  Zap, 
-  Search, 
-  ShieldCheck, 
-  TrendingUp, 
-  Target, 
-  Layout, 
-  Monitor, 
-  Terminal, 
-  Palette, 
-  Type, 
-  CheckCircle2, 
-  AlertCircle, 
-  ArrowRight,
-  BarChart3
-} from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Monitor, ShieldCheck, Target, Terminal, Zap } from "lucide-react";
+import { ScrollableImage } from "@/components/scrollable-image";
+
+import { AUDIT_CATEGORIES } from "@/lib/audit-categories";
+import { getAiAudit } from "@/lib/ai-audit";
+import { getLeadAiFields } from "@/lib/lead-ai-storage";
+import { getPrisma } from "@/lib/prisma";
+import { getReportContent, getReportMedia } from "@/lib/report-content";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
-export default async function ReportPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ReportPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ format?: string }>;
+}) {
   const { slug } = await params;
+  const { format = "full" } = await searchParams;
   const prisma = getPrisma();
   const lead = await prisma.lead.findUnique({ where: { id: slug } });
-  
   if (!lead) return notFound();
 
+  const aiFields = await getLeadAiFields(prisma, lead.id);
+  const aiAudit = getAiAudit(aiFields.aiAnalysis);
+  if (!aiAudit) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <Card className="max-w-xl">
+          <CardContent className="p-10 text-center">
+            <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-black">Focused report not generated</h1>
+            <p className="mt-3 text-slate-600">Select proposal categories in the dashboard and run Start Generation first.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const categoryLabel = (category: string) =>
+    AUDIT_CATEGORIES.find((item) => item.value === category)?.label || category;
+  const reportContent = getReportContent(aiFields.reportContent);
+  const reportMedia = getReportMedia(aiFields.reportMedia);
+  const mainDesktopScreenshot = lead.desktopImage || reportMedia.find(m => m.id === 'main')?.url;
+  const mediaFor = (section: string) => reportMedia.filter((item) => item.section === section);
+  const finalComments = reportContent.developerComments || aiAudit.developer_comments
+    .map((comment) => `${comment.heading}: ${comment.finding}\nRecommendation: ${comment.recommendation}`)
+    .join("\n\n");
+  const finalRecommendations = reportContent.recommendations.length
+    ? reportContent.recommendations
+    : aiAudit.recommendations.map((item) => item.recommendation);
   const designAnalysis = lead.designAnalysis as any;
 
-  const getBusinessImpact = (perf: number, seo: number) => {
-    return [
-      {
-        title: "User Retention",
-        icon: <Zap className="h-5 w-5 text-amber-500" />,
-        desc: perf < 70 
-          ? `With a performance score of ${perf}%, you are likely losing up to 40% of potential visitors before the page even loads. Fast loading is critical for retaining modern mobile users.` 
-          : "Your website performance is healthy, which helps keep users engaged and reduces bounce rates."
-      },
-      {
-        title: "Search Visibility",
-        icon: <Search className="h-5 w-5 text-blue-500" />,
-        desc: seo < 80 
-          ? `A score of ${seo}% in SEO means Google may be penalizing your ranking. Fixing these structural issues could significantly increase the number of organic leads you receive.` 
-          : "You have a solid SEO foundation, but there is always room to optimize for even higher rankings and more traffic."
-      },
-      {
-        title: "Trust & Credibility",
-        icon: <ShieldCheck className="h-5 w-5 text-green-500" />,
-        desc: "Design and technical best practices directly impact how customers perceive your business. A modern, polished site builds immediate trust."
-      },
-      {
-        title: "Conversion Potential",
-        icon: <TrendingUp className="h-5 w-5 text-indigo-500" />,
-        desc: "Optimizing your site's structure and CTA (Call to Action) elements can turn more of your existing traffic into paying customers."
-      }
-    ];
-  };
-
-  const improvements = lead.improvementProposals && lead.improvementProposals.length > 0 
-    ? lead.improvementProposals 
-    : [
-      "Modern Hero Section with clear value proposition",
-      "Optimized Typography for better readability",
-      "Strategic Call-to-Action (CTA) placement",
-      "Mobile-First Responsive Design",
-      "Image optimization for faster load speeds",
-      "Clear contact information and lead forms",
-      "Structured data for better Google rankings",
-      "Customer trust signals (Reviews & Testimonials)"
-    ];
+  if (format === "png") {
+    return (
+      <div className="min-h-screen bg-slate-100 p-10 font-sans text-slate-950">
+        <div className="mx-auto w-[1100px] overflow-hidden rounded-[3rem] bg-white shadow-2xl">
+          <header className="bg-slate-950 p-12 text-white">
+            <div className="flex items-start justify-between gap-8">
+              <div>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {aiAudit.selected_categories.map((category) => (
+                    <span key={category} className="rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest">{categoryLabel(category)}</span>
+                  ))}
+                </div>
+                <h1 className="text-5xl font-black">{aiAudit.png_report_data.headline}</h1>
+                <p className="mt-3 text-slate-400">{lead.website}</p>
+              </div>
+              <div className="h-32 w-32 shrink-0 rounded-3xl bg-white text-slate-950 flex flex-col items-center justify-center">
+                <span className="text-5xl font-black">{lead.websiteScore || 0}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Audit Score</span>
+              </div>
+            </div>
+          </header>
+          <main className="p-12 space-y-10">
+            <div className="relative mx-auto w-full flex items-end justify-center py-6">
+              {/* Desktop Frame */}
+              <div className="relative w-[75%] -mr-[5%] z-0">
+                <div className="relative overflow-hidden rounded-t-[2rem] border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
+                  {lead.desktopImage ? (
+                    <img src={lead.desktopImage} alt="Website desktop view" className="w-full h-full object-cover object-top" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
+                  )}
+                </div>
+                {/* Keyboard Base */}
+                <div className="relative z-0 -mt-1 mx-[-3%] h-5 rounded-b-2xl bg-slate-300 border border-slate-400 shadow-xl flex justify-center">
+                  <div className="w-1/4 h-1.5 bg-slate-400 rounded-b-md"></div>
+                </div>
+              </div>
+              {/* Mobile Frame */}
+              <div className="relative w-[22%] z-10 -mb-6">
+                <div className="relative overflow-hidden rounded-[2.5rem] border-[8px] border-slate-800 bg-slate-900 aspect-[9/19] shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute top-0 inset-x-0 h-5 flex justify-center z-20">
+                    <div className="w-1/2 h-full bg-slate-800 rounded-b-2xl"></div>
+                  </div>
+                  {lead.mobileImage ? (
+                    <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
+                  )}
+                </div>
+              </div>
+            </div>
+            {reportMedia.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-black mb-5">Visual Evidence</h2>
+                <div className="grid grid-cols-2 gap-5">
+                  {reportMedia.slice(0, 4).map((item) => (
+                    <figure key={item.id} className="overflow-hidden rounded-2xl border border-slate-200">
+                      <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                      <figcaption className="p-3 text-xs font-semibold text-slate-700">{item.caption}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </section>
+            )}
+            <div className="grid grid-cols-2 gap-8">
+              <section>
+                <h2 className="text-2xl font-black">Selected Findings</h2>
+                <ul className="mt-5 space-y-4">
+                  {aiAudit.png_report_data.findings.map((item) => <li key={item} className="flex gap-3 text-sm text-slate-700"><AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />{item}</li>)}
+                </ul>
+              </section>
+              <section>
+                <h2 className="text-2xl font-black">AI Recommendations</h2>
+                <ul className="mt-5 space-y-4">
+                  {finalRecommendations.slice(0, 8).map((item) => <li key={item} className="flex gap-3 text-sm text-slate-700"><CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />{item}</li>)}
+                </ul>
+              </section>
+            </div>
+            <section className="rounded-[2rem] bg-indigo-50 border border-indigo-100 p-8">
+              <h2 className="text-2xl font-black flex items-center gap-2"><Terminal className="h-6 w-6 text-indigo-600" /> Developer Comments</h2>
+              <div className="mt-5 grid grid-cols-2 gap-4">
+                {finalComments.split(/\n\n+/).filter(Boolean).slice(0, 6).map((item) => <p key={item} className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 whitespace-pre-line">{item}</p>)}
+              </div>
+            </section>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-20 font-sans">
-      {/* 1. Hero Section */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white pt-24 pb-40 px-6 text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30 px-4 py-1 mb-4 rounded-full text-xs font-bold uppercase tracking-widest">
-            Detailed Website Audit
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4 leading-tight">
-            Strategic Growth Audit for {lead.businessName || "Your Business"}
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 14mm 12mm; }
+          .print-cover { break-after: page; min-height: 255mm; }
+          .print-section { break-inside: avoid-page; }
+          .print-heading { break-after: avoid-page; }
+          img { max-height: 220mm; object-fit: contain; }
+        }
+      `}</style>
+      <header className="print-cover bg-gradient-to-br from-slate-950 to-indigo-950 text-white px-10 flex items-center">
+        <div className="max-w-5xl mx-auto py-20">
+          <div className="flex flex-wrap gap-2 mb-6">
+            {aiAudit.selected_categories.map((category) => (
+              <span key={category} className="rounded-full bg-white/10 border border-white/15 px-4 py-2 text-xs font-black uppercase tracking-widest">
+                {categoryLabel(category)}
+              </span>
+            ))}
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black leading-tight">
+            Focused Website Audit for {lead.businessName || "Your Business"}
           </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto font-medium">
-            A comprehensive analysis of <span className="text-blue-400">{lead.website}</span> and actionable recommendations for improvement.
+          <p className="mt-5 text-xl text-slate-300 max-w-3xl">
+            This report covers only the selected proposal categories for <span className="text-blue-300">{lead.website}</span>.
           </p>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-6 -mt-24 space-y-16">
-        {/* 2. Key Metrics Summary */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <ScoreBox label="Conversion Score" score={lead.websiteScore || 0} icon={<Target />} sub="Overall potential" />
-          <ScoreBox label="Performance" score={lead.performanceScore || 0} icon={<Zap />} sub="Loading speed" />
-          <ScoreBox label="SEO Score" score={lead.seoScore || 0} icon={<Search />} sub="Search ranking" />
-          <ScoreBox label="UX/Design" score={lead.designScore || 75} icon={<Layout />} sub="Visual appeal" />
-        </div>
-
-        {/* 3. Main Screenshot Section */}
-        <div className="space-y-10">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Monitor className="h-6 w-6 text-blue-600" />
-              Current Website Multi-Device Preview
-            </h2>
-          </div>
-          
-          <div className="grid lg:grid-cols-12 gap-10 items-center">
-            {/* Desktop Laptop Frame - 8 cols */}
-            <div className="lg:col-span-8 relative">
-              <div className="relative mx-auto border-slate-800 bg-slate-800 border-[8px] rounded-t-2xl w-full max-w-[800px] shadow-2xl overflow-hidden">
-                <div className="aspect-[16/10] w-full bg-white overflow-hidden">
-                   {lead.desktopImage ? (
-                      <img src={lead.desktopImage} alt="Desktop Preview" className="w-full h-full object-cover object-top" />
-                   ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-400 font-bold uppercase tracking-widest text-xs">Desktop Capture Pending</div>
-                   )}
+          <div className="mt-12 grid grid-cols-[1fr_1fr] gap-6">
+            {/* Design Identity */}
+            <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
+              <p className="text-2xl font-black mb-1">Design Identity</p>
+              <p className="text-xs text-slate-400 mb-6">Visual patterns and structure detected on the website.</p>
+              <div className="space-y-5">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Detected Fonts</p>
+                  <div className="flex flex-wrap gap-2">
+                    {designAnalysis?.fonts?.map((font: string) => (
+                      <span key={font} className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold">{font}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Color Palette</p>
+                  <div className="flex gap-2">
+                    {designAnalysis?.colors?.background?.map((color: string, i: number) => (
+                      <div key={i} className="w-8 h-8 rounded-full border border-white/30 shadow-md" style={{ backgroundColor: color }} title={color} />
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="relative mx-auto bg-slate-900 rounded-b-2xl rounded-t-sm h-[16px] md:h-[24px] w-[105%] -ml-[2.5%] shadow-lg"></div>
-              <div className="relative mx-auto bg-slate-800/50 rounded-b-xl h-[4px] md:h-[6px] w-[20%] mt-[-2px]"></div>
             </div>
 
-            {/* Mobile iPhone Frame - 4 cols */}
-            <div className="lg:col-span-4 flex justify-center lg:justify-end">
-              <div className="relative mx-auto border-slate-900 bg-slate-900 border-[12px] rounded-[3rem] w-[260px] aspect-[9/19.5] shadow-2xl overflow-hidden ring-4 ring-slate-800/50">
-                <div className="absolute top-0 inset-x-0 h-7 bg-slate-900 z-20 flex justify-center">
-                   <div className="w-24 h-5 bg-slate-900 rounded-b-2xl"></div>
+            {/* Website Scores */}
+            <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
+                  <Zap className="h-6 w-6" />
                 </div>
-                <div className="w-full h-full bg-white">
-                   {lead.mobileImage ? (
-                      <img src={lead.mobileImage} alt="Mobile Preview" className="w-full h-full object-cover object-top" />
-                   ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-400 font-bold uppercase tracking-widest text-[10px] text-center px-4">Mobile Capture Pending</div>
-                   )}
+                <div>
+                  <p className="text-2xl font-black">Website Scores</p>
+                  <p className="text-xs text-slate-400 mt-1">Performance and SEO metrics</p>
                 </div>
-                <div className="absolute bottom-2 inset-x-0 h-1.5 w-1/3 mx-auto bg-white/20 rounded-full z-20"></div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+                <div className="sm:col-span-3 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Overall</p>
+                    <p className="text-3xl font-black text-white mt-1">{lead.websiteScore || 0}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Performance</p>
+                    <p className="text-3xl font-black text-emerald-400 mt-1">{lead.performanceScore || 0}</p>
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">SEO</p>
+                  <p className="text-xl font-black text-white mt-1">{lead.seoScore || 0}</p>
+                </div>
+                <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Access.</p>
+                  <p className="text-xl font-black text-white mt-1">{lead.accessibilityScore || 0}</p>
+                </div>
+                <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Best Prac.</p>
+                  <p className="text-xl font-black text-white mt-1">{lead.bestPracticesScore || 0}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Developer Comments Section */}
-        {lead.developerComments && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Terminal className="h-6 w-6 text-indigo-600" />
-              Expert Technical Analysis
-            </h2>
-            <Card className="border-indigo-100 bg-indigo-50/30 overflow-hidden shadow-sm">
-              <CardContent className="p-10 relative">
-                <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                    </div>
-                    <div className="h-4 w-px bg-indigo-200 mx-2" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Developer Insights from Hassan Rizwan</p>
+      <main className="max-w-6xl mx-auto px-6 py-12 space-y-14">
+        <Card className="print-section shadow-xl border-slate-200">
+          <CardContent className="p-8 md:p-10">
+            <p className="text-xs font-black uppercase tracking-widest text-indigo-600">Executive Summary</p>
+            <h2 className="mt-2 text-2xl font-black">{aiAudit.proposal_content.title}</h2>
+            <p className="mt-4 text-slate-700 leading-relaxed">{aiAudit.full_report_data.executive_summary}</p>
+          </CardContent>
+        </Card>
+
+        <section className="print-section space-y-6">
+          <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Monitor className="h-7 w-7 text-indigo-600" /> Website Screenshot</h2>
+          <div className="relative mx-auto w-full max-w-4xl flex items-end justify-center pt-8 pb-12">
+            {/* Desktop Frame */}
+            <div className="relative w-[80%] -mr-[5%] z-0">
+              <div className="relative overflow-hidden rounded-t-[2rem] border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
+                {mainDesktopScreenshot ? (
+                  <img src={mainDesktopScreenshot} alt="Website desktop view" className="w-full h-full object-cover object-top" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
+                )}
+              </div>
+              {/* Keyboard Base */}
+              <div className="relative z-0 -mt-1 mx-[-3%] h-6 rounded-b-3xl bg-slate-300 border border-slate-400 shadow-xl flex justify-center">
+                <div className="w-1/4 h-2 bg-slate-400 rounded-b-md"></div>
+              </div>
+            </div>
+            {/* Mobile Frame */}
+            <div className="relative w-[22%] z-10 -mb-8">
+              <div className="relative overflow-hidden rounded-[2.5rem] border-[8px] border-slate-800 bg-slate-900 aspect-[9/19] shadow-2xl">
+                {/* Notch */}
+                <div className="absolute top-0 inset-x-0 h-5 flex justify-center z-20">
+                  <div className="w-1/2 h-full bg-slate-800 rounded-b-2xl"></div>
+                </div>
+                {lead.mobileImage ? (
+                  <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-8">
+          <h2 className="print-heading text-3xl font-black">Selected Category Analysis</h2>
+          {aiAudit.full_report_data.sections.map((section) => (
+            <Card key={section.category} className="print-section border-slate-200 shadow-sm overflow-hidden">
+              <div className="h-2 bg-indigo-600" />
+              <CardContent className="p-8">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-2xl font-black">{section.heading}</h3>
+                  <span className="rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-black uppercase">{categoryLabel(section.category)}</span>
+                </div>
+                <p className="mt-4 text-slate-700 leading-relaxed">{section.analysis}</p>
+                <div className="mt-7 grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="font-black text-slate-900 mb-3">Findings</h4>
+                    <ul className="space-y-3">
+                      {section.findings.map((item) => <li key={item} className="text-sm text-slate-700 flex gap-2"><AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />{item}</li>)}
+                    </ul>
                   </div>
-                  <div className="text-xl font-medium text-slate-800 leading-relaxed italic">
-                    "{lead.developerComments}"
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest pt-4">
-                     <ShieldCheck className="h-4 w-4" /> Verified Professional Audit
+                  <div>
+                    <h4 className="font-black text-slate-900 mb-3">Recommendations</h4>
+                    <ul className="space-y-3">
+                      {section.recommendations.map((item) => <li key={item} className="text-sm text-slate-700 flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>)}
+                    </ul>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          ))}
+          {mediaFor("findings").length > 0 && (
+            <div className="grid md:grid-cols-2 gap-6">
+              {mediaFor("findings").map((item) => (
+                <figure key={item.id} className="print-section overflow-hidden rounded-3xl border border-slate-200">
+                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                  <figcaption className="p-4 text-sm font-semibold">{item.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="print-section space-y-6">
+          <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Terminal className="h-7 w-7 text-indigo-600" /> Developer Comments</h2>
+          <Card className="border-indigo-100 bg-indigo-50/30">
+            <CardContent className="p-8 whitespace-pre-line text-slate-700 leading-relaxed">{finalComments}</CardContent>
+          </Card>
+        </section>
+
+        <section className="space-y-6">
+          <h2 className="print-heading text-3xl font-black">Recommendations</h2>
+          <div className="grid md:grid-cols-2 gap-5">
+            {finalRecommendations.map((item, index) => (
+              <Card key={`${index}-${item}`} className="print-section border-slate-200">
+                <CardContent className="p-6">
+                  <span className="text-xs font-black uppercase tracking-widest text-indigo-600">Recommendation {index + 1}</span>
+                  <p className="mt-3 text-sm text-slate-700">{item}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+          {mediaFor("recommendations").length > 0 && (
+            <div className="grid md:grid-cols-2 gap-6">
+              {mediaFor("recommendations").map((item) => (
+                <figure key={item.id} className="print-section overflow-hidden rounded-3xl border border-slate-200">
+                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                  <figcaption className="p-4 text-sm font-semibold">{item.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {mediaFor("appendix").length > 0 && (
+          <section className="space-y-6">
+            <h2 className="print-heading text-3xl font-black">Uploaded Screenshots</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {mediaFor("appendix").map((item) => (
+                <figure key={item.id} className="print-section overflow-hidden rounded-3xl border border-slate-200 bg-white">
+                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                  <figcaption className="p-4 text-sm font-semibold text-slate-700">{item.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Left Side: Audit Details */}
-          <div className="lg:col-span-2 space-y-12">
-            
-            {/* Design Analysis Section */}
-            {designAnalysis && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Palette className="h-6 w-6 text-pink-500" />
-                  Visual Identity Analysis
-                </h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card className="border-slate-100 shadow-sm">
-                    <CardContent className="p-6 space-y-4">
-                      <div className="flex items-center gap-2 text-slate-500 font-bold uppercase tracking-widest text-xs">
-                        <Type className="h-4 w-4" /> Detected Typography
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {designAnalysis.fonts?.map((font: string) => (
-                          <span key={font} className="px-3 py-1.5 bg-slate-100 rounded-lg text-sm font-bold text-slate-700 border border-slate-200">
-                            {font}
-                          </span>
-                        ))}
-                      </div>
-                      {designAnalysis.typography?.h1FontSize && (
-                        <p className="text-xs text-slate-500 mt-2">
-                          Main Heading: <span className="font-bold text-slate-700">{designAnalysis.typography.h1FontSize}</span> with <span className="font-bold text-slate-700">{designAnalysis.typography.h1FontWeight}</span> weight.
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <Card className="border-slate-100 shadow-sm">
-                    <CardContent className="p-6 space-y-4">
-                      <div className="flex items-center gap-2 text-slate-500 font-bold uppercase tracking-widest text-xs">
-                        <Palette className="h-4 w-4" /> Color Palette
-                      </div>
-                      <div className="flex gap-3">
-                        {designAnalysis.colors?.background?.map((color: string, i: number) => (
-                          <div key={i} className="group relative">
-                            <div 
-                              className="w-10 h-10 rounded-full border border-black/10 shadow-sm" 
-                              style={{ backgroundColor: color }} 
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-2">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
-                          <CheckCircle2 className={`h-3 w-3 ${designAnalysis.structure?.hasNavbar ? 'text-green-500' : 'text-slate-300'}`} /> Navbar
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
-                          <CheckCircle2 className={`h-3 w-3 ${designAnalysis.structure?.hasHero ? 'text-green-500' : 'text-slate-300'}`} /> Hero Section
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
-                          <CheckCircle2 className={`h-3 w-3 ${designAnalysis.structure?.hasFooter ? 'text-green-500' : 'text-slate-300'}`} /> Footer
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 text-blue-600">
-                          {designAnalysis.structure?.ctaCount || 0} CTA Buttons
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
-
-            {/* Business Impact Analysis */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <BarChart3 className="h-6 w-6 text-blue-600" />
-                Business Impact Analysis
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {getBusinessImpact(lead.performanceScore || 0, lead.seoScore || 0).map((impact, i) => (
-                  <Card key={i} className="border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <CardContent className="p-6 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                          {impact.icon}
-                        </div>
-                        <h3 className="font-bold text-slate-800">{impact.title}</h3>
-                      </div>
-                      <p className="text-sm text-slate-600 leading-relaxed">{impact.desc}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+        <section className="print-section rounded-3xl border border-indigo-100 bg-indigo-50 p-10">
+          <p className="text-xs font-black uppercase tracking-widest text-indigo-600">Proposal</p>
+          <h2 className="mt-2 text-3xl font-black">{aiAudit.proposal_content.title}</h2>
+          <p className="mt-4 text-slate-700">{aiAudit.proposal_content.executive_pitch}</p>
+          <ul className="mt-6 grid md:grid-cols-2 gap-3">
+            {aiAudit.proposal_content.scope.map((item) => <li key={item} className="flex gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />{item}</li>)}
+          </ul>
+          {mediaFor("proposal").length > 0 && (
+            <div className="mt-7 grid md:grid-cols-2 gap-5">
+              {mediaFor("proposal").map((item) => (
+                <figure key={item.id} className="overflow-hidden rounded-2xl border border-indigo-100 bg-white">
+                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                  <figcaption className="p-3 text-xs font-semibold">{item.caption}</figcaption>
+                </figure>
+              ))}
             </div>
+          )}
+        </section>
 
-            {/* Critical Issues Section */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold flex items-center gap-2 text-red-600">
-                <AlertCircle className="h-6 w-6" />
-                Critical Issues Found
-              </h2>
-              <Card className="border-red-100 shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="bg-red-50 p-8 space-y-4">
-                    {lead.topIssues ? (
-                      <div className="space-y-4">
-                        {lead.topIssues.split('\n').filter(Boolean).map((issue, idx) => (
-                          <div key={idx} className="flex gap-4 items-start">
-                            <span className="bg-red-200 text-red-800 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                              {idx + 1}
-                            </span>
-                            <span className="text-lg text-slate-800 font-medium">{issue}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 text-slate-500 py-4 italic">
-                        No critical issues reported.
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+        {aiAudit.proposal_content.maintenance_pricing.included && (
+          <section className="print-section rounded-3xl border border-emerald-100 bg-emerald-50 p-10">
+            <p className="text-xs font-black uppercase tracking-widest text-emerald-700">Maintenance Pricing</p>
+            <h2 className="mt-2 text-3xl font-black">{aiAudit.proposal_content.maintenance_pricing.plan_name}</h2>
+            <p className="mt-4 text-slate-700">{aiAudit.proposal_content.maintenance_pricing.price_note}</p>
+            <ul className="mt-6 grid md:grid-cols-2 gap-3">
+              {aiAudit.proposal_content.maintenance_pricing.services.map((item) => <li key={item} className="flex gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />{item}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section className="print-section rounded-3xl bg-slate-950 text-white p-10 md:p-12">
+          <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Before / After Comparison</h2>
+          <div className="mt-8 grid md:grid-cols-2 gap-8">
+            {/* Before */}
+            <div className="space-y-4">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
+              {lead.beforeAfterImage ? (
+                <ScrollableImage src={lead.beforeAfterImage} alt="Before" />
+              ) : (
+                <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No before image</div>
+              )}
             </div>
-
-            {/* Redesign Comparison */}
-            {lead.beforeAfterImage && (
-              <div className="space-y-6 pt-4">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Monitor className="h-6 w-6 text-blue-600" />
-                  Proposed Redesign Direction
-                </h2>
-                <Card className="overflow-hidden shadow-2xl border-0 ring-1 ring-slate-200">
-                  <img src={lead.beforeAfterImage} alt="Before vs After Comparison" className="w-full h-auto" />
-                </Card>
-                <p className="text-sm text-center text-slate-500 italic">
-                  Note: This represents a high-level conceptual direction for your new high-converting website.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Right Side: Recommendations & CTA */}
-          <div className="space-y-12">
-            {/* Implementation Plan */}
-            <div className="space-y-6 sticky top-8">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-                Growth Strategy
-              </h2>
-              <Card className="border-slate-200 shadow-xl bg-slate-50">
-                <CardContent className="p-8 space-y-6">
-                  <h3 className="font-bold text-lg text-slate-800">Action Plan for {lead.businessName}</h3>
-                  <div className="space-y-4">
-                    {improvements.map((item, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                          <CheckCircle2 className="h-3 w-3 text-white" />
-                        </div>
-                        <span className="text-sm font-semibold text-slate-700 leading-tight">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <hr className="border-slate-200" />
-
-                  <div className="space-y-4 pt-4">
-                    <p className="text-sm font-bold text-slate-800">Ready to start?</p>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Transform your online presence with a website designed to convert visitors into loyal customers. Let's build something great together.
-                    </p>
-                    <Button className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg shadow-lg shadow-blue-500/20" asChild>
-                      <a href={`mailto:hassan@example.com?subject=Re: Audit for ${lead.businessName}`}>
-                        Claim My New Website <ArrowRight className="ml-2 h-5 w-5" />
-                      </a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Trust Badge */}
-              <div className="bg-slate-100 rounded-2xl p-6 border border-slate-200 text-center">
-                 <div className="flex justify-center gap-1 mb-3">
-                   {[1,2,3,4,5].map(s => <Target key={s} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
-                 </div>
-                 <p className="text-xs font-bold text-slate-600">Trusted by modern businesses for website optimization and growth.</p>
-              </div>
+            {/* After */}
+            <div className="space-y-4">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
+              {lead.desktopImage ? (
+                <ScrollableImage src={lead.desktopImage} alt="After" />
+              ) : (
+                <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
+              )}
             </div>
           </div>
-        </div>
-
-        {/* Final CTA Footer */}
-        <div className="pt-10">
-          <Card className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white border-0 shadow-2xl rounded-3xl overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <TrendingUp className="h-40 w-40" />
-            </div>
-            <CardContent className="p-12 md:p-16 text-center space-y-8 relative z-10">
-              <h2 className="text-4xl font-black max-w-3xl mx-auto leading-tight">
-                Don't let a poorly optimized website hold your business back.
-              </h2>
-              <p className="text-blue-100 text-xl max-w-2xl mx-auto font-medium">
-                I'm offering a free 15-minute implementation strategy call to walk you through these findings and help you plan your next steps.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 font-black text-xl px-10 h-16 rounded-2xl shadow-xl">
-                  Schedule Strategy Call
-                </Button>
-                <div className="text-blue-200 text-sm font-bold flex items-center gap-2">
-                   <ShieldCheck className="h-5 w-5" /> No obligation, just expert advice.
-                </div>
+          
+          <h2 className="print-heading mt-12 text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Action Plan</h2>
+          <div className="mt-7 grid md:grid-cols-2 gap-4">
+            {finalRecommendations.map((item, index) => (
+              <div key={item} className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+                <span className="h-8 w-8 shrink-0 rounded-full bg-blue-500 flex items-center justify-center font-black">{index + 1}</span>
+                <p className="text-sm text-slate-200">{item}</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <footer className="mt-20 border-t py-12 text-center text-slate-400 text-sm font-medium">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} Growth Website Audit • All Rights Reserved</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-blue-500 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-blue-500 transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-blue-500 transition-colors">Contact Expert</a>
+            ))}
           </div>
-        </div>
-      </footer>
+          <div className="mt-10 flex flex-col md:flex-row gap-5 items-center justify-between border-t border-white/10 pt-8">
+            <div>
+              <p className="font-black text-xl">{aiAudit.proposal_content.call_to_action}</p>
+              <p className="mt-2 text-sm text-slate-400 flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Focused scope based on selected categories only.</p>
+            </div>
+            <Button className="bg-white text-slate-950 hover:bg-slate-100 h-12 px-7" asChild>
+              <a href={`mailto:hassan@example.com?subject=${encodeURIComponent(aiAudit.proposal_content.subject)}`}>
+                Discuss This Proposal <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </section>
+
+        <section className="print-section rounded-3xl border border-indigo-100 bg-indigo-50 p-10">
+          <p className="text-xs font-black uppercase tracking-widest text-indigo-600">Proposal</p>
+          <h2 className="mt-2 text-3xl font-black">{aiAudit.proposal_content.title}</h2>
+          <p className="mt-4 text-slate-700">{aiAudit.proposal_content.executive_pitch}</p>
+          <ul className="mt-6 grid md:grid-cols-2 gap-3">
+            {aiAudit.proposal_content.scope.map((item) => <li key={item} className="flex gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />{item}</li>)}
+          </ul>
+          {mediaFor("proposal").length > 0 && (
+            <div className="mt-7 grid md:grid-cols-2 gap-5">
+              {mediaFor("proposal").map((item) => (
+                <figure key={item.id} className="overflow-hidden rounded-2xl border border-indigo-100 bg-white">
+                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                  <figcaption className="p-3 text-xs font-semibold">{item.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {aiAudit.proposal_content.maintenance_pricing.included && (
+          <section className="print-section rounded-3xl border border-emerald-100 bg-emerald-50 p-10">
+            <p className="text-xs font-black uppercase tracking-widest text-emerald-700">Maintenance Pricing</p>
+            <h2 className="mt-2 text-3xl font-black">{aiAudit.proposal_content.maintenance_pricing.plan_name}</h2>
+            <p className="mt-4 text-slate-700">{aiAudit.proposal_content.maintenance_pricing.price_note}</p>
+            <ul className="mt-6 grid md:grid-cols-2 gap-3">
+              {aiAudit.proposal_content.maintenance_pricing.services.map((item) => <li key={item} className="flex gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />{item}</li>)}
+            </ul>
+          </section>
+        )}
+      </main>
     </div>
-  );
-}
-
-function ScoreBox({ label, score, icon, sub }: { label: string, score: number, icon: React.ReactNode, sub: string }) {
-  const color = score >= 90 ? "text-green-600 bg-green-50 border-green-100" : score >= 60 ? "text-blue-600 bg-blue-50 border-blue-100" : "text-red-600 bg-red-50 border-red-100";
-  return (
-    <div className={`p-8 rounded-3xl border flex flex-col items-center justify-center text-center space-y-3 transition-all hover:scale-[1.02] shadow-sm ${color}`}>
-      <div className="p-2 rounded-xl bg-white shadow-sm border border-slate-100">{icon}</div>
-      <div>
-        <div className="text-5xl font-black tracking-tight">{score}</div>
-        <div className="text-[10px] font-black uppercase tracking-widest mt-1 opacity-70">{label}</div>
-        <div className="text-[10px] italic font-medium opacity-50">{sub}</div>
-      </div>
-    </div>
-  );
-}
-
-function Badge({ children, variant, className }: { children: React.ReactNode, variant?: string, className?: string }) {
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className}`}>
-      {children}
-    </span>
   );
 }

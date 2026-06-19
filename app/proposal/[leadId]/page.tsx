@@ -1,332 +1,265 @@
-import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { CheckCircle2, Globe, Mail, Phone, ExternalLink, Terminal } from "lucide-react";
+import { CheckCircle2, Globe, Mail, Phone, Terminal, Zap } from "lucide-react";
+
+import { AUDIT_CATEGORIES } from "@/lib/audit-categories";
+import { getAiAudit } from "@/lib/ai-audit";
+import { getLeadAiFields } from "@/lib/lead-ai-storage";
+import { getPrisma } from "@/lib/prisma";
+import { getReportContent, getReportMedia } from "@/lib/report-content";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProposalPage({ 
+export default async function ProposalPage({
   params,
-  searchParams 
-}: { 
-  params: Promise<{ leadId: string }>,
-  searchParams: Promise<{ mode?: string }>
+}: {
+  params: Promise<{ leadId: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }) {
   const { leadId } = await params;
-  const { mode = "design" } = await searchParams;
   const prisma = getPrisma();
-
-  const lead = await prisma.lead.findUnique({
-    where: { id: leadId }
-  });
-
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
   if (!lead) return notFound();
 
-  const isTech = mode === "tech";
-
-  const portfolioExamples = lead.category 
-    ? await prisma.portfolioExample.findMany({
-        where: { category: lead.category },
-        take: 3
-      })
-    : [];
-
-  const scores = [
-    { label: "Performance", score: lead.performanceScore ?? lead.pageSpeedPerformance ?? 0, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "SEO", score: lead.seoScore ?? lead.pageSpeedSeo ?? 0, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: "Accessibility", score: lead.accessibilityScore ?? lead.pageSpeedAccessibility ?? 0, color: "text-amber-600", bg: "bg-amber-50" },
-    { label: "Best Practices", score: lead.bestPracticesScore ?? lead.pageSpeedBestPractices ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
-  ];
-
-  const designImprovements = [
-    "Modern & Minimalist Hero Section",
-    "Enhanced Typography for Readability",
-    "High-Contrast Call-to-Action Buttons",
-    "Mobile-First Responsive Layout",
-    "Trust-Building Social Proof Sections",
-    "Streamlined Lead Capture Forms"
-  ];
-
-  const techImprovements = [
-    "Optimized Image Compression & WebP",
-    "Core Web Vitals Optimization",
-    "SEO-Friendly Semantic HTML Structure",
-    "Advanced Caching & Minification",
-    "Accessibility (WCAG) Compliance",
-    "Rapid Server Response Time"
-  ];
-
-  const improvements = isTech ? techImprovements : designImprovements;
+  const aiFields = await getLeadAiFields(prisma, lead.id);
+  const audit = getAiAudit(aiFields.aiAnalysis);
+  if (!audit) return notFound();
+  const reportContent = getReportContent(aiFields.reportContent);
+  const reportMedia = getReportMedia(aiFields.reportMedia).filter((item) => item.section === "proposal");
+  const proposalScope = reportContent.recommendations.length
+    ? reportContent.recommendations
+    : audit.proposal_content.scope;
 
   const designAnalysis = lead.designAnalysis as any;
+  const brandColors = designAnalysis?.colors?.background?.filter((color: string) => color !== "rgb(255, 255, 255)").slice(0, 4) || [];
+  const categoryLabel = (category: string) =>
+    AUDIT_CATEGORIES.find((item) => item.value === category)?.label || category;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4">
-      {/* 1200px container */}
-      <div className="mx-auto w-[1100px] bg-white shadow-2xl rounded-[3rem] overflow-hidden border border-black/5">
-        
-        {/* Header Section */}
-        <header className={`${isTech ? 'bg-slate-900' : 'bg-primary'} p-16 text-white relative overflow-hidden`}>
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-white/10 -skew-x-12 translate-x-1/4" />
+    <div className="min-h-screen bg-slate-100 py-10 px-4">
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 12mm; }
+          .proposal-shell { width: 100% !important; box-shadow: none !important; border-radius: 0 !important; }
+          section, figure, footer { break-inside: avoid-page; }
+          h1, h2, h3 { break-after: avoid-page; }
+          img { max-height: 210mm; object-fit: contain; }
+        }
+      `}</style>
+      <div className="proposal-shell mx-auto w-[1100px] overflow-hidden rounded-[3rem] bg-white shadow-2xl border border-black/5">
+        <header className="relative overflow-hidden bg-slate-950 p-14 text-white">
+          <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-indigo-600/40 to-transparent" />
           <div className="relative z-10">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between gap-8">
               <div>
-                <span className="inline-block px-4 py-1.5 rounded-full bg-white/20 text-xs font-black uppercase tracking-widest mb-6">
-                  {isTech ? "Technical Audit & Optimization" : "UI/UX & Design Transformation"}
-                </span>
-                <h1 className="text-6xl font-black tracking-tight leading-tight">
-                  {isTech ? "Speed & SEO" : "Design & Conversion"} <br /> Proposal
-                </h1>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold opacity-90">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                <div className="mt-4 h-1 w-24 bg-white/30 ml-auto rounded-full" />
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {audit.selected_categories.map((category) => (
+                    <span key={category} className="rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest">
+                      {categoryLabel(category)}
+                    </span>
+                  ))}
+                </div>
+                <h1 className="text-5xl font-black leading-tight">{audit.proposal_content.title}</h1>
+                <p className="mt-5 text-xl text-slate-300">{lead.businessName || lead.website}</p>
+                <p className="mt-1 text-sm text-blue-300">{lead.website}</p>
               </div>
             </div>
-
-            <div className="mt-16 flex flex-wrap gap-12 items-end">
-              <div>
-                <p className="text-sm font-black uppercase tracking-widest opacity-60 mb-2">Prepared For</p>
-                <h2 className="text-3xl font-black">{lead.businessName}</h2>
-                <p className="text-lg opacity-80 mt-1">{lead.website}</p>
+            
+            <div className="mt-12 grid grid-cols-[1fr_1fr] gap-6">
+              {/* Design Identity */}
+              <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
+                <p className="text-2xl font-black mb-1">Design Identity</p>
+                <p className="text-xs text-slate-400 mb-6">Visual patterns and structure detected on the website.</p>
+                <div className="space-y-5">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Detected Fonts</p>
+                    <div className="flex flex-wrap gap-2">
+                      {designAnalysis?.fonts?.map((font: string) => (
+                        <span key={font} className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold">{font}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Color Palette</p>
+                    <div className="flex gap-2">
+                      {designAnalysis?.colors?.background?.map((color: string, i: number) => (
+                        <div key={i} className="w-8 h-8 rounded-full border border-white/30 shadow-md" style={{ backgroundColor: color }} title={color} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="h-16 w-px bg-white/20 hidden lg:block" />
-              <div>
-                <p className="text-sm font-black uppercase tracking-widest opacity-60 mb-2">Expert Developer</p>
-                <h3 className="text-3xl font-black">Hassan Rizwan</h3>
-                <p className="text-lg opacity-80 mt-1">{isTech ? "Full-Stack Performance Engineer" : "UI/UX & Next.js Expert"}</p>
+
+              {/* Website Scores */}
+              <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
+                    <Zap className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black">Website Scores</p>
+                    <p className="text-xs text-slate-400 mt-1">Performance and SEO metrics</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+                  <div className="sm:col-span-3 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Overall</p>
+                      <p className="text-3xl font-black text-white mt-1">{lead.websiteScore || 0}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Performance</p>
+                      <p className="text-3xl font-black text-emerald-400 mt-1">{lead.performanceScore || 0}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">SEO</p>
+                    <p className="text-xl font-black text-white mt-1">{lead.seoScore || 0}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Access.</p>
+                    <p className="text-xl font-black text-white mt-1">{lead.accessibilityScore || 0}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Best Prac.</p>
+                    <p className="text-xl font-black text-white mt-1">{lead.bestPracticesScore || 0}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <div className="p-16 space-y-20">
-          
-          {/* Performance Audit Section */}
-          <section>
-            <div className="flex items-center gap-4 mb-10">
-              <h3 className="text-3xl font-black text-ink">{isTech ? "Technical Performance Metrics" : "Website Health Audit"}</h3>
-              <div className="h-px flex-1 bg-black/5" />
-            </div>
-            
-            <div className="grid grid-cols-4 gap-8">
-              {scores.map((s) => (
-                <div key={s.label} className={`${s.bg} rounded-[2.5rem] p-8 text-center border border-black/5 shadow-sm`}>
-                  <div className={`text-5xl font-black mb-3 ${s.color}`}>
-                    {s.score}%
+        <main className="p-14 space-y-14">
+          <section className="grid grid-cols-[1.35fr_0.65fr] gap-10 items-center">
+            <div className="relative mx-auto w-full max-w-[800px] flex items-end">
+              {/* Desktop Frame */}
+              <div className="relative w-[80%] -mr-[5%] z-0">
+                <div className="relative overflow-hidden rounded-t-2xl border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
+                  {lead.desktopImage ? (
+                    <img src={lead.desktopImage} alt="Website desktop view" className="w-full h-full object-cover object-top" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
+                  )}
+                </div>
+                {/* Keyboard Base */}
+                <div className="relative z-0 -mt-1 mx-[-3%] h-4 rounded-b-xl bg-slate-300 border border-slate-400 shadow-xl flex justify-center">
+                  <div className="w-1/4 h-1 bg-slate-400 rounded-b-sm"></div>
+                </div>
+              </div>
+              {/* Mobile Frame */}
+              <div className="relative w-[25%] z-10 -mb-4">
+                <div className="relative overflow-hidden rounded-[2rem] border-[8px] border-slate-800 bg-slate-900 aspect-[9/19] shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute top-0 inset-x-0 h-4 flex justify-center z-20">
+                    <div className="w-1/2 h-full bg-slate-800 rounded-b-xl"></div>
                   </div>
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-                    {s.label}
-                  </p>
+                  {lead.mobileImage ? (
+                    <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-indigo-600">Executive Proposal</p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">Focused on the work that matters now</h2>
+              <p className="mt-5 text-slate-600 leading-relaxed">{audit.proposal_content.executive_pitch}</p>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-4 mb-8">
+              <h2 className="text-3xl font-black">Selected Findings</h2>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+            <div className="grid grid-cols-2 gap-5">
+              {audit.developer_comments.slice(0, 6).map((comment) => (
+                <div key={`${comment.category}-${comment.heading}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+                  <div className="flex gap-2">
+                    <span className="rounded-full bg-indigo-100 text-indigo-700 px-2.5 py-1 text-[10px] font-black uppercase">{categoryLabel(comment.category)}</span>
+                    <span className="rounded-full bg-amber-100 text-amber-700 px-2.5 py-1 text-[10px] font-black uppercase">{comment.priority}</span>
+                  </div>
+                  <h3 className="mt-4 text-lg font-black">{comment.heading}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{comment.finding}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Developer Insights Section */}
-          {lead.developerComments && (
-            <section>
-               <div className="flex items-center gap-4 mb-8">
-                  <h3 className="text-3xl font-black text-ink">Expert Analysis & Strategy</h3>
-                  <div className="h-px flex-1 bg-black/5" />
-               </div>
-               <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-5">
-                     <Terminal className="h-40 w-40" />
-                  </div>
-                  <div className="relative z-10 space-y-6">
-                     <div className="flex items-center gap-3">
-                        <div className="flex gap-1.5">
-                           <div className="w-3 h-3 rounded-full bg-red-400" />
-                           <div className="w-3 h-3 rounded-full bg-amber-400" />
-                           <div className="w-3 h-3 rounded-full bg-green-400" />
-                        </div>
-                        <div className="h-4 w-px bg-white/20 mx-2" />
-                        <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-400">Developer Insights</span>
-                     </div>
-                     <p className="text-2xl font-medium leading-relaxed italic text-slate-300">
-                        "{lead.developerComments}"
-                     </p>
-                     <div className="pt-4 flex items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                        <span>Analysis by Hassan Rizwan</span>
-                        <div className="w-12 h-px bg-slate-800" />
-                        <span>Lead Full-Stack Engineer</span>
-                     </div>
-                  </div>
-               </div>
-            </section>
-          )}
-
-          {/* Design Identity Section */}
-          {designAnalysis && (
-            <section className="grid grid-cols-2 gap-16">
-              <div>
-                <div className="flex items-center gap-4 mb-8">
-                  <h3 className="text-3xl font-black text-ink">Design Identity</h3>
-                  <div className="h-px flex-1 bg-black/5" />
-                </div>
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Detected Typography</p>
-                    <div className="flex flex-wrap gap-3">
-                      {designAnalysis.fonts?.map((font: string) => (
-                        <div key={font} className="px-5 py-3 bg-white border border-black/5 rounded-2xl shadow-sm text-lg font-bold text-slate-700">
-                          {font}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Color Palette</p>
-                    <div className="flex gap-4">
-                      {designAnalysis.colors?.background?.map((color: string, i: number) => (
-                        <div key={i} className="group relative">
-                          <div 
-                            className="w-16 h-16 rounded-2xl border border-black/10 shadow-inner transition-transform group-hover:scale-110" 
-                            style={{ backgroundColor: color }} 
-                          />
-                          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-20">
-                            {color}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-slate-50 rounded-[3rem] p-12 border border-black/5 flex flex-col justify-center">
-                 <div className="grid grid-cols-2 gap-6">
-                    <div className="p-6 bg-white rounded-3xl border border-black/5 shadow-sm">
-                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Navbar</p>
-                        <p className="text-xl font-black text-ink">{designAnalysis.structure?.hasNavbar ? "Detected" : "Missing"}</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-3xl border border-black/5 shadow-sm">
-                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Hero Section</p>
-                        <p className="text-xl font-black text-ink">{designAnalysis.structure?.hasHero ? "Detected" : "Missing"}</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-3xl border border-black/5 shadow-sm">
-                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">CTA Buttons</p>
-                        <p className="text-xl font-black text-ink">{designAnalysis.structure?.ctaCount || 0} Found</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-3xl border border-black/5 shadow-sm">
-                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Mobile View</p>
-                        <p className="text-xl font-black text-ink">Optimized</p>
-                    </div>
-                 </div>
-              </div>
-            </section>
-          )}
-
-          {/* Improvement Points Section */}
-          <section className="grid grid-cols-2 gap-16 items-center">
+          <section className="grid grid-cols-2 gap-10">
             <div>
-              <div className="flex items-center gap-4 mb-10">
-                <h3 className="text-3xl font-black text-ink">{isTech ? "Technical Roadmap" : "Design Strategy"}</h3>
-                <div className="h-px flex-1 bg-black/5" />
-              </div>
-              <ul className="space-y-6">
-                {improvements.map((text) => (
-                  <li key={text} className="flex items-center gap-5">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-2xl ${isTech ? 'bg-slate-200 text-slate-700' : 'bg-primary/10 text-primary'} flex items-center justify-center`}>
-                      <CheckCircle2 size={24} />
-                    </div>
-                    <span className="text-xl font-bold text-slate-700">{text}</span>
+              <h2 className="text-3xl font-black mb-7">Recommended Scope</h2>
+              <ul className="space-y-5">
+                {proposalScope.slice(0, 8).map((item) => (
+                  <li key={item} className="flex gap-4">
+                    <span className="h-9 w-9 shrink-0 rounded-2xl bg-green-100 text-green-700 flex items-center justify-center"><CheckCircle2 className="h-5 w-5" /></span>
+                    <span className="text-base font-semibold text-slate-700">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-slate-50 rounded-[3rem] p-12 border border-black/5">
-                <p className="text-2xl font-black text-ink mb-6 italic leading-relaxed">
-                    {isTech 
-                      ? "A faster website isn't just a luxury—it's a requirement for SEO rankings and user retention in 2026." 
-                      : "We don't just build websites; we create high-converting digital experiences that drive real business growth."}
-                </p>
-                <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full ${isTech ? 'bg-slate-800' : 'bg-primary'}`} />
-                    <div>
-                        <p className="font-black text-ink">Hassan Rizwan</p>
-                        <p className="text-sm font-bold text-slate-400">{isTech ? "Technical Lead" : "Lead Designer"}</p>
-                    </div>
-                </div>
+            <div className="rounded-[2.5rem] bg-slate-950 p-8 text-white">
+              <div className="flex items-center gap-3 text-blue-400">
+                <Terminal className="h-6 w-6" />
+                <span className="text-xs font-black uppercase tracking-widest">Developer Recommendation</span>
+              </div>
+              <p className="mt-6 text-2xl font-semibold leading-relaxed">
+                {audit.png_report_data.developer_comments[0]}
+              </p>
+              <div className="mt-8 border-t border-white/10 pt-6">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500">Expected outcome</p>
+                <p className="mt-2 text-slate-300">{audit.proposal_content.expected_outcomes[0]}</p>
+              </div>
             </div>
           </section>
 
-          {/* Screenshot / Before-After Section (Only for Design) */}
-          {!isTech && lead.beforeAfterImage && (
+          {reportMedia.length > 0 && (
             <section>
-              <div className="flex items-center gap-4 mb-10">
-                <h3 className="text-3xl font-black text-ink">Proposed Visual Transformation</h3>
-                <div className="h-px flex-1 bg-black/5" />
+              <div className="flex items-center gap-4 mb-8">
+                <h2 className="text-3xl font-black">Proposal References</h2>
+                <div className="h-px flex-1 bg-slate-200" />
               </div>
-              <div className="rounded-[2.5rem] overflow-hidden border border-black/5 shadow-lg">
-                <img src={lead.beforeAfterImage} alt="Visual Transformation" className="w-full h-auto" />
+              <div className="grid grid-cols-2 gap-6">
+                {reportMedia.map((item) => (
+                  <figure key={item.id} className="overflow-hidden rounded-3xl border border-slate-200">
+                    <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                    <figcaption className="p-4 text-sm font-semibold text-slate-700">{item.caption}</figcaption>
+                  </figure>
+                ))}
               </div>
             </section>
           )}
 
-          {/* Portfolio Section */}
-          {portfolioExamples.length > 0 && (
-            <section>
-              <div className="flex items-center gap-4 mb-10">
-                <h3 className="text-3xl font-black text-ink">Relevant {isTech ? "Case Studies" : "Portfolio Work"}</h3>
-                <div className="h-px flex-1 bg-black/5" />
-              </div>
-              <div className="grid grid-cols-3 gap-8">
-                {portfolioExamples.map((item) => (
-                  <div key={item.id} className="group rounded-[2.5rem] border border-black/5 bg-white overflow-hidden shadow-soft transition-all hover:shadow-premium">
-                    <div className="relative aspect-video bg-slate-100">
-                      <Image src={item.thumbnail} alt={item.title} fill className="object-cover" />
-                    </div>
-                    <div className="p-8">
-                      <h4 className="text-xl font-black text-ink mb-2">{item.title}</h4>
-                      <p className="text-sm text-slate-500 font-medium mb-6 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center text-primary font-black text-xs uppercase tracking-widest gap-2">
-                        <Globe size={14} />
-                        {item.url.replace('https://', '').replace('www.', '')}
-                      </div>
-                    </div>
+          {audit.proposal_content.maintenance_pricing.included && (
+            <section className="rounded-[2.5rem] border border-emerald-100 bg-emerald-50 p-9">
+              <p className="text-xs font-black uppercase tracking-widest text-emerald-700">Maintenance Pricing</p>
+              <h2 className="mt-2 text-3xl font-black">{audit.proposal_content.maintenance_pricing.plan_name}</h2>
+              <p className="mt-4 text-slate-700">{audit.proposal_content.maintenance_pricing.price_note}</p>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                {audit.proposal_content.maintenance_pricing.services.map((item) => (
+                  <div key={item} className="flex gap-2 text-sm font-semibold text-slate-700">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /> {item}
                   </div>
                 ))}
               </div>
             </section>
           )}
 
-          {/* Footer CTA Section */}
-          <footer className={`bg-slate-950 rounded-[3rem] p-16 text-white text-center relative overflow-hidden`}>
-            <div className="absolute inset-0 bg-primary/10" />
-            <div className="relative z-10">
-                <h3 className="text-4xl font-black mb-4">{isTech ? "Ready to optimize your performance?" : "Want a modern website like these examples?"}</h3>
-                <p className="text-xl text-white/60 mb-12 max-w-2xl mx-auto">
-                    Let's discuss how we can transform your online presence and start attracting more customers today.
-                </p>
-                
-                <div className="flex flex-wrap justify-center gap-8">
-                    <div className="flex items-center gap-4 bg-white/5 rounded-2xl px-8 py-4 border border-white/10">
-                        <div className="text-primary"><Phone size={24} /></div>
-                        <div className="text-left">
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-50">WhatsApp Me</p>
-                            <p className="text-lg font-bold">+92 312 1234567</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 bg-white/5 rounded-2xl px-8 py-4 border border-white/10">
-                        <div className="text-primary"><Mail size={24} /></div>
-                        <div className="text-left">
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Email Support</p>
-                            <p className="text-lg font-bold">hassan@example.com</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 bg-white/5 rounded-2xl px-8 py-4 border border-white/10">
-                        <div className="text-primary"><Globe size={24} /></div>
-                        <div className="text-left">
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Visit My Website</p>
-                            <p className="text-lg font-bold">www.hassanrizwan.com</p>
-                        </div>
-                    </div>
-                </div>
+          <footer className="rounded-[2.5rem] bg-gradient-to-r from-indigo-700 to-blue-600 p-10 text-white">
+            <div className="flex items-center justify-between gap-8">
+              <div>
+                <h2 className="text-3xl font-black">{audit.proposal_content.call_to_action}</h2>
+                <p className="mt-3 text-blue-100">The attached full audit contains the complete selected-category findings and action plan.</p>
+              </div>
+              <div className="space-y-3 shrink-0 text-sm font-bold">
+                <div className="flex items-center gap-3"><Phone className="h-5 w-5" /> +92 312 1234567</div>
+                <div className="flex items-center gap-3"><Mail className="h-5 w-5" /> hassan@example.com</div>
+                <div className="flex items-center gap-3"><Globe className="h-5 w-5" /> www.hassanrizwan.com</div>
+              </div>
             </div>
           </footer>
-
-        </div>
+        </main>
       </div>
     </div>
   );

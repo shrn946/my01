@@ -1,6 +1,7 @@
 import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import LeadDetailClient from "./lead-client";
+import { getLeadAiFields } from "@/lib/lead-ai-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   });
 
   if (!lead) return notFound();
+  const aiFields = await getLeadAiFields(prisma, lead.id);
 
   const [templates, settings, portfolioExamples] = await Promise.all([
     prisma.emailTemplate.findMany({ orderBy: { name: "asc" } }),
@@ -23,7 +25,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="container mx-auto py-10">
-      <LeadDetailClient lead={lead} templates={templates} settings={settings} portfolioExamples={portfolioExamples} />
+      <LeadDetailClient lead={{ ...lead, ...aiFields }} templates={templates} settings={settings} portfolioExamples={portfolioExamples} />
     </div>
   );
 }

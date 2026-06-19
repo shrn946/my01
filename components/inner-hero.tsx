@@ -41,37 +41,32 @@ export async function InnerHero({
               {title}
             </h1>
             
-            <nav className="mt-8 flex flex-wrap items-center justify-center gap-3" aria-label="Breadcrumb">
-              <Link 
-                href="/" 
-                className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold backdrop-blur-md transition-all hover:bg-white/20" 
+            <nav className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm font-medium" aria-label="Breadcrumb">
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 hover:underline decoration-2 underline-offset-4 transition-all"
                 style={{ color: settings.breadcrumbColor }}
               >
                 <Home size={14} /> Home
               </Link>
-              
+
               {breadcrumbs.map((crumb) => (
-                <span key={`${crumb.label}-${crumb.href ?? "current"}`} className="flex items-center gap-3">
-                  <ChevronRight size={14} className="opacity-50" style={{ color: settings.breadcrumbColor }} />
+                <span key={`${crumb.label}-${crumb.href ?? "current"}`} className="flex items-center gap-2 opacity-80" style={{ color: settings.breadcrumbColor }}>
+                  <ChevronRight size={14} />
                   {crumb.href ? (
-                    <Link 
-                      href={crumb.href} 
-                      className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold backdrop-blur-md transition-all hover:bg-white/20"
-                      style={{ color: settings.breadcrumbColor }}
+                    <Link
+                      href={crumb.href}
+                      className="hover:underline decoration-2 underline-offset-4 transition-all"
                     >
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span 
-                      className="flex items-center gap-2 rounded-full bg-primary/20 px-4 py-2 text-sm font-bold backdrop-blur-md"
-                      style={{ color: settings.breadcrumbColor }}
-                    >
-                      {crumb.label}
-                    </span>
+                    <span className="font-bold opacity-100">{crumb.label}</span>
                   )}
                 </span>
               ))}
             </nav>
+
           </div>
         </div>
       </div>

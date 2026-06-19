@@ -3,14 +3,129 @@
 import { getPrisma } from "./prisma";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
+import { getLeadAiFields } from "./lead-ai-storage";
+import { getAiAudit } from "./ai-audit";
+import { getReportContent, getReportMedia } from "./report-content";
+import path from "path";
+import fs from "fs";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "dummy_key_for_build");
+function absoluteUrl(baseUrl: string, value: string | null | undefined) {
+  if (!value) return "";
+  if (value.startsWith("http")) return value;
+  return `${baseUrl.replace(/\/$/, "")}/${value.replace(/^\//, "")}`;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function professionalEmailHtml({
+  body,
+  businessName,
+  companyName,
+  proposalImage,
+  reportUrl,
+  findings,
+  media,
+  contactUrl,
+}: {
+  body: string;
+  businessName: string;
+  companyName: string;
+  proposalImage: string;
+  reportUrl: string;
+  findings: string[];
+  media: Array<{ url: string; caption: string }>;
+  contactUrl: string;
+}) {
+  const findingsHtml = findings.slice(0, 5).map((item) =>
+    `<tr><td style="padding:10px 0;color:#3f3f46;font-size:15px;line-height:24px;border-bottom:1px solid #f4f4f5;"><span style="color:#2563eb;font-weight:800;display:inline-block;margin-right:8px;">✓</span> ${escapeHtml(item)}</td></tr>`,
+  ).join("");
+
+  const mediaHtml = media.map((item) => `
+    <tr><td style="padding:20px 0 0;">
+      <img src="${item.url}" alt="${escapeHtml(item.caption)}" style="display:block;width:100%;max-width:600px;height:auto;border-radius:12px;border:1px solid #e4e4e7;">
+      <p style="margin:8px 0 0;color:#71717a;font-size:13px;line-height:20px;text-align:center;">${escapeHtml(item.caption)}</p>
+    </td></tr>`).join("");
+
+  return `<!doctype html>
+  <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>@media only screen and (max-width:640px){.email-shell{width:100%!important;border-radius:0!important;border:none!important}.email-pad{padding:24px 20px!important}.email-button{display:block!important;margin:10px 0!important;text-align:center!important}}</style>
+  </head><body style="margin:0;background-color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#18181b;padding:40px 0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f8fafc;">
+      <tr><td align="center" style="padding: 0 10px;">
+        <table role="presentation" class="email-shell" width="600" cellspacing="0" cellpadding="0" style="width:600px;max-width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 10px 15px -3px rgba(0,0,0,0.05);">
+
+          <!-- Header -->
+          <tr><td class="email-pad" style="padding:40px;background-color:#ffffff;text-align:center;border-bottom:1px solid #f1f5f9;">
+            <p style="margin:0;color:#2563eb;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;">${escapeHtml(companyName)}</p>
+            <h1 style="margin:16px 0 0;font-size:26px;line-height:34px;color:#0f172a;font-weight:800;">Website Audit & Recommendations</h1>
+            <p style="margin:12px 0 0;color:#64748b;font-size:16px;">Prepared for <strong>${escapeHtml(businessName)}</strong></p>
+          </td></tr>
+
+          <!-- Body Text -->
+          <tr><td class="email-pad" style="padding:40px 40px 20px;background-color:#ffffff;">
+            <div style="color:#334155;font-size:16px;line-height:26px;">${body.replace(/\n/g, "<br>")}</div>
+          </td></tr>
+
+          <!-- Proposal Image / Preview -->
+          ${proposalImage ? `
+          <tr><td class="email-pad" style="padding:10px 40px 30px;background-color:#ffffff;text-align:center;">
+            <div style="background-color:#f8fafc;padding:24px;border-radius:16px;border:1px solid #e2e8f0;display:inline-block;width:100%;box-sizing:border-box;">
+              <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#475569;text-align:center;text-transform:uppercase;letter-spacing:0.5px;">Preview Summary</p>
+              <a href="${reportUrl}" style="display:block;text-decoration:none;">
+                <img src="${proposalImage}" alt="Website proposal summary" style="display:block;width:100%;max-width:100%;height:auto;border-radius:8px;border:1px solid #cbd5e1;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);background-color:#ffffff;">
+              </a>
+            </div>
+          </td></tr>` : ""}
+
+          <!-- Findings -->
+          <tr><td class="email-pad" style="padding:30px 40px;background-color:#fafaf9;border-top:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;">
+            <h2 style="margin:0 0 16px;font-size:18px;color:#0f172a;font-weight:700;">Key Observations</h2>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${findingsHtml}</table>
+          </td></tr>
+
+          <!-- Extra Media -->
+          ${mediaHtml ? `<tr><td class="email-pad" style="padding:20px 40px;"><table role="presentation" width="100%">${mediaHtml}</table></td></tr>` : ""}
+
+          <!-- Action Buttons -->
+          <tr><td class="email-pad" style="padding:40px;background-color:#ffffff;text-align:center;">
+            <a class="email-button" href="${reportUrl}" style="display:inline-block;padding:14px 28px;border-radius:8px;background-color:#2563eb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;box-shadow:0 2px 4px rgba(37,99,235,0.2);">View Full Audit Report</a>
+          </td></tr>
+
+          <!-- Footer -->
+          <tr><td class="email-pad" style="padding:40px;background-color:#0f172a;text-align:center;">
+            <h2 style="margin:0;font-size:20px;color:#ffffff;font-weight:600;">Ready to discuss the recommended improvements?</h2>
+            <p style="margin:16px 0 24px;color:#94a3b8;font-size:15px;line-height:24px;">Reply to this email or book a short consultation to review priorities and next steps.</p>
+            <a class="email-button" href="${contactUrl}" style="display:inline-block;padding:12px 24px;border-radius:8px;background-color:#ffffff;color:#0f172a;text-decoration:none;font-size:14px;font-weight:600;">Book a Consultation</a>
+          </td></tr>
+
+        </table>
+        <p style="margin:20px 0 0;color:#94a3b8;font-size:12px;text-align:center;">&copy; ${new Date().getFullYear()} ${escapeHtml(companyName)}. All rights reserved.</p>
+      </td></tr>
+    </table>
+  </body></html>`;
+}
 
 export async function sendLeadEmail(leadId: string, templateId: string | null, customBody: string, subject: string, toEmail: string) {
   try {
     const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
-    const baseUrl = settings?.portfolioUrl || "";
+    const resend = new Resend(settings?.resendApiKey || process.env.RESEND_API_KEY || "dummy_key_for_build");
+    const baseUrl = settings?.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || "";
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) throw new Error("Lead not found.");
+    const aiFields = await getLeadAiFields(prisma, leadId);
+    const audit = getAiAudit(aiFields.aiAnalysis);
+    const reportContent = getReportContent(aiFields.reportContent);
+    const reportMedia = getReportMedia(aiFields.reportMedia)
+      .filter((item) => item.includeInEmail || item.section === "email")
+      .map((item) => ({ url: absoluteUrl(baseUrl, item.url), caption: item.caption }));
 
     // Basic limit check: Max 20 emails per day
     const today = new Date();
@@ -28,18 +143,67 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     let status = "Sent";
     let errorMsg = null;
     
-    // Convert newlines to <br> and handle potential HTML tags
-    const htmlBody = customBody.replace(/\n/g, "<br>");
+    const reportUrl = absoluteUrl(baseUrl, `/report/${leadId}`);
+    
+    // Ensure image shows by falling back to any available visual preview
+    const imageToUse = lead.proposalImage || lead.desktopImage;
+    
+    let inlineImageUrl = "";
+    const emailAttachments: any[] = [];
+    
+    if (imageToUse) {
+      const isLocalPath = imageToUse.startsWith("/");
+      
+      try {
+        if (isLocalPath) {
+          const attachmentPath = path.join(process.cwd(), "public", imageToUse);
+          const fileBuffer = fs.readFileSync(attachmentPath);
+          emailAttachments.push({
+            filename: "preview-summary.png",
+            content: fileBuffer,
+            content_id: "preview-summary-image"
+          });
+        } else {
+          // If it's a remote URL, Resend allows passing it as path, but we must ensure it has http/https
+          emailAttachments.push({
+            filename: "preview-summary.png",
+            path: imageToUse,
+            content_id: "preview-summary-image"
+          });
+        }
+        inlineImageUrl = "cid:preview-summary-image";
+      } catch (err) {
+        console.error("Failed to attach preview summary image", err);
+      }
+    }
+
+    const htmlBody = professionalEmailHtml({
+      body: customBody,
+      businessName: lead.businessName || "Your Business",
+      companyName: settings?.companyName || settings?.senderName || "Website Consultant",
+      proposalImage: inlineImageUrl,
+      reportUrl,
+      findings: reportContent.recommendations.length
+        ? reportContent.recommendations
+        : audit?.png_report_data.findings || lead.topIssues?.split("\n").filter(Boolean) || [],
+      media: reportMedia,
+      contactUrl: settings?.portfolioUrl || `mailto:${settings?.senderEmail || "hello@example.com"}`,
+    });
 
     try {
-      if (process.env.RESEND_API_KEY) {
-        await resend.emails.send({
+      if (settings?.resendApiKey || process.env.RESEND_API_KEY) {
+        const { error } = await resend.emails.send({
           from: `${settings?.senderName || "Agency"} <${settings?.senderEmail || "onboarding@resend.dev"}>`,
           to: [toEmail],
           subject: subject,
           html: htmlBody,
           text: customBody.replace(/<[^>]*>?/gm, ''), // Plain text fallback
+          attachments: emailAttachments.length > 0 ? emailAttachments : undefined,
         });
+        
+        if (error) {
+          throw new Error(error.message);
+        }
       } else {
         console.log("No RESEND_API_KEY provided. Mocking email send to:", toEmail);
       }
@@ -89,13 +253,14 @@ export async function sendTestEmail() {
   try {
     const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const resend = new Resend(settings?.resendApiKey || process.env.RESEND_API_KEY || "dummy_key_for_build");
     const latestLead = await prisma.lead.findFirst({
       orderBy: { createdAt: "desc" }
     });
     
     const testEmail = "shrn496@gmail.com";
     
-    if (!process.env.RESEND_API_KEY) {
+    if (!settings?.resendApiKey && !process.env.RESEND_API_KEY) {
       throw new Error("RESEND_API_KEY is not configured in .env file.");
     }
 
@@ -150,4 +315,3 @@ export async function sendTestEmail() {
     return { success: false, error: error.message };
   }
 }
-

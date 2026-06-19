@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { HeaderFooterWrapper } from "@/components/header-footer-wrapper";
 import { ScrollProgressBar } from "@/components/scroll-progress-bar";
 import { PageTransition } from "@/components/page-transition";
 import { Toaster } from "@/components/ui/toaster";
@@ -40,13 +39,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={jakarta.variable} suppressHydrationWarning>
       <body className="font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground">
         <ScrollProgressBar />
-        <SiteHeader />
-        <main className="min-h-screen">
+        <HeaderFooterWrapper>
           <PageTransition>
             {children}
           </PageTransition>
-        </main>
-        <SiteFooter />
+        </HeaderFooterWrapper>
         <Toaster />
       </body>
     </html>

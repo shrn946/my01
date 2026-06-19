@@ -4,7 +4,8 @@ import * as cheerio from "cheerio";
 import { getPrisma } from "./prisma";
 import { auditWebsiteHtml } from "./site-audit";
 import { launchBrowser } from "./browser";
-import { storeGeneratedImage } from "./generated-image-storage";
+import { storeGeneratedFile, storeGeneratedImage } from "./generated-image-storage";
+import { saveLeadReportPaths } from "./lead-ai-storage";
 import { revalidatePath } from "next/cache";
 
 export async function extractWebsiteInfo(url: string, data: { businessName: string, source: string, category: string, city: string, notes: string }) {
@@ -286,7 +287,7 @@ export async function analyzeWebsite(leadId: string) {
     };
 
     const businessName = getBusinessName($("title").text().trim(), new URL(lead.website).hostname);
-
+    const websiteScore = Math.round((perfScore + seoScore + designScore + conversionScore) / 4);
     // 7. Update Database
     const updatedLead = await prisma.lead.update({
       where: { id: leadId },
@@ -304,8 +305,8 @@ export async function analyzeWebsite(leadId: string) {
         conversionScore: conversionScore,
         mobileScore: mobilePerf,
         desktopScore: desktopPerf,
-        websiteScore: Math.round((perfScore + seoScore + designScore + conversionScore) / 4),
-        leadScore: Math.round(((perfScore + seoScore + designScore + conversionScore) / 4) * 0.8 + 20),
+        websiteScore,
+        leadScore: Math.round(websiteScore * 0.8 + 20),
         improvementProposals: proposals,
         topIssues: [...audit.issues, ...proposals].slice(0, 8).join("\n"),
         designAnalysis: designAnalysis as any,
@@ -337,21 +338,22 @@ export async function captureWebsiteScreenshot(leadId: string) {
     browser = await launchBrowser();
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
+      deviceScaleFactor: 1,
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     });
     const page = await context.newPage();
     
     // 1. Desktop Screenshot
     try {
-      await page.goto(lead.website, { waitUntil: "domcontentloaded", timeout: 30000 });
-      await page.waitForTimeout(5000); // Wait for animations
+      await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
+      await page.waitForTimeout(15000); // Increased wait for lazy loading
     } catch (e) {
       console.warn("Desktop navigation timed out, attempting screenshot anyway");
     }
     
     const captureId = Date.now();
     const desktopFileName = `desktop-${leadId}-${captureId}.png`;
-    const desktopImage = await page.screenshot({ fullPage: false });
+    const desktopImage = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" }); 
     const desktopPublicPath = await storeGeneratedImage(
       desktopImage,
       `screenshots/${desktopFileName}`,
@@ -360,14 +362,14 @@ export async function captureWebsiteScreenshot(leadId: string) {
     // 2. Mobile Screenshot
     await page.setViewportSize({ width: 390, height: 844 });
     try {
-      await page.goto(lead.website, { waitUntil: "domcontentloaded", timeout: 30000 });
-      await page.waitForTimeout(5000);
+      await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
+      await page.waitForTimeout(15000); // Increased wait for lazy loading
     } catch (e) {
       console.warn("Mobile navigation timed out, attempting screenshot anyway");
     }
     
     const mobileFileName = `mobile-${leadId}-${captureId}.png`;
-    const mobileImage = await page.screenshot({ fullPage: false });
+    const mobileImage = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" });
     const mobilePublicPath = await storeGeneratedImage(
       mobileImage,
       `screenshots/${mobileFileName}`,
@@ -390,7 +392,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
   }
 }
 
-export async function generateProposalPng(leadId: string, mode: "design" | "tech" = "design") {
+export async function generateProposalPng(leadId: string, mode: "design" | "tech" | "focused" = "focused") {
   let browser;
   try {
     const prisma = getPrisma();
@@ -406,7 +408,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
 
     browser = await launchBrowser();
     const context = await browser.newContext({
-      viewport: { width: 1200, height: 1600 }
+      viewport: { width: 1200, height: 1600 },
+      deviceScaleFactor: 1,
     });
     const page = await context.newPage();
     
@@ -420,7 +423,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     const fileName = `proposal-${mode}-${leadId}-${Date.now()}.png`;
     const proposalImage = await page.screenshot({
       fullPage: true,
-      animations: "disabled"
+      animations: "disabled",
+      scale: "css"
     });
     const publicPath = await storeGeneratedImage(
       proposalImage,
@@ -428,8 +432,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     );
 
     const updateData: any = {};
-    if (mode === "design") updateData.proposalImage = publicPath;
-    else updateData.proposalImageTech = publicPath;
+    if (mode === "tech") updateData.proposalImageTech = publicPath;
+    else updateData.proposalImage = publicPath;
 
     await prisma.lead.update({
       where: { id: leadId },
@@ -442,6 +446,71 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
   } catch (error: any) {
     console.error(`PNG Generation Error (${mode}):`, error);
     return { success: false, error: error.message };
+  } finally {
+    if (browser) await browser.close();
+  }
+}
+
+export async function generateAuditExports(leadId: string) {
+  let browser;
+  try {
+    const prisma = getPrisma();
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) throw new Error("Lead not found");
+
+    const vercelHost =
+      process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
+    const fullReportUrl = `${siteUrl}/report/${leadId}?export=1&format=full`;
+    const pngReportUrl = `${siteUrl}/report/${leadId}?export=1&format=png`;
+    const proposalUrl = `${siteUrl}/proposal/${leadId}`;
+
+    browser = await launchBrowser();
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1200 },
+      deviceScaleFactor: 1,
+    });
+    const page = await context.newPage();
+    await page.goto(fullReportUrl, { waitUntil: "networkidle", timeout: 60_000 });
+    await page.emulateMedia({ media: "screen" });
+    await page.waitForTimeout(2_000);
+
+    const exportId = Date.now();
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "12mm", right: "10mm", bottom: "12mm", left: "10mm" },
+    });
+    await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 60_000 });
+    await page.waitForTimeout(1_000);
+    const proposalPdfBytes = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
+    });
+    await page.goto(pngReportUrl, { waitUntil: "networkidle", timeout: 60_000 });
+    await page.waitForTimeout(1_000);
+    const image = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" });
+
+    const [reportPdf, reportImage, proposalPdf] = await Promise.all([
+      storeGeneratedFile(pdf, `reports/audit-${leadId}-${exportId}.pdf`, "application/pdf"),
+      storeGeneratedImage(image, `reports/audit-${leadId}-${exportId}.png`),
+      storeGeneratedFile(proposalPdfBytes, `reports/proposal-${leadId}-${exportId}.pdf`, "application/pdf"),
+    ]);
+
+    await saveLeadReportPaths(prisma, leadId, reportPdf, reportImage, proposalPdf);
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/report/${leadId}`);
+    return { success: true, reportPdf, reportImage, proposalPdf };
+  } catch (error) {
+    console.error("Audit export generation error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Audit export generation failed",
+    };
   } finally {
     if (browser) await browser.close();
   }

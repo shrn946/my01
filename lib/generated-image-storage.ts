@@ -3,8 +3,11 @@ import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import fs from "fs/promises";
 import path from "path";
+import sharp from "sharp";
 
 const DEFAULT_BUCKET = "generated-images";
+const MAX_GENERATED_PNG_WIDTH = 1280;
+const MAX_GENERATED_PNG_HEIGHT = 2000;
 
 async function ensurePublicBucket(
   supabase: SupabaseClient,
@@ -29,9 +32,10 @@ async function ensurePublicBucket(
   }
 }
 
-export async function storeGeneratedImage(
-  image: Buffer,
+export async function storeGeneratedFile(
+  contents: Buffer,
   objectPath: string,
+  contentType: string,
 ): Promise<string> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -45,8 +49,8 @@ export async function storeGeneratedImage(
 
     const { error } = await supabase.storage
       .from(bucket)
-      .upload(objectPath, image, {
-        contentType: "image/png",
+      .upload(objectPath, contents, {
+        contentType,
         upsert: true,
       });
 
@@ -67,6 +71,30 @@ export async function storeGeneratedImage(
 
   const fullPath = path.join(process.cwd(), "public", "generated", objectPath);
   await fs.mkdir(path.dirname(fullPath), { recursive: true });
-  await fs.writeFile(fullPath, image);
+  await fs.writeFile(fullPath, contents);
   return `/generated/${objectPath.replaceAll("\\", "/")}`;
+}
+
+export async function storeGeneratedImage(
+  image: Buffer,
+  objectPath: string,
+): Promise<string> {
+  const optimized = await sharp(image)
+    .rotate()
+    .resize({
+      width: MAX_GENERATED_PNG_WIDTH,
+      height: MAX_GENERATED_PNG_HEIGHT,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .png({
+      compressionLevel: 9,
+      adaptiveFiltering: true,
+      palette: true,
+      colors: 128,
+      effort: 10,
+    })
+    .toBuffer();
+
+  return storeGeneratedFile(optimized, objectPath, "image/png");
 }

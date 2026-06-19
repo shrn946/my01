@@ -35,238 +35,106 @@ export const services = [
 
 export const projects = [
   {
-    title: "SaaS Landing Page in WordPress",
-    slug: "saas-landing-page-wordpress",
-    category: "Elementor",
-    description: "A fast Elementor landing page for a B2B software company.",
-    overview: "The client needed a professional WordPress landing page that matched their SaaS positioning and could be edited by their marketing team.",
-    problem: "Their old page loaded slowly, had weak mobile spacing, and did not explain the offer clearly.",
-    solution: "I rebuilt the page with Elementor Pro, optimized media, simplified sections, and added conversion-focused CTAs.",
-    result: "Load time dropped under two seconds and qualified inquiries increased after launch.",
-    tools: ["WordPress", "Elementor Pro", "Rank Math", "WP Rocket"],
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+    title: 'Bright Smile Dental',
+    slug: 'bright-smile-dental',
+    category: 'Dentists 🦷',
+    description: 'A comprehensive, patient-focused website for a modern dental clinic.',
+    overview: 'The client needed an engaging and reassuring online presence to attract new patients and facilitate easy appointment bookings.',
+    problem: 'Their previous site was slow, outdated, and lacked mobile responsiveness.',
+    solution: 'Designed a clean, modern interface with built-in booking forms and patient testimonials.',
+    result: 'Online appointments increased by 45% in the first three months.',
+    tools: ['Next.js', 'Tailwind CSS', 'Prisma'],
+    image: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80',
     gallery: [
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80"
+      'https://images.unsplash.com/photo-1598256989800-fea5ce5146f2?auto=format&fit=crop&w=1200&q=80'
     ],
-    liveUrl: "https://example.com",
+    liveUrl: 'https://example.com/dental',
     featured: true
   },
   {
-    title: "WooCommerce Fashion Store",
-    slug: "woocommerce-fashion-store",
-    category: "WooCommerce",
-    description: "A conversion-focused online store with smooth checkout and product filtering.",
-    overview: "A boutique needed a complete WooCommerce store with inventory, payments, and shipping setup.",
-    problem: "The previous store had abandoned carts, poor category pages, and confusing checkout steps.",
-    solution: "I rebuilt product templates, improved filters, configured payment gateways, and optimized checkout.",
-    result: "The store became easier to manage and mobile checkout completion improved.",
-    tools: ["WooCommerce", "WordPress", "Stripe", "ACF"],
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80",
+    title: 'Apex Legal Partners',
+    slug: 'apex-legal-partners',
+    category: 'Law Firms ⚖️',
+    description: 'A highly professional corporate website for a premier law firm.',
+    overview: 'The firm wanted to showcase its practice areas and successful case studies with an authoritative design.',
+    problem: 'Clients struggled to find relevant case studies on their old platform.',
+    solution: 'Implemented a robust taxonomy and search system for case studies and attorney profiles.',
+    result: 'Bounce rate dropped significantly and lead quality improved.',
+    tools: ['WordPress', 'Elementor', 'ACF'],
+    image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=1200&q=80',
     gallery: [
-      "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&fit=crop&w=1200&q=80"
+      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80'
     ],
-    liveUrl: "https://example.com",
+    liveUrl: 'https://example.com/law',
     featured: true
   },
   {
-    title: "Custom Booking Plugin",
-    slug: "custom-booking-plugin",
-    category: "Plugin Development",
-    description: "A lightweight WordPress plugin for service bookings and admin notifications.",
-    overview: "The client wanted a custom booking flow without the overhead of a large third-party plugin.",
-    problem: "Existing plugins were too complex and introduced conflicts with their theme.",
-    solution: "I built a focused plugin with custom database tables, validation, admin screens, and email alerts.",
-    result: "The booking workflow became reliable, faster, and easier for staff to manage.",
-    tools: ["PHP", "WordPress Plugin API", "MySQL", "JavaScript"],
-    image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=1200&q=80",
+    title: 'Elite Roofing Solutions',
+    slug: 'elite-roofing-solutions',
+    category: 'Roofing Companies 🏠',
+    description: 'A robust lead-generation platform for a residential roofing company.',
+    overview: 'A local roofer needed a site that highlighted their durability, warranty, and fast response times.',
+    problem: 'The old site failed to capture emergency service requests effectively.',
+    solution: 'Built an immediate call-to-action hero section and integrated a quick quote calculator.',
+    result: 'Emergency leads doubled within the first month.',
+    tools: ['Next.js', 'Tailwind CSS'],
+    image: 'https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&w=1200&q=80',
     gallery: [
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80"
+      'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80'
     ],
-    liveUrl: "https://example.com",
+    liveUrl: 'https://example.com/roofing',
+    featured: false
+  },
+  {
+    title: 'Comfort Air HVAC',
+    slug: 'comfort-air-hvac',
+    category: 'HVAC Companies ❄️',
+    description: 'A service-oriented website with seasonal promotions for an HVAC business.',
+    overview: 'The company wanted to push seasonal maintenance contracts and repair services.',
+    problem: 'Customers were not aware of their full range of seasonal offerings.',
+    solution: 'Created dynamic promotional banners and a clear service catalog.',
+    result: 'Maintenance contract signups grew by 30%.',
+    tools: ['React', 'Framer Motion'],
+    image: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1200&q=80'
+    ],
+    liveUrl: 'https://example.com/hvac',
+    featured: false
+  },
+  {
+    title: 'Rapid Response Plumbing',
+    slug: 'rapid-response-plumbing',
+    category: 'Plumbing Companies 🔧',
+    description: 'An emergency-focused website for a 24/7 plumbing service.',
+    overview: 'The focus was on speed: users needed to find a phone number and request help instantly.',
+    problem: 'The contact information was buried on the previous site.',
+    solution: 'Designed a mobile-first site with sticky contact buttons and a streamlined contact form.',
+    result: 'Mobile conversion rates skyrocketed by 60%.',
+    tools: ['WordPress', 'Tailwind CSS'],
+    image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=1200&q=80'
+    ],
+    liveUrl: 'https://example.com/plumbing',
     featured: true
   },
   {
-    title: "Local Business WordPress Website",
-    slug: "local-business-wordpress-website",
-    category: "Business Website",
-    description: "A clean service website for a local company with lead-focused pages.",
-    overview: "The client needed a professional WordPress presence that made services clear and helped visitors request quotes.",
-    problem: "Their existing website looked outdated and did not guide visitors toward contacting the business.",
-    solution: "I created a responsive WordPress website with service pages, trust sections, contact forms, and SEO-friendly structure.",
-    result: "The website became easier to navigate and started generating more qualified service inquiries.",
-    tools: ["WordPress", "Elementor", "Contact Form 7", "Rank Math"],
-    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+    title: 'City Health Clinic',
+    slug: 'city-health-clinic',
+    category: 'Medical Clinics',
+    description: 'A comprehensive health portal for a multi-specialty clinic.',
+    overview: 'The clinic needed to display various specialties, doctors, and patient resources.',
+    problem: 'Navigation was confusing for patients looking for specific departments.',
+    solution: 'Implemented an intuitive mega-menu and dedicated department landing pages.',
+    result: 'Improved user experience and reduced calls to the front desk for basic info.',
+    tools: ['Next.js', 'PostgreSQL', 'Prisma'],
+    image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
     gallery: [
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
+      'https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=1200&q=80'
     ],
-    liveUrl: "https://example.com",
+    liveUrl: 'https://example.com/clinic',
     featured: true
-  },
-  {
-    title: "Restaurant Elementor Website",
-    slug: "restaurant-elementor-website",
-    category: "Elementor",
-    description: "A mobile-first restaurant website with menu, gallery, and reservation CTA.",
-    overview: "A restaurant wanted a modern website that loaded quickly and looked polished on mobile.",
-    problem: "The old website had poor mobile spacing and made the menu hard to read.",
-    solution: "I redesigned the website with Elementor, optimized the menu layout, and added strong booking calls to action.",
-    result: "Visitors could browse the menu faster and reach the reservation form with fewer clicks.",
-    tools: ["WordPress", "Elementor Pro", "WP Rocket", "ShortPixel"],
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
-  },
-  {
-    title: "Healthcare Clinic Website",
-    slug: "healthcare-clinic-website",
-    category: "Business Website",
-    description: "A trustworthy clinic website with doctors, services, FAQs, and appointment forms.",
-    overview: "The clinic needed a reliable WordPress website that helped patients understand treatments and book appointments.",
-    problem: "Important service information was scattered and the appointment flow was unclear.",
-    solution: "I organized services, added structured FAQs, created doctor profile sections, and improved the appointment form.",
-    result: "Patients could find information faster and submit appointment requests more confidently.",
-    tools: ["WordPress", "ACF", "Elementor", "Rank Math"],
-    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1580281657527-47f249e8f4df?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
-  },
-  {
-    title: "WooCommerce Electronics Store",
-    slug: "woocommerce-electronics-store",
-    category: "WooCommerce",
-    description: "A WooCommerce store with product filters, cart improvements, and checkout setup.",
-    overview: "The client needed a store that handled product categories, variations, shipping, and payment setup cleanly.",
-    problem: "The catalog was hard to browse and checkout had too many friction points.",
-    solution: "I improved category pages, configured product attributes, simplified checkout, and tuned store performance.",
-    result: "The store became easier to shop and faster on mobile devices.",
-    tools: ["WooCommerce", "Stripe", "Elementor", "LiteSpeed Cache"],
-    image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: true
-  },
-  {
-    title: "Real Estate Listing Website",
-    slug: "real-estate-listing-website",
-    category: "Custom WordPress",
-    description: "A property listing website with custom fields, filters, and agent contact forms.",
-    overview: "A real estate agency needed property listings that were easy to update from WordPress admin.",
-    problem: "Their previous workflow required manual page edits for every property.",
-    solution: "I created custom post types, ACF fields, listing templates, and filterable property archives.",
-    result: "The team could publish listings faster and visitors could filter properties more easily.",
-    tools: ["WordPress", "ACF", "Custom Post Types", "PHP"],
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
-  },
-  {
-    title: "Membership Website Setup",
-    slug: "membership-website-setup",
-    category: "Custom WordPress",
-    description: "A membership site with protected content, user roles, and payment flow.",
-    overview: "The client wanted gated training content and a simple member experience.",
-    problem: "Their content was public and there was no reliable way to manage paid access.",
-    solution: "I configured memberships, role-based access, payment integration, and account pages.",
-    result: "The client could sell access and manage members from the WordPress dashboard.",
-    tools: ["WordPress", "MemberPress", "Stripe", "Elementor"],
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
-  },
-  {
-    title: "WordPress Speed Optimization",
-    slug: "wordpress-speed-optimization",
-    category: "Performance",
-    description: "A speed optimization project focused on Core Web Vitals and mobile loading.",
-    overview: "The website had good content but slow load times were hurting conversions and SEO.",
-    problem: "Large images, unused scripts, and weak caching pushed page speed scores down.",
-    solution: "I optimized images, cleaned assets, configured cache, improved fonts, and reduced plugin overhead.",
-    result: "The site loaded faster and achieved stronger Core Web Vitals results.",
-    tools: ["WP Rocket", "ShortPixel", "Perfmatters", "Cloudflare"],
-    image: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: true
-  },
-  {
-    title: "Landing Page for Lead Generation",
-    slug: "landing-page-lead-generation",
-    category: "Landing Page",
-    description: "A focused landing page for ads with clear copy, trust sections, and contact form.",
-    overview: "The client needed a landing page for a paid campaign and wanted it editable in WordPress.",
-    problem: "Their traffic was going to a generic service page with weak conversion structure.",
-    solution: "I built a dedicated landing page with stronger offer framing, proof sections, and a short form.",
-    result: "The campaign had a clearer destination and better lead capture flow.",
-    tools: ["WordPress", "Elementor Pro", "Google Tag Manager", "Rank Math"],
-    image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
-  },
-  {
-    title: "Bug Fixing and Maintenance Plan",
-    slug: "bug-fixing-maintenance-plan",
-    category: "Maintenance",
-    description: "A maintenance setup with updates, backups, bug fixing, and monthly reporting.",
-    overview: "The client needed reliable ongoing WordPress care after repeated plugin conflicts.",
-    problem: "Updates were risky, backups were inconsistent, and small bugs stayed unresolved for weeks.",
-    solution: "I set up staged updates, backups, monitoring, plugin cleanup, and a monthly maintenance workflow.",
-    result: "The website became more stable and the client had predictable support each month.",
-    tools: ["WordPress", "UpdraftPlus", "ManageWP", "Wordfence"],
-    image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
-  },
-  {
-    title: "WordPress Migration to New Hosting",
-    slug: "wordpress-migration-new-hosting",
-    category: "Migration",
-    description: "A complete WordPress migration with domain, SSL, email checks, and zero-data-loss transfer.",
-    overview: "A business needed to move from slow hosting to a better server without losing content or breaking forms.",
-    problem: "The site had a large media library, old PHP version, and fragile plugin setup.",
-    solution: "I backed up the website, migrated files and database, updated DNS, configured SSL, and tested core forms.",
-    result: "The site moved cleanly and performed better on the new hosting environment.",
-    tools: ["WordPress", "cPanel", "Cloudflare", "Duplicator"],
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
-    ],
-    liveUrl: "https://example.com",
-    featured: false
   }
 ];
 

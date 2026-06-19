@@ -5,6 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Star, User } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PLACEHOLDER_IMAGE } from "@/lib/utils";
 
 export function ReviewsCarousel({ reviews }: { reviews: any[] }) {
   const autoplay = useRef(Autoplay({ delay: 4500, stopOnInteraction: false, stopOnMouseEnter: true }));
@@ -38,7 +39,7 @@ export function ReviewsCarousel({ reviews }: { reviews: any[] }) {
               <article className="h-full rounded-lg border border-black/5 bg-white p-6 shadow-soft">
                 <div className="flex items-center gap-4">
                   <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
-                    {review.image ? <Image src={review.image} alt={review.client} fill className="object-cover" /> : <User size={24} />}
+                    {review.image ? <Image src={PLACEHOLDER_IMAGE} alt={review.client} fill className="object-cover" /> : <User size={24} />}
                   </div>
                   <div>
                     <h3 className="font-bold text-ink">{review.client}</h3>

@@ -157,3 +157,62 @@ SUPABASE_STORAGE_BUCKET="generated-images"
 The service-role key is server-only and must never use a `NEXT_PUBLIC_` prefix.
 The application creates the configured public bucket when the first image is
 generated. Local development continues to save images under `public/generated`.
+
+## AI Website Audits
+
+Set a Gemini Developer API key from Google AI Studio:
+
+```env
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+GEMINI_MODEL="gemini-3.1-flash-lite"
+```
+
+The initial website scan collects measured scores and website evidence without
+generating proposal content. Before report generation, select one or more
+service categories in the dashboard:
+
+- Re-Design
+- Fix Issues
+- Fix Loading Speed
+- SEO Improvements
+- Website Maintenance
+
+`Start Generation` captures a fresh homepage screenshot, sends only the
+selected service scope and website evidence to Gemini, creates a focused
+proposal image, and exports separate PNG and PDF reports. Unselected categories
+are excluded from Gemini comments, recommendations, proposal copy, PNG content,
+and the full report.
+
+Manual developer comments and recommendation edits are stored separately from
+the immutable Gemini response. Each save keeps a bounded revision history, so
+regeneration does not delete the original AI content or prior manual versions.
+
+Lead-scoped report media supports issue screenshots, competitor references,
+branding images, and before/after examples. Each image has a caption, report
+section placement, and optional email inclusion. Up to four uploaded images are
+provided to Gemini as visual context during the next generation.
+
+Generated outreach emails use a responsive branded HTML layout with the
+proposal PNG embedded in the message, key findings, uploaded email images, a
+full audit report button, a proposal PDF button, and a consultation call to
+action.
+
+The structured result is saved on the lead and contains:
+
+```text
+selected_categories
+audit_summary
+developer_comments
+recommendations
+proposal_content
+png_report_data
+full_report_data
+```
+
+If Gemini is unavailable or the free-tier quota is exhausted, the audit uses an
+evidence-based local fallback so report generation can still finish. The exact
+six-key JSON result is available at:
+
+```text
+/api/audits/{leadId}/ai
+```

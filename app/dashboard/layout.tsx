@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Settings, Search } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +13,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors text-sm font-medium">
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
+          <Link href="/dashboard/lead-finder" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors text-sm font-medium">
+            <Search className="w-4 h-4" /> Lead Finder
+          </Link>
           <Link href="/dashboard/leads" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors text-sm font-medium">
             <Users className="w-4 h-4" /> Leads
           </Link>
@@ -21,6 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
         </nav>
       </aside>
+
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-screen overflow-hidden">

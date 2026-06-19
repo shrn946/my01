@@ -4,6 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
+import { PLACEHOLDER_IMAGE } from "@/lib/utils";
+
+// Using the local placeholder image
+const TALL_PLACEHOLDER = "/pro.png";
 
 export function ProjectCard({ project }: { project: any }) {
   return (
@@ -11,62 +15,81 @@ export function ProjectCard({ project }: { project: any }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-soft transition-all duration-500 hover:shadow-premium"
+      className="group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
     >
-      <div className="relative aspect-[16/11] overflow-hidden">
-        <Image 
-          src={project.image} 
-          alt={project.title} 
-          fill 
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
-          sizes="(min-width: 1024px) 33vw, 100vw" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-        
-        {/* Hover Content */}
-        <div className="absolute inset-x-0 bottom-0 p-8 translate-y-full transition-transform duration-500 group-hover:translate-y-0">
-          <div className="flex flex-wrap gap-2 mb-6">
-            {project.tools.map((tool: string) => (
-              <span key={tool} className="rounded-lg bg-white/10 px-3 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/10">
-                {tool}
-              </span>
-            ))}
-          </div>
-          
-          <div className="flex gap-4">
-            {project.liveUrl && (
-              <a 
-                href={project.liveUrl} 
-                target="_blank" 
-                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white text-ink text-sm font-bold transition-all hover:bg-slate-100 active:scale-95"
-              >
-                <ExternalLink size={18} />
-                Live Demo
-              </a>
-            )}
-            <Link 
-              href={`/portfolio/${project.slug}`} 
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-white text-sm font-bold transition-all hover:bg-blue-600 active:scale-95"
+      <motion.div 
+        className="relative aspect-[4/3] overflow-hidden bg-slate-100 rounded-3xl shadow-inner"
+        whileHover="hover"
+      >
+        <Link href={`/portfolio/${project.slug}`}>
+          <div className="relative w-full h-full overflow-hidden">
+            <motion.div
+              className="absolute top-0 left-0 w-full"
+              style={{ height: "400%" }}
+              variants={{
+                hover: { y: "-75%" }
+              }}
+              initial={{ y: 0 }}
+              transition={{ duration: 6, ease: "linear" }}
             >
-              <ArrowUpRight size={18} />
-              Details
-            </Link>
+              <Image 
+                src={TALL_PLACEHOLDER} 
+                alt={project.title} 
+                fill
+                className="object-cover object-top"
+              />
+            </motion.div>
           </div>
+
+          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
+        </Link>
+
+        {/* Tool Tags Overlay */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+          {project.tools.map((tool: string) => (
+            <span key={tool} className="rounded-full bg-white/80 backdrop-blur-sm border border-white/20 px-2 py-0.5 text-[9px] font-bold text-ink shadow-sm">
+              {tool}
+            </span>
+          ))}
         </div>
+
+      {/* Scroll Bar Track */}
+      <div className="absolute right-1 top-2 bottom-2 w-1 rounded-full bg-slate-200/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 overflow-hidden">
+          <motion.div
+              className="w-full bg-primary rounded-full"
+              variants={{
+                  hover: { height: "25%", y: ["0%", "300%"] }
+              }}
+              transition={{ duration: 6, ease: "linear" }}
+          />
       </div>
+      </motion.div>
       
-      <div className="p-8 transition-all duration-500 group-hover:-translate-y-4">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full bg-primary/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/20">
+      <div className="flex flex-col flex-1 p-5 sm:p-6 transition-opacity duration-300 group-hover:opacity-60">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-slate-500">
             {project.category}
           </span>
+          {project.liveUrl && (
+            <a 
+              href={project.liveUrl} 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-slate-400 transition-colors hover:text-primary"
+              aria-label="Live Demo"
+            >
+              <ExternalLink size={16} />
+            </a>
+          )}
         </div>
         
-        <h3 className="mt-4 text-2xl font-black text-ink group-hover:text-primary transition-colors">
-          {project.title}
-        </h3>
+        <Link href={`/portfolio/${project.slug}`}>
+          <h3 className="text-lg font-bold text-ink transition-colors group-hover:text-primary">
+            {project.title}
+          </h3>
+        </Link>
         
-        <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-slate-500">
+        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500 flex-1">
           {project.description}
         </p>
       </div>

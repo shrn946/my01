@@ -4,8 +4,10 @@ import * as cheerio from "cheerio";
 import { getPrisma } from "@/lib/prisma";
 import { auditWebsiteHtml } from "@/lib/site-audit";
 import { launchBrowser } from "@/lib/browser";
+import { getLeadAiFields } from "@/lib/lead-ai-storage";
 import { revalidatePath } from "next/cache";
-import { Resend } from "resend";
+import { sendLeadEmail } from "@/lib/email-actions";
+import { detectBusinessCategory } from "@/lib/utils";
 
 async function crawlDesignData(url: string) {
   let browser;
@@ -43,11 +45,27 @@ async function crawlDesignData(url: string) {
       const ctaButtons = document.querySelectorAll("button, .btn, .button, a[class*='btn'], a[class*='button']").length;
       const h1Styles = document.querySelector("h1") ? getStyles(document.querySelector("h1")!) : null;
 
+      // Technology detection
+      const html = document.documentElement.innerHTML;
+      let technology = "Unknown";
+      if (html.includes("wp-content") || html.includes("wp-includes") || document.querySelector('meta[name="generator"][content*="WordPress"]')) {
+        technology = "WordPress";
+      } else if (html.includes("shopify")) {
+        technology = "Shopify";
+      } else if (html.includes("wix")) {
+        technology = "Wix";
+      } else if (html.includes("squarespace")) {
+        technology = "Squarespace";
+      } else if (html.includes("next.js") || html.includes("next-assets")) {
+        technology = "Next.js";
+      }
+
       return {
         colors: { background: Array.from(bgColors).slice(0, 5) },
         fonts: Array.from(fonts).slice(0, 5),
         structure: { hasHero, hasNavbar, hasFooter, ctaCount: ctaButtons },
-        typography: { h1FontSize: h1Styles?.fontSize || "N/A", h1FontWeight: h1Styles?.fontWeight || "N/A" }
+        typography: { h1FontSize: h1Styles?.fontSize || "N/A", h1FontWeight: h1Styles?.fontWeight || "N/A" },
+        technology
       };
     });
     return analysis;
@@ -250,7 +268,6 @@ export async function quickAnalyzeWebsite(url: string) {
     };
 
     const businessName = getBusinessName(title, parsedUrl.hostname);
-
     const extractedData = {
       businessName,
       website: targetUrl,
@@ -270,7 +287,8 @@ export async function quickAnalyzeWebsite(url: string) {
       status: leadStatus,
       topIssues: audit.issues.length > 0
         ? audit.issues.join("\n")
-        : "No major HTML-level issues detected"
+        : "No major HTML-level issues detected",
+      beforeAfterImage: null as string | null
     };
 
     // Check for valid DATABASE_URL before creating
@@ -279,6 +297,15 @@ export async function quickAnalyzeWebsite(url: string) {
       throw new Error("DATABASE_URL is not configured. Please set a valid PostgreSQL connection string in your .env file to save leads.");
     }
 
+    // After designAnalysis is generated, classify the website using detectBusinessCategory
+    const autoCategory = detectBusinessCategory(
+      extractedData.businessName,
+      title,
+      metaDescription,
+      targetUrl,
+      pageHtml
+    );
+
     const lead = await prisma.lead.create({
       data: {
         businessName: extractedData.businessName,
@@ -286,6 +313,7 @@ export async function quickAnalyzeWebsite(url: string) {
         email: extractedData.email,
         phone: extractedData.phone,
         address: extractedData.address,
+        category: autoCategory, // Auto-assign category
         status: extractedData.status,
         leadScore: extractedData.leadScore,
         websiteScore: extractedData.overallScore,
@@ -305,6 +333,8 @@ export async function quickAnalyzeWebsite(url: string) {
       }
     });
 
+    // Do NOT capture screenshot on analyze. Screenshot generation is deferred to report generation.
+
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/leads");
     
@@ -317,21 +347,57 @@ export async function quickAnalyzeWebsite(url: string) {
 
 export async function getDashboardStats() {
   const prisma = getPrisma();
+  
+  // Format today's date in local date string format (YYYY-MM-DD)
+  const tzOffset = new Date().getTimezoneOffset() * 60000;
+  const localDate = new Date(Date.now() - tzOffset);
+  const todayStr = localDate.toISOString().split("T")[0];
+
   try {
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const searchUsage = await prisma.searchUsage.findUnique({
+      where: { date: todayStr }
+    });
+    
+    const googleLimit = settings?.googleSearchLimit ?? 40;
+    const serpLimit = settings?.serpApiSearchLimit ?? 40;
+
+    const googleUsed = searchUsage?.googleCount || 0;
+    const serpUsed = searchUsage?.serpCount || 0;
+
+    const searchesUsed = googleUsed + serpUsed;
+    const remainingSearches = Math.max(0, (googleLimit + serpLimit) - searchesUsed);
+
     const totalLeads = await prisma.lead.count();
+    const leadsSaved = await prisma.lead.count({
+      where: {
+        status: { not: "Finder" }
+      }
+    });
+
+    const emailsSent = await prisma.emailLog.count();
+
     const hotLeads = await prisma.lead.count({ where: { status: "Hot Lead" } });
     const contactedLeads = await prisma.lead.count({ where: { status: "Contacted" } });
     const wonLeads = await prisma.lead.count({ where: { status: "Won" } });
 
     return {
+      searchesUsed,
+      remainingSearches,
       totalLeads,
+      leadsSaved,
+      emailsSent,
       hotLeads,
       contactedLeads,
       wonLeads
     };
   } catch (error) {
     return {
+      searchesUsed: 0,
+      remainingSearches: 80,
       totalLeads: 0,
+      leadsSaved: 0,
+      emailsSent: 0,
       hotLeads: 0,
       contactedLeads: 0,
       wonLeads: 0
@@ -369,6 +435,22 @@ export async function updateLeadEmail(leadId: string, email: string) {
   }
 }
 
+export async function updateLeadCategory(leadId: string, category: string) {
+  const prisma = getPrisma();
+  try {
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { category }
+    });
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/leads");
+    revalidatePath("/dashboard/lead-finder");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function deleteLead(leadId: string) {
   const prisma = getPrisma();
   try {
@@ -400,7 +482,7 @@ export async function getSettings() {
   }
 }
 
-export async function getLeads(filters?: { search?: string; status?: string }) {
+export async function getLeads(filters?: { search?: string; status?: string; category?: string }) {
   const prisma = getPrisma();
   try {
     const where: any = {};
@@ -418,6 +500,11 @@ export async function getLeads(filters?: { search?: string; status?: string }) {
     }
     if (filters?.status && filters.status !== "All") {
       where.status = filters.status;
+    } else {
+      where.status = { not: "Finder" };
+    }
+    if (filters?.category && filters.category !== "All") {
+      where.category = filters.category;
     }
 
     return await prisma.lead.findMany({
@@ -436,6 +523,20 @@ export async function bulkUpdateLeadStatus(leadIds: string[], status: string) {
     await prisma.lead.updateMany({
       where: { id: { in: leadIds } },
       data: { status }
+    });
+    revalidatePath("/dashboard/leads");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function bulkUpdateLeadCategory(leadIds: string[], category: string) {
+  const prisma = getPrisma();
+  try {
+    await prisma.lead.updateMany({
+      where: { id: { in: leadIds } },
+      data: { category }
     });
     revalidatePath("/dashboard/leads");
     return { success: true };
@@ -485,7 +586,10 @@ export async function getTemplates() {
 export async function getLeadAction(leadId: string) {
   const prisma = getPrisma();
   try {
-    return await prisma.lead.findUnique({ where: { id: leadId } });
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) return null;
+    const aiFields = await getLeadAiFields(prisma, leadId);
+    return { ...lead, ...aiFields };
   } catch (error) {
     return null;
   }
@@ -501,49 +605,64 @@ export async function getMediaAssetsAction() {
 }
 
 export async function sendLeadEmailFromDashboard(leadId: string, subject: string, body: string, toEmail: string) {
+  return sendLeadEmail(leadId, null, body, subject, toEmail);
+}
+
+export async function getLeadStats() {
   const prisma = getPrisma();
   try {
-    const settings = await getSettings();
-    if (!settings?.resendApiKey) {
-      throw new Error("Resend API key not found in settings.");
-    }
-    if (!settings?.senderEmail) {
-      throw new Error("Sender email not found in settings.");
-    }
-
-    const resend = new Resend(settings.resendApiKey);
+    const totalLeads = await prisma.lead.count({ where: { status: { not: "Finder" } } });
     
-    const { data, error } = await resend.emails.send({
-      from: `${settings.senderName || "Agency"} <${settings.senderEmail}>`,
-      to: [toEmail],
-      subject: subject,
-      html: body.replace(/\n/g, "<br>"),
+    // Count leads with valid email
+    const withEmail = await prisma.lead.count({
+      where: {
+        status: { not: "Finder" },
+        AND: [
+          { email: { not: null } },
+          { email: { not: "" } }
+        ]
+      }
+    });
+    
+    const withoutEmail = Math.max(0, totalLeads - withEmail);
+
+    // Group leads by category to get category counts
+    const categoryGroup = await prisma.lead.groupBy({
+      by: ["category"],
+      where: { status: { not: "Finder" } },
+      _count: { _all: true }
     });
 
-    if (error) throw new Error(error.message);
+    const categoryCounts: Record<string, number> = {};
+    categoryGroup.forEach(group => {
+      const cat = group.category || "Other";
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + group._count._all;
+    });
 
-    await prisma.emailLog.create({
-      data: {
-        leadId,
-        toEmail,
-        subject,
-        body,
-        status: "Sent"
+    // Counts for leads created in the last 24h
+    const recentlyAdded = await prisma.lead.count({
+      where: {
+        status: { not: "Finder" },
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
       }
     });
 
-    await prisma.lead.update({
-      where: { id: leadId },
-      data: {
-        status: "Contacted",
-        lastContactedAt: new Date()
-      }
-    });
-
-    revalidatePath("/dashboard/leads");
-    return { success: true };
-  } catch (error: any) {
-    console.error("Email Error:", error);
-    return { success: false, error: error.message };
+    return {
+      totalLeads,
+      withEmail,
+      withoutEmail,
+      categoryCounts,
+      recentlyAdded
+    };
+  } catch (error) {
+    console.error("GET_LEAD_STATS_ERROR:", error);
+    return {
+      totalLeads: 0,
+      withEmail: 0,
+      withoutEmail: 0,
+      categoryCounts: {},
+      recentlyAdded: 0
+    };
   }
 }
+

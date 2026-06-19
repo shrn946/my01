@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Loader2, Save, ExternalLink, Send, Sparkles, Settings2, Clock, Trash2
+  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Loader2, Save, ExternalLink, Send, Sparkles, Settings2, Clock, Trash2, Tag, Filter
 } from "lucide-react";
 import { 
   searchAndAnalyzeLeads, 
@@ -189,6 +189,57 @@ const DEFAULT_NICHES = [
   "Beauty Salons", "Spas", "Wedding Photographers", "Law Firms", "Accounting Firms"
 ];
 
+// Social Media & WhatsApp SVG Icons
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+    </svg>
+  );
+}
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  );
+}
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+    </svg>
+  );
+}
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  );
+}
+function TwitterXIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
+function YouTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+    </svg>
+  );
+}
+
 export default function LeadFinderPage() {
   const [formData, setFormData] = useState({
     country: "",
@@ -199,6 +250,7 @@ export default function LeadFinderPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [maxResults, setMaxResults] = useState(10);
+  const [categoryFilter, setCategoryFilter] = useState("All");
   const [stats, setStats] = useState({
     googleUsed: 0,
     googleRemaining: 40,
@@ -215,6 +267,9 @@ export default function LeadFinderPage() {
   const [activeCityIndex, setActiveCityIndex] = useState(0);
   const [activeNicheIndex, setActiveNicheIndex] = useState(0);
   const [activeCountryIndex, setActiveCountryIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+  const [isImporting, setIsImporting] = useState(false);
 
   const [popularCities, setPopularCities] = useState<{ city: string; state: string; country: string }[]>(DEFAULT_CITIES);
   const [popularNiches, setPopularNiches] = useState<string[]>(DEFAULT_NICHES);
@@ -275,7 +330,7 @@ export default function LeadFinderPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [results]);
+  }, [results, categoryFilter]);
 
   const selectCountry = (countryStr: string) => {
     setFormData(prev => ({
@@ -562,6 +617,33 @@ export default function LeadFinderPage() {
       const finderLeads = await getFinderLeads();
       setResults(finderLeads);
 
+      // Restore last search from localStorage
+      try {
+        const savedNiche = localStorage.getItem("leadFinder_lastSearchNiche");
+        const savedCity = localStorage.getItem("leadFinder_lastSearchCity");
+        const savedState = localStorage.getItem("leadFinder_lastSearchState");
+        const savedCountry = localStorage.getItem("leadFinder_lastSearchCountry");
+        const savedMaxResults = localStorage.getItem("leadFinder_lastSearchMaxResults");
+
+        if (savedNiche || savedCity || savedState || savedCountry) {
+          setFormData(prev => ({
+            ...prev,
+            niche: savedNiche || "",
+            city: savedCity || "",
+            state: savedState || "",
+            country: savedCountry || ""
+          }));
+        }
+        if (savedMaxResults) {
+          const parsedMax = parseInt(savedMaxResults, 10);
+          if (!isNaN(parsedMax)) {
+            setMaxResults(parsedMax);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to restore last search from localStorage", e);
+      }
+
       // Load dynamic cities & categories from search settings
       try {
         const searchSettings = await getSearchSettings();
@@ -702,10 +784,22 @@ export default function LeadFinderPage() {
     setIsSearching(true);
     setResults([]);
 
+    // Save last search to localStorage
+    try {
+      localStorage.setItem("leadFinder_lastSearchNiche", formData.niche || "");
+      localStorage.setItem("leadFinder_lastSearchCity", formData.city || "");
+      localStorage.setItem("leadFinder_lastSearchState", formData.state || "");
+      localStorage.setItem("leadFinder_lastSearchCountry", formData.country || "");
+      localStorage.setItem("leadFinder_lastSearchMaxResults", maxResults.toString());
+    } catch (e) {
+      console.error("Failed to save last search to localStorage", e);
+    }
+
     try {
       const res = await searchAndAnalyzeLeads(formData, maxResults);
       if (res.success && res.data) {
-        setResults(res.data);
+        const finderLeads = await getFinderLeads();
+        setResults(finderLeads);
         if (res.stats) {
           setStats(res.stats);
         } else {
@@ -838,6 +932,41 @@ export default function LeadFinderPage() {
     }
     // Auto Mode: Limit exceeded if BOTH are finished
     return stats.googleRemaining === 0 && stats.serpRemaining === 0;
+  };
+
+  // Get active categories in results for quick filter chips
+  const resultsCategories = Array.from(new Set(results.map(r => r.category || "Other")));
+
+  const filteredResults = results.filter(lead => {
+    if (categoryFilter === "All") return true;
+    return (lead.category || "Other").toLowerCase() === categoryFilter.toLowerCase();
+  });
+
+  const totalLeadsCount = filteredResults.length;
+  const totalPages = Math.ceil(totalLeadsCount / pageSize) || 1;
+  const paginatedResults = filteredResults.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Generate paginated number array with ellipsis
+  const getPaginationPages = () => {
+    const delta = 2; // pages on each side of current
+    const pages: (number | "...")[] = [];
+    const left = currentPage - delta;
+    const right = currentPage + delta;
+    let lastAdded = 0;
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= left && i <= right)) {
+        if (lastAdded && i - lastAdded > 1) pages.push("...");
+        pages.push(i);
+        lastAdded = i;
+      }
+    }
+    return pages;
+  };
+
+  // Open WhatsApp chat for a phone number
+  const openWhatsApp = (phone: string) => {
+    const cleaned = phone.replace(/[^\d+]/g, "");
+    window.open(`https://wa.me/${cleaned}`, "_blank");
   };
 
   return (
@@ -1160,9 +1289,41 @@ export default function LeadFinderPage() {
 
       {/* Results View */}
       <div className="space-y-6">
+        {results.length > 0 && (
+          <div className="flex flex-col gap-2 p-4 bg-muted/30 border rounded-2xl">
+            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5 text-primary" /> Filter Results by Category:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={categoryFilter === "All" ? "default" : "outline"}
+                size="sm"
+                className="h-8 text-xs font-bold rounded-xl"
+                onClick={() => setCategoryFilter("All")}
+              >
+                All Categories ({results.length})
+              </Button>
+              {resultsCategories.map(cat => {
+                const count = results.filter(r => (r.category || "Other") === cat).length;
+                return (
+                  <Button
+                    key={cat}
+                    variant={categoryFilter === cat ? "default" : "outline"}
+                    size="sm"
+                    className="h-8 text-xs font-bold rounded-xl"
+                    onClick={() => setCategoryFilter(cat)}
+                  >
+                    {cat} ({count})
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
-            Found Businesses {results.length > 0 && <Badge variant="secondary" className="font-bold">{results.length}</Badge>}
+            Found Businesses {totalLeadsCount > 0 && <Badge variant="secondary" className="font-bold">{totalLeadsCount}</Badge>}
           </h2>
           <div className="flex flex-wrap items-center gap-3">
             <input 
@@ -1261,12 +1422,17 @@ export default function LeadFinderPage() {
                       {/* Column 1: Info */}
                       <div className="md:col-span-2 space-y-4">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-extrabold text-xl truncate">{lead.businessName}</h3>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-extrabold text-xl truncate max-w-[320px]">{lead.businessName}</h3>
                             {lead.isSaved && <Badge variant="outline" className="text-emerald-500 border-emerald-500 bg-emerald-500/5 font-black uppercase text-[10px]">Saved</Badge>}
                             {!lead.email && (
-                              <Badge className="bg-red-500/15 text-red-600 border border-red-200 uppercase font-black text-[9px] hover:bg-red-500/20">
+                              <Badge className="bg-rose-500/10 text-rose-500 border border-rose-500/20 font-black uppercase text-[9px]">
                                 No Email
+                              </Badge>
+                            )}
+                            {lead.category && (
+                              <Badge className="bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 font-black uppercase text-[9px] flex items-center">
+                                <Tag className="h-2.5 w-2.5 mr-1" /> {lead.category}
                               </Badge>
                             )}
                           </div>
@@ -1296,9 +1462,19 @@ export default function LeadFinderPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="truncate font-semibold text-xs" title={lead.phone || "No Phone"}>
-                              {lead.phone || "No Phone"}
-                            </span>
+                            {lead.phone ? (
+                              <button
+                                type="button"
+                                title="Send WhatsApp Message"
+                                onClick={() => openWhatsApp(lead.phone)}
+                                className="truncate font-semibold text-xs text-green-600 hover:text-green-700 hover:underline flex items-center gap-1 cursor-pointer"
+                              >
+                                <WhatsAppIcon className="h-3 w-3 text-green-500" />
+                                {lead.phone}
+                              </button>
+                            ) : (
+                              <span className="truncate font-semibold text-xs text-muted-foreground">No Phone</span>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 col-span-2">
                             <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1307,6 +1483,48 @@ export default function LeadFinderPage() {
                             </span>
                           </div>
                         </div>
+
+                        {/* Social Media Links */}
+                        {lead.socialLinks && Object.values(lead.socialLinks).some(Boolean) && (
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {lead.socialLinks.facebook && (
+                              <a href={lead.socialLinks.facebook} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors">
+                                <FacebookIcon className="h-3 w-3" /> Facebook
+                              </a>
+                            )}
+                            {lead.socialLinks.instagram && (
+                              <a href={lead.socialLinks.instagram} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200 transition-colors">
+                                <InstagramIcon className="h-3 w-3" /> Instagram
+                              </a>
+                            )}
+                            {lead.socialLinks.linkedin && (
+                              <a href={lead.socialLinks.linkedin} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-colors">
+                                <LinkedInIcon className="h-3 w-3" /> LinkedIn
+                              </a>
+                            )}
+                            {lead.socialLinks.twitter && (
+                              <a href={lead.socialLinks.twitter} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors">
+                                <TwitterXIcon className="h-3 w-3" /> X / Twitter
+                              </a>
+                            )}
+                            {lead.socialLinks.youtube && (
+                              <a href={lead.socialLinks.youtube} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors">
+                                <YouTubeIcon className="h-3 w-3" /> YouTube
+                              </a>
+                            )}
+                            {lead.socialLinks.tiktok && (
+                              <a href={lead.socialLinks.tiktok} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-900/10 text-slate-800 hover:bg-slate-200 border border-slate-300 transition-colors">
+                                <TikTokIcon className="h-3 w-3" /> TikTok
+                              </a>
+                            )}
+                          </div>
+                        )}
 
                         {/* Detection Tags */}
                         <div className="flex flex-wrap gap-2 pt-1">
@@ -1506,53 +1724,72 @@ export default function LeadFinderPage() {
                   </div>
                 </Card>
               </motion.div>
+            ))}
           </AnimatePresence>
         </div>
 
         {/* Pagination Controls */}
-        {results.length > 0 && (
+        {totalLeadsCount > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card border rounded-2xl shadow-sm mt-6">
             <p className="text-xs font-semibold text-muted-foreground">
               Showing <span className="font-bold text-foreground">{(currentPage - 1) * pageSize + 1}</span> to{" "}
               <span className="font-bold text-foreground">{Math.min(currentPage * pageSize, totalLeadsCount)}</span> of{" "}
-              <span className="font-bold text-foreground">{totalLeadsCount}</span> leads (Page {currentPage} of {totalPages})
+              <span className="font-bold text-foreground">{totalLeadsCount}</span> leads
+              {" "}— Page <span className="font-bold text-foreground">{currentPage}</span> of <span className="font-bold text-foreground">{totalPages}</span>
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap justify-center">
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg"
+                className="h-8 px-2 text-xs font-bold rounded-lg"
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
-                First
+                «
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg"
+                className="h-8 px-2 text-xs font-bold rounded-lg"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
-                Previous
+                ‹
               </Button>
+              {getPaginationPages().map((page, i) =>
+                page === "..." ? (
+                  <span key={`ellipsis-${i}`} className="h-8 px-1 flex items-center text-xs text-muted-foreground font-bold">…</span>
+                ) : (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    className={`h-8 w-8 p-0 text-xs font-bold rounded-lg ${
+                      currentPage === page ? "shadow-md" : ""
+                    }`}
+                    onClick={() => setCurrentPage(page as number)}
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg"
+                className="h-8 px-2 text-xs font-bold rounded-lg"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
               >
-                Next
+                ›
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg"
+                className="h-8 px-2 text-xs font-bold rounded-lg"
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
               >
-                Last
+                »
               </Button>
             </div>
           </div>

@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Magnetic } from "./magnetic";
+import { PLACEHOLDER_IMAGE } from "@/lib/utils";
 
 export function HeroSlider({ slides }: { slides: any[] }) {
   const autoplay = useRef(AutoplayPlugin({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true }));
@@ -92,7 +93,7 @@ export function HeroSlider({ slides }: { slides: any[] }) {
             <div key={slide.id ?? slide.title} className="relative min-w-0 flex-[0_0_100%]">
               <div className="absolute inset-0">
                 <Image 
-                  src={slide.image} 
+                  src={PLACEHOLDER_IMAGE} 
                   alt={slide.title} 
                   fill 
                   priority={index === 0}

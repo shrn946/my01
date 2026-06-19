@@ -8,16 +8,6 @@ import { FadeIn } from "@/components/fade-in";
 import { getProjects } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 
-// Custom Icon Mapper for Categories
-function CategoryIcon({ category, size = 14 }: { category: string; size?: number }) {
-  const c = category.toLowerCase();
-  if (c.includes("ecommerce") || c.includes("woo")) return <ShoppingCart size={size} />;
-  if (c.includes("elementor") || c.includes("landing")) return <LayoutTemplate size={size} />;
-  if (c.includes("plugin") || c.includes("dev")) return <Plug size={size} />;
-  if (c.includes("speed") || c.includes("performance")) return <Gauge size={size} />;
-  if (c.includes("maintenance") || c.includes("support")) return <LifeBuoy size={size} />;
-  return <BriefcaseBusiness size={size} />;
-}
 
 export const metadata: Metadata = {
   title: "Portfolio | WordPress Developer Case Studies",
@@ -27,7 +17,14 @@ export const metadata: Metadata = {
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const { category } = await searchParams;
   const projects = await getProjects();
-  const categories = Array.from(new Set(projects.map((project) => project.category))).sort();
+  const categories = [
+    "Dentists 🦷",
+    "Law Firms ⚖️",
+    "Roofing Companies 🏠",
+    "HVAC Companies ❄️",
+    "Plumbing Companies 🔧",
+    "Medical Clinics"
+  ];
   const filteredProjects = category
     ? projects.filter((project) => slugify(project.category) === category)
     : projects;
@@ -61,7 +58,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                   href={`/portfolio?category=${slug}`} 
                   className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition-all ${active ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-600 hover:bg-slate-50 hover:text-primary"}`}
                 >
-                  <CategoryIcon category={item} /> {item}
+                  {item}
                 </Link>
               );
             })}

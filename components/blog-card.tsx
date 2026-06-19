@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, PLACEHOLDER_IMAGE } from "@/lib/utils";
 
 export function BlogCard({ post }: { post: any }) {
   return (
@@ -9,7 +9,7 @@ export function BlogCard({ post }: { post: any }) {
       <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-black/5 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-premium">
         <div className="relative aspect-[16/10] overflow-hidden">
           <Image 
-            src={post.image} 
+            src={PLACEHOLDER_IMAGE} 
             alt={post.title} 
             fill 
             className="object-cover transition-transform duration-700 group-hover:scale-110" 

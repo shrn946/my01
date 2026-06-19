@@ -181,7 +181,15 @@ model Lead {
   proposalImageTech      String?
   designAnalysis         Json?
   developerComments      String?
+  aiAnalysis             Json?
+  reportContent          Json?
+  reportMedia            Json?
+  reportPdf              String?
+  reportImage            String?
+  proposalPdf            String?
   emailLogs              EmailLog[]
+
+  @@index([category])
 }
 
 model PortfolioExample {
@@ -228,9 +236,43 @@ model Settings {
   portfolioUrl    String?
   demoWebsiteUrls String?
   updatedAt       DateTime @updatedAt
+
+  googleSearchEnabled Boolean @default(true)
+  googleApiKey        String?
+  googleSearchCx      String?
+  googleSearchLimit   Int     @default(40)
+
+  serpApiSearchEnabled Boolean @default(true)
+  serpApiKey           String?
+  serpApiSearchLimit   Int     @default(40)
+
+  searchProviderMode   String  @default("Auto")
+
+  // Target Locations (by country)
+  locationsUsa          String[] @default(["Houston", "Dallas", "Phoenix", "Atlanta", "Charlotte", "Tampa", "Denver", "Austin", "San Antonio", "Orlando", "Miami", "Jacksonville", "Raleigh", "Nashville", "Las Vegas", "Salt Lake City", "Columbus", "Indianapolis", "Kansas City"])
+  locationsUk           String[] @default(["London", "Manchester", "Birmingham", "Leeds", "Liverpool", "Bristol", "Nottingham", "Sheffield", "Leicester", "Newcastle"])
+  locationsCanada       String[] @default(["Toronto", "Calgary", "Vancouver", "Ottawa", "Edmonton", "Winnipeg", "Mississauga", "Hamilton"])
+  locationsGermany      String[] @default(["Berlin", "Hamburg", "Munich", "Frankfurt", "Cologne", "Stuttgart", "Düsseldorf"])
+  locationsAustralia    String[] @default(["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"])
+  locationsNewZealand   String[] @default(["Auckland", "Wellington", "Christchurch"])
+  locationsPriority     String[] @default(["Houston", "Dallas", "Phoenix", "Atlanta", "Manchester", "Toronto", "London", "Austin", "Miami", "Calgary"])
+
+  // Cold Outreach Categories
+  categories            String[] @default(["Dentists", "Lawyers", "Accountants", "Real Estate Agents", "Roofing Companies", "HVAC Companies", "Plumbers", "Electricians", "Home Remodelers", "Landscaping Companies", "Pest Control Companies", "Cleaning Services", "Moving Companies", "Chiropractors", "Physical Therapists", "Medical Clinics", "Veterinarians", "Dental Clinics", "Restaurants", "Coffee Shops", "Auto Repair Shops", "Car Dealerships", "Insurance Agencies", "Mortgage Brokers", "Financial Advisors", "Marketing Agencies", "Web Design Agencies", "IT Support Companies", "Managed Service Providers (MSPs)", "Construction Companies", "Solar Installers", "Property Management Companies", "Private Schools", "Tutoring Centers", "Gyms & Fitness Centers", "Beauty Salons", "Spas", "Wedding Photographers", "Law Firms", "Accounting Firms"])
+}
+
+model SearchUsage {
+  id          String   @id @default(cuid())
+  date        String   @unique
+  googleCount Int      @default(0)
+  serpCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Role {
   ADMIN
   CLIENT
 }
+
+
