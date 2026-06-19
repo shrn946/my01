@@ -723,24 +723,25 @@ export default function LeadsPage() {
 
                         {/* Column: Actions */}
                         <div className="p-4 lg:py-0 lg:pr-5 lg:pl-2 lg:col-span-2 flex items-center justify-end gap-2 bg-muted/5 lg:bg-transparent border-t lg:border-t-0 border-dashed">
-                          <Button variant="outline" size="sm" className="h-9 rounded-xl font-bold text-xs shrink-0" asChild>
+                          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl shrink-0" title="View Report" asChild>
                             <a href={`/report/${lead.id}`} target="_blank" rel="noreferrer">
-                              <Eye className="h-3.5 w-3.5 mr-1" /> View Report
+                              <Eye className="h-4 w-4" />
                             </a>
                           </Button>
                           
                           <Sheet>
                             <SheetTrigger asChild>
                               <Button 
-                                size="sm" 
-                                className="h-9 rounded-xl font-bold text-xs shrink-0"
+                                size="icon" 
+                                className="h-9 w-9 rounded-xl shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
+                                title="Actions"
                                 onClick={() => {
                                   setSelectedLead(lead);
                                   setRecipientEmail(lead.email?.split(",")[0]?.trim() || "");
                                   setShowEmailSection(false);
                                 }}
                               >
-                                Actions
+                                <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </SheetTrigger>
                             <SheetContent className="sm:max-w-xl overflow-y-auto">
