@@ -64,6 +64,7 @@ const settingsSchema = z.object({
   companyName: z.string().min(2, "Company name must be at least 2 characters"),
   portfolioUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   demoWebsiteUrls: z.string().optional(),
+  geminiModel: z.string().optional(),
 
   // Search API settings
   googleSearchEnabled: z.boolean(),
@@ -135,6 +136,7 @@ export default function SettingsPage() {
           companyName: emailData.companyName || "",
           portfolioUrl: emailData.portfolioUrl || "",
           demoWebsiteUrls: emailData.demoWebsiteUrls || "",
+          geminiModel: (emailData as any).geminiModel || "",
           googleSearchEnabled: searchData?.googleSearchEnabled ?? true,
           googleApiKey: searchData?.googleApiKey || "",
           googleSearchCx: searchData?.googleSearchCx || "",
@@ -165,7 +167,8 @@ export default function SettingsPage() {
       resendApiKey: values.resendApiKey,
       companyName: values.companyName,
       portfolioUrl: values.portfolioUrl,
-      demoWebsiteUrls: values.demoWebsiteUrls
+      demoWebsiteUrls: values.demoWebsiteUrls,
+      geminiModel: values.geminiModel
     };
 
     const searchSettings = {
@@ -333,6 +336,37 @@ export default function SettingsPage() {
                     </FormControl>
                     <FormDescription>
                       Get your API key from the Resend dashboard.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* AI Settings */}
+          <Card className="shadow-sm border-muted">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings2 className="h-5 w-5 text-primary" />
+                AI Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure the Google Gemini model used for generating reports and proposals.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="geminiModel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gemini Model Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="gemini-3.1-flash-lite" className="rounded-xl" {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormDescription>
+                      Leave blank to use the default (<code>gemini-3.1-flash-lite</code>). You can also use <code>gemini-2.5-pro</code> for higher quality outputs (may be slower).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getPrisma } from "./prisma";
+
 import * as cheerio from "cheerio";
 import { readFile } from "fs/promises";
 import path from "path";
@@ -575,10 +577,10 @@ async function loadImageParts(images: ReportMediaItem[] = []) {
   return parts;
 }
 
-async function callGemini(prompt: string, images: ReportMediaItem[] = []) {
+async function callGemini(prompt: string, images: ReportMediaItem[] = [], modelOverride?: string | null) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
-  const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite";
+  const model = modelOverride?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 55_000);
@@ -629,13 +631,16 @@ function validateCategoryScope(audit: AiAudit, selected: AuditCategory[]) {
 }
 
 export async function generateAiAudit(input: AuditInput): Promise<{ audit: AiAudit; source: "gemini" | "fallback"; warning?: string }> {
+  const prisma = getPrisma();
+  const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+  
   const selectedCategories = Array.from(new Set(input.selectedCategories));
   if (selectedCategories.length === 0) throw new Error("Select at least one audit category");
   const scopedInput = { ...input, selectedCategories };
   const pages = await crawlWebsite(input.website, input.homepageHtml);
   const fallback = buildFallback(scopedInput, pages);
   try {
-    const audit = await callGemini(formatPrompt(scopedInput, pages), input.referenceImages);
+    const audit = await callGemini(formatPrompt(scopedInput, pages), input.referenceImages, settings?.geminiModel);
     validateCategoryScope(audit, selectedCategories);
     return { audit, source: "gemini" };
   } catch (error) {

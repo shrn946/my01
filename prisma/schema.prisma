@@ -235,6 +235,7 @@ model Settings {
   companyName     String?
   portfolioUrl    String?
   demoWebsiteUrls String?
+  geminiModel     String?  @default("gemini-3.1-flash-lite")
   updatedAt       DateTime @updatedAt
 
   googleSearchEnabled Boolean @default(true)

@@ -271,7 +271,9 @@ async function findEmailWithGemini(
     const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) return null;
 
-    const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+    const prisma = getPrisma();
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
     const prompt = `You are a data extraction assistant. A user wants to find the contact email address for a business.
