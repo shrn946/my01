@@ -410,8 +410,8 @@ export default async function ReportPage({
             {/* After */}
             <div className="space-y-4">
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
-              {lead.desktopImage ? (
-                <ScrollableImage src={lead.desktopImage} alt="After" />
+              {((lead.reportContent as any)?.afterImage || lead.desktopImage) ? (
+                <ScrollableImage src={(lead.reportContent as any)?.afterImage || lead.desktopImage!} alt="After" />
               ) : (
                 <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
               )}

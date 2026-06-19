@@ -666,22 +666,16 @@ export async function searchAndAnalyzeLeads(
           }
         });
 
-        const status = (analysis.email && analysis.email.trim() !== "") ? "New" : "Finder";
+        const status = "New";
 
         if (existingLead) {
-          // Promote status if it was Finder but now contains an email
-          let nextStatus = existingLead.status;
-          if (existingLead.status === "Finder" && (existingLead.email || analysis.email)) {
-            nextStatus = "New";
-          }
-
           existingLead = await prisma.lead.update({
             where: { id: existingLead.id },
             data: {
               email: existingLead.email || analysis.email,
               phone: existingLead.phone || analysis.phone,
               category: existingLead.category || analysis.category || niche,
-              status: nextStatus
+              status: "New"
             }
           });
 
@@ -941,10 +935,7 @@ export async function importLeadsAction(leadsData: any[]) {
       const country = row["Country"] || row["country"] || null;
       const category = row["Category/Niche"] || row["category"] || null;
       
-      let status = row["Status"] || row["status"] || "Finder";
-      if (email && email.trim() !== "" && status === "Finder") {
-        status = "New"; // Auto-save imported leads with email
-      }
+      let status = row["Status"] || row["status"] || "New";
 
       let detectedCategory = category;
       if (!detectedCategory || detectedCategory.toLowerCase() === "other" || detectedCategory.toLowerCase() === "general") {
