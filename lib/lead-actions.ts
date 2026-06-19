@@ -346,14 +346,14 @@ export async function captureWebsiteScreenshot(leadId: string) {
     // 1. Desktop Screenshot
     try {
       await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
-      await page.waitForTimeout(15000); // Increased wait for lazy loading
+      await page.waitForTimeout(3000); // Shorter wait for above the fold
     } catch (e) {
       console.warn("Desktop navigation timed out, attempting screenshot anyway");
     }
     
     const captureId = Date.now();
     const desktopFileName = `desktop-${leadId}-${captureId}.png`;
-    const desktopImage = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" }); 
+    const desktopImage = await page.screenshot({ fullPage: false, animations: "disabled", scale: "css" }); 
     const desktopPublicPath = await storeGeneratedImage(
       desktopImage,
       `screenshots/${desktopFileName}`,
@@ -363,13 +363,13 @@ export async function captureWebsiteScreenshot(leadId: string) {
     await page.setViewportSize({ width: 390, height: 844 });
     try {
       await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
-      await page.waitForTimeout(15000); // Increased wait for lazy loading
+      await page.waitForTimeout(3000); // Shorter wait for above the fold
     } catch (e) {
       console.warn("Mobile navigation timed out, attempting screenshot anyway");
     }
     
     const mobileFileName = `mobile-${leadId}-${captureId}.png`;
-    const mobileImage = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" });
+    const mobileImage = await page.screenshot({ fullPage: false, animations: "disabled", scale: "css" });
     const mobilePublicPath = await storeGeneratedImage(
       mobileImage,
       `screenshots/${mobileFileName}`,
@@ -414,15 +414,15 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     const page = await context.newPage();
     
     try {
-      await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 60000 });
-      await page.waitForTimeout(5000);
+      await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 30000 });
+      await page.waitForTimeout(3000);
     } catch (e) {
       console.warn("Proposal generation navigation timed out, attempting screenshot anyway");
     }
 
     const fileName = `proposal-${mode}-${leadId}-${Date.now()}.png`;
     const proposalImage = await page.screenshot({
-      fullPage: true,
+      fullPage: false,
       animations: "disabled",
       scale: "css"
     });
