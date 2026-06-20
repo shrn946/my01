@@ -578,7 +578,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 pb-10 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Lead Generation Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Lead Generation Dashboard</h1>
         <p className="text-muted-foreground mt-2">Step 1: Analyze website to extract data. Step 2: Generate comprehensive proposal report.</p>
       </div>
 
@@ -629,7 +629,7 @@ export default function DashboardPage() {
                 ))}
               </datalist>
             </div>
-            <Button type="submit" disabled={isAnalyzing || !url || reportState.active} className="h-12 px-8 text-md">
+            <Button type="submit" disabled={isAnalyzing || !url || reportState.active} className="h-12 px-8 text-base w-full sm:w-auto">
               {isAnalyzing ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Analyzing...</>
               ) : (
@@ -649,7 +649,7 @@ export default function DashboardPage() {
                     key={lead.id} 
                     variant="outline" 
                     size="sm" 
-                    className={`h-8 text-xs font-bold rounded-lg ${result?.leadId === lead.id ? "border-primary bg-primary/5 text-primary" : ""}`}
+                    className={`h-8 text-xs font-bold rounded-lg max-w-full truncate ${result?.leadId === lead.id ? "border-primary bg-primary/5 text-primary" : ""}`}
                     onClick={() => handleSelectLead(lead.id)}
                     disabled={isAnalyzing || isLoadingLead}
                   >
@@ -694,15 +694,15 @@ export default function DashboardPage() {
                     <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Business Name</p>
                     {isEditingName ? (
                       <div className="flex gap-2">
-                        <Input size={1} value={editName} onChange={e => setEditName(e.target.value)} className="h-8" />
-                        <Button size="icon" className="h-8 w-8" onClick={handleUpdateName}><Save className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditingName(false)}><X className="h-4 w-4" /></Button>
+                        <Input size={1} value={editName} onChange={e => setEditName(e.target.value)} className="h-8 flex-1 min-w-0" />
+                        <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleUpdateName}><Save className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setIsEditingName(false)}><X className="h-4 w-4" /></Button>
                       </div>
                     ) : (
-                      <p className="text-sm font-medium truncate flex items-center justify-between">
-                        {result.businessName}
-                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100" onClick={() => setIsEditingName(true)} />
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium break-words min-w-0 flex-1">{result.businessName}</p>
+                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100 shrink-0 mt-1" onClick={() => setIsEditingName(true)} />
+                      </div>
                     )}
                   </div>
 
@@ -710,15 +710,15 @@ export default function DashboardPage() {
                     <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Email Address</p>
                     {isEditingEmail ? (
                       <div className="flex gap-2">
-                        <Input size={1} value={editEmail} onChange={e => setEditEmail(e.target.value)} className="h-8" />
-                        <Button size="icon" className="h-8 w-8" onClick={handleUpdateEmail}><Save className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
+                        <Input size={1} value={editEmail} onChange={e => setEditEmail(e.target.value)} className="h-8 flex-1 min-w-0" />
+                        <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleUpdateEmail}><Save className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
                       </div>
                     ) : (
-                      <p className="text-sm font-medium truncate flex items-center justify-between">
-                        {result.email || "Not Found"}
-                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100" onClick={() => setIsEditingEmail(true)} />
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium break-all min-w-0 flex-1">{result.email || "Not Found"}</p>
+                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100 shrink-0 mt-1" onClick={() => setIsEditingEmail(true)} />
+                      </div>
                     )}
                   </div>
 
@@ -1465,7 +1465,7 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string
       </div>
       <div className="overflow-hidden">
         <p className="text-xs font-semibold text-muted-foreground uppercase">{label}</p>
-        <p className="text-sm font-medium truncate" title={value}>{value}</p>
+        <p className="text-sm font-medium break-words" title={value}>{value}</p>
       </div>
     </div>
   );
