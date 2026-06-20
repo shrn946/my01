@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,52 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sendLeadEmail } from "@/lib/email-actions";
 import { generateProposalPng, updateLead } from "@/lib/lead-actions";
-import { getReportContent } from "@/lib/report-content";
-import { Loader2, Send, AlertTriangle, Monitor, Smartphone, CheckCircle2, Zap, Search, Palette, BarChart, ExternalLink, Download, RefreshCw, FileImage, Globe, MessageCircle, Save, FolderKanban } from "lucide-react";
-
-export default function LeadDetailClient({ lead, templates, settings, portfolioExamples }: { lead: any, templates: any[], settings: any, portfolioExamples: any[] }) {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
-  const [toEmail, setToEmail] = useState(lead.email || "");
-  const [isPreview, setIsPreview] = useState(false);
-
-  useEffect(() => {
-    setToEmail(lead.email || "");
-  }, [lead.email]);
-
-  const parseTemplate = (text: string, isForPreview = false) => {
-    if (!text) return "";
-    const baseUrl = settings?.portfolioUrl || "";
-    const getFullUrl = (path: string) => {
-      if (!path) return "";
-      if (path.startsWith("http")) return path;
-      const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-      const cleanPath = path.startsWith("/") ? path : `/${path}`;
-      return `${cleanBase}${cleanPath}`;
-    };
-
-    const reportUrl = getFullUrl(`/report/${lead.id}`);
-    const proposalPngUrl = lead.proposalImage ? getFullUrl(lead.proposalImage) : "";
-
-    const proposalsHtml = lead.improvementProposals && lead.improvementProposals.length > 0
-      ? `<ul style="color: #475569; font-family: sans-serif; padding-left: 20px;">${lead.improvementProposals.map((p: string) => `<li style="margin-bottom: 8px;">${p}</li>`).join("")}</ul>`
-      : "No major improvements suggested.";
-
-    const commentsHtml = lead.developerComments 
-      ? `<div style="margin: 20px 0; padding: 20px; background-color: #f8fafc; border-left: 4px solid #6366f1; font-style: italic; color: #334155; border-radius: 8px;">
-          <strong>Expert Technical Insight:</strong><br/>
-          "${lead.developerComments}"
-         </div>`
-      : "";
-
-    let processed = text
-      .replace(/{{businessName}}|{businessName}/g, lead.businessName || "there")
 import { getReportContent } from "@/lib/report-content";
 import { Loader2, Send, AlertTriangle, Monitor, Smartphone, CheckCircle2, Zap, Search, Palette, BarChart, ExternalLink, Download, RefreshCw, FileImage, Globe, MessageCircle, Save, FolderKanban } from "lucide-react";
 
@@ -172,6 +126,190 @@ export default function LeadDetailClient({ lead, templates, settings, portfolioE
     try {
       const templateId = selectedTemplate === "ai-focused" ? null : (selectedTemplate || null);
       const result = await sendLeadEmail(lead.id, templateId, body, subject, toEmail);
+      if (result.success) {
+        toast({ title: "Email Sent", description: "The proposal has been sent successfully." });
+        router.refresh();
+      } else {
+        toast({ title: "Send Failed", description: result.error, variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGeneratePng = async () => {
+    setGenerating(true);
+    try {
+      const result = await generateProposalPng(lead.id);
+      if (result.success) {
+        toast({ title: "Success", description: "Proposal PNG generated successfully." });
+        router.refresh();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!toEmail) return;
+    setUpdating(true);
+    try {
+      const result = await updateLead(lead.id, { email: toEmail });
+      if (result.success) {
+        toast({ title: "Lead Updated", description: "Email address has been saved." });
+        router.refresh();
+      } else {
+        toast({ title: "Update Failed", description: result.error, variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const hasScore = lead.websiteScore !== null;
+
+  return (
+    <div className="space-y-8 pb-10">
+      <div className="flex justify-between items-end">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{lead.businessName || lead.website}</h1>
+            <Button variant="outline" size="sm" asChild className="h-8">
+               <a href={`https://www.google.com/search?q=${encodeURIComponent(lead.businessName || lead.website)}`} target="_blank" rel="noreferrer">
+                  <Search className="h-3 w-3 mr-2" />
+                  Search on Google
+               </a>
+            </Button>
+          </div>
+          <p className="text-muted-foreground flex items-center gap-1 mt-1">
+            {lead.website} <ExternalLink className="h-3 w-3" />
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Badge variant={lead.status === "Contacted" ? "default" : "secondary"}>{lead.status}</Badge>
+          {lead.leadScore && <Badge variant="outline">Lead Score: {lead.leadScore}</Badge>}
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Analysis Results */}
+          {hasScore && (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <ScoreCard label="Performance" score={lead.performanceScore ?? lead.pageSpeedPerformance} icon={<Zap className="h-4 w-4" />} />
+                <ScoreCard label="SEO" score={lead.seoScore ?? lead.pageSpeedSeo} icon={<Search className="h-4 w-4" />} />
+                <ScoreCard label="Accessibility" score={lead.accessibilityScore ?? lead.pageSpeedAccessibility} icon={<Search className="h-4 w-4" />} />
+                <ScoreCard label="Best Practices" score={lead.bestPracticesScore ?? lead.pageSpeedBestPractices} icon={<CheckCircle2 className="h-4 w-4" />} />
+              </div>
+
+              {/* Proposal PNG Generator Section */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="space-y-1">
+                    <CardTitle>Website Proposal PNG</CardTitle>
+                    <CardDescription>Generate a professional brochure-style PNG for cold outreach.</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    {lead.proposalImage ? (
+                      <>
+                        <Button variant="outline" size="sm" onClick={handleGeneratePng} disabled={generating}>
+                          {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                          Regenerate
+                        </Button>
+                        <Button variant="default" size="sm" asChild>
+                          <a href={lead.proposalImage} download={`proposal-${lead.businessName}.png`}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PNG
+                          </a>
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="default" size="sm" onClick={handleGeneratePng} disabled={generating}>
+                        {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileImage className="h-4 w-4 mr-2" />}
+                        Generate Proposal PNG
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {lead.proposalImage ? (
+                    <div className="mt-4 border rounded-xl overflow-hidden bg-muted/20 relative group">
+                      <img src={lead.proposalImage} alt="Proposal Preview" className="w-full h-auto shadow-lg" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                         <Button variant="secondary" asChild>
+                           <a href={lead.proposalImage} target="_blank" rel="noreferrer">View Full Image</a>
+                         </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 border-2 border-dashed rounded-xl p-12 text-center bg-muted/10">
+                      <FileImage className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+                      <p className="text-muted-foreground font-medium">No proposal image generated yet.</p>
+                      <Button variant="link" onClick={handleGeneratePng} disabled={generating} className="mt-2">
+                        {generating ? "Generating..." : "Click here to generate one now"}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Related Portfolio Examples Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FolderKanban className="h-5 w-5 text-primary" />
+                    Related Portfolio Examples ({lead.category || "General"})
+                  </CardTitle>
+                  <CardDescription>These examples will be featured on the proposal PNG.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {portfolioExamples && portfolioExamples.length > 0 ? (
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {portfolioExamples.map((item: any) => (
+                        <div key={item.id} className="border rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow">
+                          <div className="relative aspect-video bg-muted">
+                            <img src={item.thumbnail} alt={item.title} className="object-cover w-full h-full" />
+                          </div>
+                          <div className="p-4">
+                            <h4 className="font-bold text-sm truncate">{item.title}</h4>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-3 h-8">{item.description}</p>
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider">
+                              <Globe className="h-3 w-3" />
+                              {item.url.replace('https://', '').replace('www.', '').split('/')[0]}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-amber-800 flex items-start gap-4">
+                      <AlertTriangle className="h-6 w-6 shrink-0" />
+                      <div>
+                        <p className="font-bold">No matching portfolio examples found!</p>
+                        <p className="text-sm mt-1">
+                          Go to the <Button variant="link" className="p-0 h-auto text-amber-900 font-bold underline" onClick={() => router.push('/admin')}>Admin Dashboard</Button> and add some examples for the <strong>{lead.category || "General"}</strong> category to make the proposal more effective.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {lead.beforeAfterImage && aiFields.reportContent.includeBeforeAfter && (
+                <Card className="overflow-hidden">
+                  <CardHeader>
+                    <CardTitle>Redesign Proposal</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
                     <img src={lead.beforeAfterImage} alt="Before/After" className="w-full h-auto" />
                   </CardContent>
                 </Card>
