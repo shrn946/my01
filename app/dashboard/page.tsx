@@ -898,7 +898,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="space-y-3">
                         <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Color Palette</p>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {result.designAnalysis.colors?.background?.map((color: string, i: number) => (
                             <div key={i} className="w-8 h-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} title={color} />
                           ))}
@@ -949,11 +949,12 @@ export default function DashboardPage() {
                     </div>
                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
                       {(result.beforeAfterImage || result.desktopImage) ? (
-                        <img 
-                          src={`${result.beforeAfterImage || result.desktopImage}?v=${new Date().getTime()}`} 
-                          alt="Before Screenshot" 
-                          className="w-full h-full object-cover object-top" 
-                        />
+                          <img 
+                            src={`${result.beforeAfterImage || result.desktopImage}?v=${new Date().getTime()}`} 
+                            alt="Before Screenshot" 
+                            className="w-full h-full object-contain bg-muted/20 object-center" 
+                            loading="lazy"
+                          />
                       ) : (
                         <div className="flex flex-col items-center gap-2 p-4 text-center">
                           <FileImage className="h-8 w-8 text-indigo-200" />
@@ -998,7 +999,8 @@ export default function DashboardPage() {
                          <img 
                            src={`${result.reportContent?.afterImage || result.proposalImage}?v=${new Date().getTime()}`} 
                            alt="After / Proposed Screenshot" 
-                           className="w-full h-full object-cover object-top" 
+                           className="w-full h-full object-contain bg-muted/20 object-center" 
+                           loading="lazy"
                          />
                        ) : (
                          <div className="flex flex-col items-center gap-2 p-4 text-center">
@@ -1254,7 +1256,7 @@ export default function DashboardPage() {
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {reportMedia.map((item) => (
                         <div key={item.id} className="overflow-hidden rounded-2xl border bg-white">
-                          <img src={item.url} alt={item.caption} className="aspect-video w-full object-cover" />
+                          <img src={item.url} alt={item.caption} className="aspect-video w-full object-contain bg-muted/20" loading="lazy" />
                           <div className="p-4">
                             <div className="flex justify-between gap-3">
                               <div>
@@ -1572,7 +1574,7 @@ function MediaSelector({ currentImage, media, onSelect, label }: { currentImage:
         <div className="group relative aspect-video rounded-xl border-2 border-dashed flex flex-col items-center justify-center bg-muted/20 cursor-pointer overflow-hidden hover:border-primary/50 transition-colors">
           {currentImage ? (
             <>
-              <img src={currentImage} alt={label} className="w-full h-full object-cover" />
+              <img src={currentImage} alt={label} className="w-full h-full object-contain" loading="lazy" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                 <Button variant="secondary" size="sm"><FileImage className="h-4 w-4 mr-2" /> Change Image</Button>
               </div>
@@ -1596,7 +1598,7 @@ function MediaSelector({ currentImage, media, onSelect, label }: { currentImage:
               className="group relative aspect-square rounded-lg border overflow-hidden cursor-pointer hover:border-primary transition-colors"
               onClick={() => onSelect(asset.url)}
             >
-              <img src={asset.url} alt={asset.fileName} className="w-full h-full object-cover" />
+              <img src={asset.url} alt={asset.fileName} className="w-full h-full object-contain" loading="lazy" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                 <Button variant="secondary" size="sm">Select</Button>
               </div>

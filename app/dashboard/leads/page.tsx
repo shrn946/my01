@@ -12,7 +12,8 @@ import {
   getTemplates,
   sendLeadEmailFromDashboard,
   deleteLead,
-  getLeadStats
+  getLeadStats,
+  getPaginatedLeads
 } from "../actions";
 import { 
   Table, 
@@ -103,6 +104,7 @@ const CATEGORIES = [
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
+  const [totalLeadsCount, setTotalLeadsCount] = useState(0);
   const [templates, setTemplates] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -152,21 +154,31 @@ export default function LeadsPage() {
 
   useEffect(() => {
     fetchLeadsAndStats();
-  }, [search, statusFilter, categoryFilter]);
+  }, [search, statusFilter, categoryFilter, currentPage, pageSize, sortBy, sortOrder]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusFilter, categoryFilter, pageSize]);
+  }, [search, statusFilter, categoryFilter, pageSize, sortBy, sortOrder]);
 
   const fetchLeadsAndStats = async () => {
     setIsLoading(true);
     try {
-      const leadsData = await getLeads({ 
+      const leadsData = await getPaginatedLeads({ 
         search, 
         status: statusFilter, 
-        category: categoryFilter 
+        category: categoryFilter,
+        page: currentPage,
+        limit: pageSize,
+        sortField: sortBy,
+        sortOrder: sortOrder
       });
-      setLeads(Array.isArray(leadsData) ? leadsData : []);
+      if (leadsData) {
+        setLeads(leadsData.leads);
+        setTotalLeadsCount(leadsData.total);
+      } else {
+        setLeads([]);
+        setTotalLeadsCount(0);
+      }
       
       const statsData = await getLeadStats();
       setStats(statsData);
@@ -379,24 +391,11 @@ export default function LeadsPage() {
     return `hsl(${hue}, 85%, 35%)`;
   };
 
-  // Client-side Sorting
-  const sortedLeads = [...leads].sort((a, b) => {
-    let valA = a[sortBy] ?? "";
-    let valB = b[sortBy] ?? "";
-
-    if (typeof valA === "string") valA = valA.toLowerCase();
-    if (typeof valB === "string") valB = valB.toLowerCase();
-
-    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const totalLeads = sortedLeads.length;
+  const totalLeads = totalLeadsCount;
   const totalPages = Math.ceil(totalLeads / pageSize) || 1;
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const paginatedLeads = sortedLeads.slice(startIndex, endIndex);
+  const paginatedLeads = leads; // Server-side paginated
 
   // Compute unique count of categories found
   const categoriesFoundCount = Object.keys(stats.categoryCounts).filter(cat => stats.categoryCounts[cat] > 0).length;

@@ -136,7 +136,7 @@ export default async function ProposalPage({
               <div className="relative w-[80%] -mr-[5%] z-0">
                 <div className="relative overflow-hidden rounded-t-2xl border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
                   {lead.desktopImage ? (
-                    <img src={lead.desktopImage} alt="Website desktop view" className="w-full h-full object-cover object-top" />
+                    <img src={lead.desktopImage} alt="Website desktop view" className="w-full h-full object-contain object-top bg-muted/10" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
                   )}
@@ -154,7 +154,7 @@ export default async function ProposalPage({
                     <div className="w-1/2 h-full bg-slate-800 rounded-b-xl"></div>
                   </div>
                   {lead.mobileImage ? (
-                    <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top" />
+                    <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-contain object-top bg-muted/10" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
                   )}

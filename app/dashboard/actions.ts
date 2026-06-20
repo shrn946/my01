@@ -543,6 +543,85 @@ export async function getLeads(filters?: { search?: string; status?: string; cat
   }
 }
 
+export async function getPaginatedLeads(filters: { search?: string; status?: string; category?: string; page?: number; limit?: number; sortField?: string; sortOrder?: string }) {
+  const prisma = getPrisma();
+  try {
+    const where: any = {};
+    if (filters?.search && filters.search.trim() !== "") {
+      const s = filters.search.trim();
+      where.OR = [
+        { businessName: { contains: s, mode: "insensitive" } },
+        { website: { contains: s, mode: "insensitive" } },
+        { email: { contains: s, mode: "insensitive" } },
+        { phone: { contains: s, mode: "insensitive" } },
+        { city: { contains: s, mode: "insensitive" } },
+        { address: { contains: s, mode: "insensitive" } },
+        { notes: { contains: s, mode: "insensitive" } },
+      ];
+    }
+    if (filters?.status && filters.status !== "All") {
+      where.status = filters.status;
+    } else {
+      where.status = { not: "Finder" };
+    }
+    if (filters?.category && filters.category !== "All") {
+      where.category = filters.category;
+    }
+
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const sortField = filters.sortField || "createdAt";
+    const sortOrder = filters.sortOrder || "desc";
+
+    const [total, leads] = await Promise.all([
+      prisma.lead.count({ where }),
+      prisma.lead.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { [sortField]: sortOrder },
+        select: {
+          id: true,
+          businessName: true,
+          website: true,
+          email: true,
+          phone: true,
+          address: true,
+          city: true,
+          category: true,
+          source: true,
+          status: true,
+          leadScore: true,
+          websiteScore: true,
+          performanceScore: true,
+          seoScore: true,
+          pageSpeedPerformance: true,
+          pageSpeedSeo: true,
+          accessibilityScore: true,
+          bestPracticesScore: true,
+          desktopScore: true,
+          mobileScore: true,
+          topIssues: true,
+          notes: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      })
+    ]);
+
+    return {
+      leads,
+      total,
+      totalPages: Math.ceil(total / limit)
+    };
+  } catch (error) {
+    console.error("GET_PAGINATED_LEADS_ERROR:", error);
+    throw error;
+  }
+}
+
 export async function bulkUpdateLeadStatus(leadIds: string[], status: string) {
   const prisma = getPrisma();
   try {
