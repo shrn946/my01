@@ -1560,60 +1560,47 @@ export default function LeadFinderPage() {
                       </div>
 
                       {/* Column 3: Lead Action buttons */}
-                      <div className="flex flex-col gap-2">
+                      <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
                         <Button 
-                          className="w-full font-bold h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2"
+                          className="w-full font-bold h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-1.5 px-2"
                           onClick={() => {
                             window.location.href = `/dashboard?url=${encodeURIComponent(lead.website)}`;
                           }}
                         >
-                          <Globe className="h-4 w-4" /> Analyze Website
+                          <Globe className="h-4 w-4 shrink-0" /> 
+                          <span className="hidden sm:inline">Analyze Website</span>
+                          <span className="sm:hidden text-xs">Analyze</span>
                         </Button>
 
                         {!lead.isSaved ? (
                           <Button 
                             onClick={() => handleSave(lead.id)}
-                            className="w-full font-bold h-10 rounded-xl"
+                            className="w-full font-bold h-10 rounded-xl flex items-center justify-center gap-1.5 px-2"
                           >
-                            <Save className="mr-2 h-4 w-4" /> Save Lead
+                            <Save className="h-4 w-4 shrink-0" /> 
+                            <span className="hidden sm:inline">Save Lead</span>
+                            <span className="sm:hidden text-xs">Save</span>
                           </Button>
                         ) : (
-                          <div className="p-2 text-center rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-center gap-1.5 h-10">
-                            <CheckCircle2 className="h-4 w-4" /> Import Complete
+                          <div className="p-2 text-center rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold flex items-center justify-center gap-1.5 h-10 w-full px-2">
+                            <CheckCircle2 className="h-4 w-4 shrink-0" /> 
+                            <span className="hidden sm:inline text-xs">Import Complete</span>
+                            <span className="sm:hidden text-[10px]">Imported</span>
                           </div>
                         )}
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleAddToCampaign(lead.id)}
-                            className="h-10 rounded-xl text-xs font-bold"
-                            disabled={lead.status === "Hot Lead"}
-                          >
-                            Add Campaign
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleMarkAsContacted(lead.id)}
-                            className="h-10 rounded-xl text-xs font-bold"
-                            disabled={lead.status === "Contacted"}
-                          >
-                            Mark Contacted
-                          </Button>
-                        </div>
 
                         {/* Send Email Drawer Sheet Trigger */}
                         <Sheet>
                           <SheetTrigger asChild>
                             <Button 
                               variant="secondary" 
-                              className="w-full text-xs font-bold h-10 rounded-xl border border-muted"
+                              className="w-full font-bold h-10 rounded-xl border border-muted flex items-center justify-center gap-1.5 px-2"
                               onClick={() => handleOpenOutreach(lead)}
                               disabled={!lead.email}
                             >
-                              <Mail className="mr-2 h-4 w-4" /> Outreach Email
+                              <Mail className="h-4 w-4 shrink-0" /> 
+                              <span className="hidden sm:inline text-xs">Outreach Email</span>
+                              <span className="sm:hidden text-[10px]">Email</span>
                             </Button>
                           </SheetTrigger>
                           <SheetContent className="sm:max-w-xl overflow-y-auto">
@@ -1710,13 +1697,38 @@ export default function LeadFinderPage() {
                           </SheetContent>
                         </Sheet>
 
+                        <div className="grid grid-cols-2 gap-1 lg:gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleAddToCampaign(lead.id)}
+                            className="h-10 rounded-xl text-[10px] sm:text-xs font-bold px-1"
+                            disabled={lead.status === "Hot Lead"}
+                          >
+                            <span className="hidden sm:inline">Add Campaign</span>
+                            <span className="sm:hidden">Campaign</span>
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleMarkAsContacted(lead.id)}
+                            className="h-10 rounded-xl text-[10px] sm:text-xs font-bold px-1"
+                            disabled={lead.status === "Contacted"}
+                          >
+                            <span className="hidden sm:inline">Mark Contacted</span>
+                            <span className="sm:hidden">Contacted</span>
+                          </Button>
+                        </div>
+
                         {/* Individual Delete Button */}
                         <Button 
                           variant="outline" 
-                          className="w-full text-xs font-bold h-10 rounded-xl border border-muted text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0 mt-1"
+                          className="w-full text-xs font-bold h-10 rounded-xl border border-muted text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0 col-span-2 lg:col-span-1"
                           onClick={() => setDeleteConfirmLeadId(lead.id)}
                         >
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete Lead
+                          <Trash2 className="mr-1 sm:mr-2 h-4 w-4 shrink-0" /> 
+                          <span className="hidden sm:inline">Delete Lead</span>
+                          <span className="sm:hidden">Delete</span>
                         </Button>
                       </div>
 
