@@ -171,7 +171,7 @@ export default async function ReportPage({
           <p className="mt-5 text-xl text-slate-300 max-w-3xl">
             This report covers only the selected proposal categories for <span className="text-blue-300">{lead.website}</span>.
           </p>
-          <div className="mt-12 grid grid-cols-[1fr_1fr] gap-6">
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Design Identity */}
             <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
               <p className="text-2xl font-black mb-1">Design Identity</p>

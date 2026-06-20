@@ -134,6 +134,9 @@ export default function DashboardPage() {
     emailsSent: 0
   });
 
+  const [hideEmailCard, setHideEmailCard] = useState(false);
+  const [hideMediaCard, setHideMediaCard] = useState(false);
+
   const handleSelectLead = async (leadId: string) => {
     setIsLoadingLead(true);
     try {
@@ -341,6 +344,8 @@ export default function DashboardPage() {
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
+    setHideEmailCard(false);
+    setHideMediaCard(false);
     if (!url) return;
     await performAnalysis(url);
   };
@@ -1069,11 +1074,16 @@ export default function DashboardPage() {
                 </Card>
               )}
 
-              {result.aiAnalysis && (
+              {!hideEmailCard && result.aiAnalysis && (
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0">
                     <div>
-                      <CardTitle className="text-xl">Ready-to-Send Email</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-xl">Ready-to-Send Email</CardTitle>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setHideEmailCard(true)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <CardDescription>Personalized to the selected proposal scope.</CardDescription>
                     </div>
                     <div className="flex gap-2">
@@ -1139,11 +1149,19 @@ export default function DashboardPage() {
                 </Card>
               )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Report Screenshots & References</CardTitle>
-                  <CardDescription>Upload issue screenshots, competitors, branding references, and before/after examples. Captions are shared with AI during generation.</CardDescription>
-                </CardHeader>
+              {!hideMediaCard && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-xl">Report Screenshots & References</CardTitle>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setHideMediaCard(true)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <CardDescription>Upload issue screenshots, competitors, branding references, and before/after examples. Captions are shared with AI during generation.</CardDescription>
+                    </div>
+                  </CardHeader>
                 <CardContent className="space-y-6">
                   <form action={handleReportMediaUpload} className="grid md:grid-cols-2 gap-4 rounded-2xl border bg-slate-50 p-5">
                     <div className="space-y-2 md:col-span-2">
@@ -1205,6 +1223,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+              )}
             </div>
 
             {/* Right Column: Actions */}
