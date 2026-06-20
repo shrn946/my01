@@ -663,98 +663,11 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {recentFinderLeads.length > 0 && (
-            <div className="mt-4 pt-4 border-t flex flex-col gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                <Search className="h-3.5 w-3.5 text-primary" /> Latest Discovered from Lead Finder
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {recentFinderLeads.map((lead) => (
-                  <Button 
-                    key={lead.id} 
-                    variant="outline" 
-                    size="sm" 
-                    className={`h-8 text-xs font-bold rounded-lg ${result?.leadId === lead.id ? "border-primary bg-primary/5 text-primary" : ""}`}
-                    onClick={() => handleSelectLead(lead.id)}
-                    disabled={isAnalyzing || isLoadingLead}
-                  >
-                    {isLoadingLead && result?.leadId === lead.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    ) : null}
-                    {lead.businessName} ({lead.website.replace(/^https?:\/\//, "").split("/")[0]})
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
+
         </CardContent>
       </Card>
 
-      {/* Recent Leads Main Grid (welcoming state if no lead is loaded) */}
-      {!result && !isAnalyzing && (
-        <div className="space-y-4 pt-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            Recent Saved Leads
-            {recentLeads.length > 0 && <Badge variant="secondary" className="font-bold">{recentLeads.length}</Badge>}
-          </h2>
-          {recentLeads.length === 0 ? (
-            <Card className="p-8 border-dashed text-center">
-              <p className="text-muted-foreground">
-                No saved leads in your database yet. Navigate to the{" "}
-                <a href="/dashboard/lead-finder" className="text-primary hover:underline font-bold">
-                  Lead Finder
-                </a>{" "}
-                to discover and save prospects.
-              </p>
-            </Card>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {recentLeads.map((lead) => (
-                <Card key={lead.id} className="hover:shadow-md transition-shadow border-muted flex flex-col justify-between">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-sm font-bold truncate" title={lead.businessName}>
-                        {lead.businessName}
-                      </CardTitle>
-                      <Badge variant="outline" className="text-[9px] uppercase font-bold px-1.5 py-0 border-primary/20 bg-primary/5 text-primary">
-                        {lead.status}
-                      </Badge>
-                    </div>
-                    <CardDescription className="truncate text-[11px]" title={lead.website}>
-                      {lead.website}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-3 pt-0 text-xs text-muted-foreground space-y-1">
-                    <p className="truncate"><strong>Email:</strong> {lead.email || "Not found"}</p>
-                    <p className="truncate"><strong>Phone:</strong> {lead.phone || "Not found"}</p>
-                    <p className="truncate"><strong>Location:</strong> {[lead.city, lead.country].filter(Boolean).join(", ") || "Unknown"}</p>
-                  </CardContent>
-                  <CardFooter className="pt-0 border-t bg-muted/5 flex justify-between items-center p-2.5">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
-                      onClick={() => setDeleteConfirmLeadId(lead.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="text-xs font-bold text-primary hover:text-primary-focus h-8"
-                      onClick={() => handleSelectLead(lead.id)}
-                      disabled={isLoadingLead}
-                    >
-                      {isLoadingLead ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <ArrowRight className="h-3.5 w-3.5 mr-1" />}
-                      Analyze & Redesign
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* Results & Actions Container */}
       <AnimatePresence>
