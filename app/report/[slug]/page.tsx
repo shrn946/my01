@@ -395,29 +395,33 @@ export default async function ReportPage({
         )}
 
         <section className="print-section rounded-3xl bg-slate-950 text-white p-10 md:p-12">
-          <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Before / After Comparison</h2>
-          <div className="mt-8 grid md:grid-cols-2 gap-8">
-            {/* Before */}
-            <div className="space-y-4">
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
-              {(lead.beforeAfterImage || lead.desktopImage) ? (
-                <img src={lead.beforeAfterImage || lead.desktopImage!} alt="Before" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
-              ) : (
-                <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No before image</div>
-              )}
+          {reportContent.includeBeforeAfter && (
+            <div className="mb-12">
+              <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Before / After Comparison</h2>
+              <div className="mt-8 grid md:grid-cols-2 gap-8">
+                {/* Before */}
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
+                  {(lead.beforeAfterImage || lead.desktopImage) ? (
+                    <img src={lead.beforeAfterImage || lead.desktopImage!} alt="Before" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
+                  ) : (
+                    <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No before image</div>
+                  )}
+                </div>
+                {/* After */}
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
+                  {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
+                    <img src={(lead.reportContent as any)?.afterImage || lead.proposalImage!} alt="After" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
+                  ) : (
+                    <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
+                  )}
+                </div>
+              </div>
             </div>
-            {/* After */}
-            <div className="space-y-4">
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
-              {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
-                <img src={(lead.reportContent as any)?.afterImage || lead.proposalImage!} alt="After" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
-              ) : (
-                <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
-              )}
-            </div>
-          </div>
-          
-          <h2 className="print-heading mt-12 text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Action Plan</h2>
+          )}
+
+          <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Action Plan</h2>
           <div className="mt-7 grid md:grid-cols-2 gap-4">
             {finalRecommendations.map((item, index) => (
               <div key={item} className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">

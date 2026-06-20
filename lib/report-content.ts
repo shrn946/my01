@@ -20,6 +20,7 @@ export const reportContentSchema = z.object({
     developerComments: z.string(),
     recommendations: z.array(z.string()),
   })).default([]),
+  includeBeforeAfter: z.boolean().default(false),
 });
 
 export type ReportMediaItem = z.infer<typeof reportMediaItemSchema>;
@@ -27,7 +28,7 @@ export type ReportContent = z.infer<typeof reportContentSchema>;
 
 export function getReportContent(value: unknown): ReportContent {
   const parsed = reportContentSchema.safeParse(value);
-  return parsed.success ? parsed.data : { developerComments: "", recommendations: [], history: [] };
+  return parsed.success ? parsed.data : { developerComments: "", recommendations: [], history: [], includeBeforeAfter: false };
 }
 
 export function getReportMedia(value: unknown): ReportMediaItem[] {

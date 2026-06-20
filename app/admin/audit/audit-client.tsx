@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeWebsite, updateLead } from "@/lib/lead-actions";
+import { getReportContent } from "@/lib/report-content";
 import { Loader2, RefreshCw, Mail, FileText, Send, CheckCircle2, Monitor, Smartphone, Zap, Search, Palette, BarChart, Edit2, Save, X } from "lucide-react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -83,7 +84,7 @@ export default function AuditClient({ lead }: { lead: any }) {
         </div>
       </div>
 
-      {hasScore && lead.beforeAfterImage && (
+      {hasScore && lead.beforeAfterImage && getReportContent(lead.reportContent).includeBeforeAfter && (
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>Design Improvement Proposal</CardTitle>

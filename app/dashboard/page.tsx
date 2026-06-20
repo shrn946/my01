@@ -459,23 +459,25 @@ export default function DashboardPage() {
       let screenshotRes: any = { success: true, desktopPath: result.desktopImage, mobilePath: result.mobileImage };
 
       // Step 1: Capture the Before image from the ORIGINAL site URL
-      if (!beforeImage || !result.desktopImage) {
-        toast({ title: "Capturing Website Screenshot...", description: "Fetching original website screenshot for the Before panel." });
-        const beforeRes = await actionCaptureScreenshot(result.leadId);
-        if (beforeRes.success && beforeRes.desktopPath) {
-          beforeImage = beforeRes.desktopPath;
-          screenshotRes = beforeRes;
-          await updateLead(result.leadId, { 
-            beforeAfterImage: beforeImage,
-            desktopImage: beforeRes.desktopPath,
-            mobileImage: beforeRes.mobilePath || undefined
-          });
+      if (result.reportContent?.includeBeforeAfter) {
+        if (!beforeImage || !result.desktopImage) {
+          toast({ title: "Capturing Website Screenshot...", description: "Fetching original website screenshot for the Before panel." });
+          const beforeRes = await actionCaptureScreenshot(result.leadId);
+          if (beforeRes.success && beforeRes.desktopPath) {
+            beforeImage = beforeRes.desktopPath;
+            screenshotRes = beforeRes;
+            await updateLead(result.leadId, { 
+              beforeAfterImage: beforeImage,
+              desktopImage: beforeRes.desktopPath,
+              mobileImage: beforeRes.mobilePath || undefined
+            });
+          }
         }
       }
 
       // Step 2: If afterUrl is provided, capture After image SEPARATELY
       // — stored ONLY in reportContent.afterImage, never in desktopImage
-      if (afterUrl && !result.reportContent?.isAfterImageLocked) {
+      if (result.reportContent?.includeBeforeAfter && afterUrl && !result.reportContent?.isAfterImageLocked) {
         toast({ title: "Capturing After Screenshot...", description: "Fetching proposal URL for the After panel." });
         const originalDesktopImage = result.desktopImage;
         const originalMobileImage = result.mobileImage;
@@ -831,10 +833,10 @@ export default function DashboardPage() {
                 </Card>
               )}
 
-              <Card className="border-indigo-100 shadow-sm overflow-hidden mb-6">
-                <div className="p-6 bg-indigo-50/50 border-b border-indigo-100">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 bg-indigo-500 rounded-lg text-white">
+              <Card className={`shadow-sm overflow-hidden mb-6 transition-colors ${result.reportContent?.includeBeforeAfter ? 'border-indigo-100' : 'border-slate-200'}`}>
+                <div className={`p-6 border-b flex justify-between items-center transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-slate-200'}`}>
+                    <div className={`flex items-center gap-2 transition-opacity ${result.reportContent?.includeBeforeAfter ? 'opacity-100' : 'opacity-60'}`}>
+                      <div className={`p-2 rounded-lg text-white transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-500' : 'bg-slate-400'}`}>
                         <ImageIcon className="h-5 w-5" />
                       </div>
                       <div>
@@ -842,8 +844,23 @@ export default function DashboardPage() {
                         <CardDescription>Comparison of the existing site vs. the proposed redesign</CardDescription>
                       </div>
                     </div>
+                    <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border shadow-sm hover:bg-slate-50 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        className="h-4 w-4 accent-indigo-600 rounded border-slate-300 cursor-pointer" 
+                        checked={result.reportContent?.includeBeforeAfter || false}
+                        onChange={async (e) => {
+                          const isChecked = e.target.checked;
+                          const updatedReportContent = { ...result.reportContent, includeBeforeAfter: isChecked };
+                          setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                          await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                        }}
+                      />
+                      <span className="text-sm font-semibold text-slate-700">Include in Report</span>
+                    </label>
                 </div>
-                <div className="grid md:grid-cols-2 gap-0">
+                {result.reportContent?.includeBeforeAfter && (
+                  <div className="grid md:grid-cols-2 gap-0">
                   {/* Before Image */}
                   <div className="p-6 border-r border-indigo-100">
                     <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Before (Existing)</p>
@@ -925,6 +942,7 @@ export default function DashboardPage() {
                      </div>
                    </div>
                 </div>
+                )}
               </Card>
 
               <Card className="border-indigo-100 shadow-sm overflow-hidden">
