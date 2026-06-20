@@ -463,20 +463,18 @@ export default function DashboardPage() {
       let beforeImage = result.beforeAfterImage;
       let screenshotRes: any = { success: true, desktopPath: result.desktopImage, mobilePath: result.mobileImage };
 
-      // Step 1: Capture the Before image from the ORIGINAL site URL
-      if (result.reportContent?.includeBeforeAfter) {
-        if (!beforeImage || !result.desktopImage) {
-          toast({ title: "Capturing Website Screenshot...", description: "Fetching original website screenshot for the Before panel." });
-          const beforeRes = await actionCaptureScreenshot(result.leadId);
-          if (beforeRes.success && beforeRes.desktopPath) {
-            beforeImage = beforeRes.desktopPath;
-            screenshotRes = beforeRes;
-            await updateLead(result.leadId, { 
-              beforeAfterImage: beforeImage,
-              desktopImage: beforeRes.desktopPath,
-              mobileImage: beforeRes.mobilePath || undefined
-            });
-          }
+      // Step 1: Capture the desktop and mobile screenshots of the ORIGINAL site URL
+      if (!beforeImage || !result.desktopImage) {
+        toast({ title: "Capturing Website Screenshot...", description: "Fetching original website screenshot for the report." });
+        const beforeRes = await actionCaptureScreenshot(result.leadId);
+        if (beforeRes.success && beforeRes.desktopPath) {
+          beforeImage = beforeRes.desktopPath;
+          screenshotRes = beforeRes;
+          await updateLead(result.leadId, { 
+            beforeAfterImage: beforeImage,
+            desktopImage: beforeRes.desktopPath,
+            mobileImage: beforeRes.mobilePath || undefined
+          });
         }
       }
 
