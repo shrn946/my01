@@ -462,25 +462,46 @@ async function analyzeWebsite(url: string, businessName: string = "") {
       const title = $("title").text().trim();
       const metaDescription = $("meta[name='description']").attr("content") || "";
 
-      // If email/phone not found, crawl primary contact page
+      // If email/phone not found, crawl primary contact pages
       if (emails.size === 0 && contactLinks.length > 0) {
-        try {
-          const cController = new AbortController();
-          const cTimeout = setTimeout(() => cController.abort(), 4000);
-          const cRes = await fetch(contactLinks[0], { signal: cController.signal });
-          clearTimeout(cTimeout);
-          if (cRes.ok) {
-            const cHtml = await cRes.text();
-            const $c = cheerio.load(cHtml);
-            extractFromText($c("body").text());
-            if ($c("form").length > 0) {
-              result.contactForm = true;
+        for (const link of contactLinks.slice(0, 3)) { // Try up to 3 contact pages
+          try {
+            const cController = new AbortController();
+            const cTimeout = setTimeout(() => cController.abort(), 4000);
+            const cRes = await fetch(link, { signal: cController.signal });
+            clearTimeout(cTimeout);
+            if (cRes.ok) {
+              const cHtml = await cRes.text();
+              const $c = cheerio.load(cHtml);
+              extractFromText($c("body").text());
+              
+              $c("a").each((_, el) => {
+                const href = $c(el).attr("href");
+                if (href && href.startsWith("mailto:")) {
+                  emails.add(href.replace("mailto:", "").trim().toLowerCase());
+                }
+              });
+
+              if ($c("form").length > 0) {
+                result.contactForm = true;
+              }
+
+              if (emails.size > 0) break; // Found an email, stop crawling contact pages
             }
-          }
-        } catch {}
+          } catch {}
+        }
       }
 
-      if (emails.size > 0) result.email = Array.from(emails)[0];
+      if (emails.size > 0) {
+        result.email = Array.from(emails).filter(e => {
+          const lower = e.toLowerCase();
+          // Filter out obvious fake/placeholder emails
+          return !lower.includes('example.com') && 
+                 !lower.includes('domain.com') && 
+                 !lower.startsWith('noreply@') && 
+                 !lower.startsWith('no-reply@');
+        })[0] || Array.from(emails)[0];
+      }
       if (phones.size > 0) result.phone = Array.from(phones)[0];
 
       // Gemini AI fallback — if no email found via scraping, ask Gemini to extract from page text
