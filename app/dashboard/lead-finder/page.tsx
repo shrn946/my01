@@ -251,6 +251,7 @@ export default function LeadFinderPage() {
   const [results, setResults] = useState<any[]>([]);
   const [maxResults, setMaxResults] = useState(10);
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [wordpressFilter, setWordpressFilter] = useState(false);
   const [stats, setStats] = useState({
     googleUsed: 0,
     googleRemaining: 40,
@@ -330,7 +331,7 @@ export default function LeadFinderPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [results, categoryFilter]);
+  }, [results, categoryFilter, wordpressFilter]);
 
   const selectCountry = (countryStr: string) => {
     setFormData(prev => ({
@@ -938,8 +939,9 @@ export default function LeadFinderPage() {
   const resultsCategories = Array.from(new Set(results.map(r => r.category || "Other")));
 
   const filteredResults = results.filter(lead => {
-    if (categoryFilter === "All") return true;
-    return (lead.category || "Other").toLowerCase() === categoryFilter.toLowerCase();
+    if (wordpressFilter && !lead.wordpress) return false;
+    if (categoryFilter !== "All" && (lead.category || "Other").toLowerCase() !== categoryFilter.toLowerCase()) return false;
+    return true;
   });
 
   const totalLeadsCount = filteredResults.length;
@@ -1292,9 +1294,9 @@ export default function LeadFinderPage() {
         {results.length > 0 && (
           <div className="flex flex-col gap-2 p-4 bg-muted/30 border rounded-2xl">
             <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Filter className="h-3.5 w-3.5 text-primary" /> Filter Results by Category:
+              <Filter className="h-3.5 w-3.5 text-primary" /> Filter Results:
             </span>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant={categoryFilter === "All" ? "default" : "outline"}
                 size="sm"
@@ -1317,6 +1319,19 @@ export default function LeadFinderPage() {
                   </Button>
                 );
               })}
+              {results.some(r => r.wordpress) && (
+                <>
+                  <div className="w-px h-6 bg-border mx-1"></div>
+                  <Button
+                    variant={wordpressFilter ? "default" : "outline"}
+                    size="sm"
+                    className={`h-8 text-xs font-bold rounded-xl ${wordpressFilter ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 'text-slate-600'}`}
+                    onClick={() => setWordpressFilter(!wordpressFilter)}
+                  >
+                    WordPress Only ({results.filter(r => r.wordpress).length})
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
