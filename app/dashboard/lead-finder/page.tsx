@@ -1407,9 +1407,9 @@ export default function LeadFinderPage() {
                 transition={{ delay: idx * 0.05 }}
               >
                 <Card className={`overflow-hidden border transition-shadow bg-card shadow-sm ${selectedLeads.includes(lead.id) ? 'border-primary bg-primary/5' : 'border-muted hover:shadow-lg'}`}>
-                  <div className="flex flex-col sm:flex-row">
+                  <div className="flex flex-row items-stretch min-w-0">
                     {/* Selection Checkbox */}
-                    <div className="p-4 flex items-center bg-muted/10 border-r border-dashed shrink-0">
+                    <div className="p-3 sm:p-4 flex items-center justify-center bg-muted/10 border-r border-dashed shrink-0">
                        <input 
                          type="checkbox" 
                          checked={selectedLeads.includes(lead.id)}
@@ -1417,13 +1417,13 @@ export default function LeadFinderPage() {
                          className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                        />
                     </div>
-                    <div className="flex-1 p-6 grid md:grid-cols-4 gap-6 items-center">
+                    <div className="flex-1 p-4 sm:p-6 grid md:grid-cols-4 gap-4 sm:gap-6 items-center min-w-0">
                       
                       {/* Column 1: Info */}
-                      <div className="md:col-span-2 space-y-4">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-extrabold text-xl truncate max-w-[320px]">{lead.businessName}</h3>
+                      <div className="md:col-span-2 space-y-3 sm:space-y-4 min-w-0">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <h3 className="font-extrabold text-lg sm:text-xl truncate max-w-full">{lead.businessName}</h3>
                             {lead.isSaved && <Badge variant="outline" className="text-emerald-500 border-emerald-500 bg-emerald-500/5 font-black uppercase text-[10px]">Saved</Badge>}
                             {!lead.email && (
                               <Badge className="bg-rose-500/10 text-rose-500 border border-rose-500/20 font-black uppercase text-[9px]">
@@ -1440,16 +1440,18 @@ export default function LeadFinderPage() {
                             href={lead.website} 
                             target="_blank" 
                             rel="noreferrer" 
-                            className="text-primary hover:underline text-sm font-semibold flex items-center gap-1 mt-1"
+                            className="text-primary hover:underline text-xs sm:text-sm font-semibold flex items-center gap-1 mt-1 truncate max-w-full"
                           >
-                            <Globe className="h-3 w-3" /> {lead.website} <ExternalLink className="h-3 w-3" />
+                            <Globe className="h-3 w-3 shrink-0" /> 
+                            <span className="truncate">{lead.website}</span>
+                            <ExternalLink className="h-3 w-3 shrink-0" />
                           </a>
                         </div>
 
                         {/* Contact Fields */}
-                        <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-3 rounded-2xl border border-muted">
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm bg-muted/30 p-2 sm:p-3 rounded-2xl border border-muted">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             {lead.email ? (
                               <span className="truncate font-semibold text-xs text-foreground" title={lead.email}>
                                 {lead.email}
@@ -1460,8 +1462,8 @@ export default function LeadFinderPage() {
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             {lead.phone ? (
                               <button
                                 type="button"
@@ -1476,8 +1478,8 @@ export default function LeadFinderPage() {
                               <span className="truncate font-semibold text-xs text-muted-foreground">No Phone</span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 col-span-2">
-                            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                          <div className="flex items-center gap-2 sm:col-span-2 min-w-0">
+                            <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             <span className="truncate text-xs font-semibold">
                               {[lead.city, lead.country].filter(Boolean).join(", ") || "Location Unknown"}
                             </span>
