@@ -1544,7 +1544,7 @@ export default function LeadFinderPage() {
                       </div>
 
                       {/* Column 2: Scores */}
-                      <div className="flex items-center justify-around gap-4 bg-muted/10 p-4 rounded-2xl border">
+                      <div className="hidden sm:flex items-center justify-around gap-4 bg-muted/10 p-4 rounded-2xl border">
                         <div className="text-center">
                           <div className={`h-14 w-14 rounded-full border-4 flex items-center justify-center font-black text-sm mb-1 ${getScoreColor(lead.qualityScore)}`}>
                             {lead.qualityScore}
