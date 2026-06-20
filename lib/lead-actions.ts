@@ -422,7 +422,7 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
 
     const fileName = `proposal-${mode}-${leadId}-${Date.now()}.png`;
     const proposalImage = await page.screenshot({
-      fullPage: false,
+      fullPage: true,
       animations: "disabled",
       scale: "css"
     });
