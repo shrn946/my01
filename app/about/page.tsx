@@ -8,13 +8,13 @@ import { Magnetic } from "@/components/magnetic";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "About Hassan Naqvi, a freelance developer specializing in Next.js, React, WordPress, Elementor, and WooCommerce."
+  description: "About CoreWebLabs, a web development agency founded by Hassan Naqvi, specializing in Next.js, React, WordPress, Elementor, and WooCommerce."
 };
 
 export default function AboutPage() {
   return (
     <>
-      <InnerHero title="About Me" breadcrumbs={[{ label: "About" }]} />
+      <InnerHero title="About Us" breadcrumbs={[{ label: "About" }]} />
       
       <section className="section relative overflow-hidden bg-white">
         {/* Subtle Background Glow */}
@@ -28,12 +28,12 @@ export default function AboutPage() {
               <SectionHeading 
                 align="left"
                 eyebrow="Introduction" 
-                title={`${profile.name}, your dedicated WordPress, Next.js & React partner.`} 
+                title={`CoreWebLabs, your dedicated WordPress, Next.js & React partners.`} 
                 outlineText="STORY"
               />
               <div className="space-y-8 text-lg leading-relaxed text-slate-600">
                 <p className="first-letter:text-5xl first-letter:font-black first-letter:text-primary first-letter:mr-3 first-letter:float-left">{profile.bio}</p>
-                <p>With over 8 years of specialized experience, I've helped hundreds of businesses transform their online presence. My approach combines technical excellence with a deep understanding of conversion optimization and user experience.</p>
+                <p>With over 8 years of specialized experience, our team has helped hundreds of businesses transform their online presence. Our approach combines technical excellence with a deep understanding of conversion optimization and user experience.</p>
                 
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   {[
@@ -68,7 +68,7 @@ export default function AboutPage() {
                       "Building for the <span className="text-primary italic">long-term</span>."
                     </h3>
                     <p className="mt-8 text-lg leading-relaxed text-slate-300">
-                      I don't just build websites; I build reliable digital foundations. Every project is an opportunity to solve a unique business challenge through smart WordPress, Next.js, and React architecture and elegant design.
+                      We don't just build websites; we build reliable digital foundations. Every project is an opportunity to solve a unique business challenge through smart WordPress, Next.js, and React architecture and elegant design.
                     </p>
                     
                     <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -97,8 +97,8 @@ export default function AboutPage() {
         <div className="section-container">
           <SectionHeading 
             eyebrow="Expertise" 
-            title="My Technical Toolkit" 
-            text="I specialize in modern JavaScript frameworks like Next.js and React, alongside the entire WordPress ecosystem."
+            title="Our Technical Toolkit" 
+            text="We specialize in modern JavaScript frameworks like Next.js and React, alongside the entire WordPress ecosystem."
             outlineText="SKILLS"
           />
           
