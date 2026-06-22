@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   
   return (
     <html lang="en" className={jakarta.variable} suppressHydrationWarning>
-      <body className="font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground">
+      <body className="font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground overflow-x-hidden w-full">
         <ScrollProgressBar />
         <HeaderFooterWrapper menuItems={menuItems}>
           <PageTransition>
