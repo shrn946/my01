@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@example.com";
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "15551234567";
+  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hassan@coreweblabs.com";
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "923226692496";
 
   return (
     <>
@@ -24,7 +24,7 @@ export default function ContactPage() {
           <SectionHeading 
             eyebrow="Contact" 
             title="Let's discuss your next project" 
-            text="Whether you have a fully scoped project or just an initial idea, I'm here to help you navigate the WordPress landscape." 
+            text="Whether you have a fully scoped project or just an initial idea, we're here to help you navigate the modern web landscape." 
           />
           
           <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
@@ -33,7 +33,7 @@ export default function ContactPage() {
                 <div className="rounded-[2.5rem] bg-ink p-10 text-white shadow-premium">
                   <h2 className="text-3xl font-black italic text-primary">Ready to scale?</h2>
                   <p className="mt-6 text-lg leading-relaxed text-slate-300">
-                    Fill out the form with your project details and I'll get back to you within 24 hours with a personalized strategy.
+                    Fill out the form with your project details and we'll get back to you within 24 hours with a personalized strategy.
                   </p>
                   
                   <div className="mt-12 space-y-6">
@@ -48,7 +48,7 @@ export default function ContactPage() {
                         </div>
                         <div>
                           <p className="text-xs font-bold uppercase tracking-widest text-slate-400">WhatsApp</p>
-                          <p className="text-lg font-bold">Chat with me</p>
+                          <p className="text-lg font-bold">Chat with us</p>
                         </div>
                       </div>
                       <ArrowRight size={20} className="text-slate-500 transition-transform group-hover:translate-x-1 group-hover:text-primary" />
