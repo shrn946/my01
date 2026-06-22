@@ -37,7 +37,7 @@ export function SiteHeader({ menuItems }: { menuItems?: any }) {
         </Link>
         
         <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-600 lg:flex">
-          {navItems.map((item) => (
+          {navItems.map((item: any) => (
             item.children ? (
               <div key={item.label} className="group relative py-2">
                 <Link href={item.href} className="relative flex items-center gap-1 transition-colors hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">
@@ -92,7 +92,7 @@ export function SiteHeader({ menuItems }: { menuItems?: any }) {
             className="absolute left-0 top-full w-full border-b border-black/5 bg-white/95 p-6 backdrop-blur-lg lg:hidden"
           >
             <nav className="flex flex-col gap-4">
-              {navItems.map((item) => (
+              {navItems.map((item: any) => (
                 <div key={item.label} className="flex flex-col gap-2">
                   <Link 
                     href={item.href} 
