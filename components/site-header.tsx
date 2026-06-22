@@ -32,8 +32,8 @@ export function SiteHeader({ menuItems }: { menuItems?: any }) {
     >
       <div className="container mx-auto flex items-center justify-between px-6">
         <Link href="/" className="group flex items-center gap-2 text-xl font-black tracking-tight text-ink">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white transition-transform group-hover:scale-110">H</span>
-          <span>Hassan<span className="text-primary">WP</span></span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white transition-transform group-hover:scale-110">C</span>
+          <span>CoreWeb<span className="text-primary">Labs</span></span>
         </Link>
         
         <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-600 lg:flex">

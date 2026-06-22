@@ -140,27 +140,27 @@ export const projects = [
 
 export const heroSlides = [
   {
-    title: "WordPress Developer & Elementor Expert",
-    subtitle: "I build fast, modern, and conversion-focused WordPress websites for businesses, startups, and freelancers.",
-    buttonText: "View Portfolio",
+    title: "High-Performance Web Solutions & Next.js Experts",
+    subtitle: "We build fast, modern, and conversion-focused websites for enterprises, startups, and growing brands.",
+    buttonText: "View Our Portfolio",
     buttonLink: "/portfolio",
     image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=80",
     sortOrder: 1,
     active: true
   },
   {
-    title: "WooCommerce Stores Built to Sell",
-    subtitle: "Launch a professional online store with clean product pages, smooth checkout, and mobile-first performance.",
-    buttonText: "Start a Store",
+    title: "WooCommerce & E-Commerce Engineering",
+    subtitle: "Launch a professional online store with our team's expertise in custom product flows, smooth checkout, and mobile-first performance.",
+    buttonText: "Start Your Store",
     buttonLink: "/contact",
     image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=80",
     sortOrder: 2,
     active: true
   },
   {
-    title: "Custom WordPress Plugins & Fixes",
-    subtitle: "Get reliable plugin development, bug fixing, speed optimization, and long-term maintenance support.",
-    buttonText: "Hire Me",
+    title: "Custom Web Development & Maintenance",
+    subtitle: "Get reliable team support for complex web applications, speed optimization, and long-term technical maintenance.",
+    buttonText: "Work With Us",
     buttonLink: "/contact",
     image: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1600&q=80",
     sortOrder: 3,

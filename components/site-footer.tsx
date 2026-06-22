@@ -42,8 +42,8 @@ export function SiteFooter() {
         <div className="grid gap-16 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <Link href="/" className="group flex items-center gap-2 text-2xl font-black tracking-tight text-ink">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg shadow-primary/20">H</span>
-              <span>Hassan<span className="text-primary">WP</span></span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-lg shadow-primary/20">C</span>
+              <span>CoreWeb<span className="text-primary">Labs</span></span>
             </Link>
             
             <p className="mt-8 max-w-sm text-lg leading-relaxed text-slate-600">
@@ -94,7 +94,7 @@ export function SiteFooter() {
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
               <p className="text-sm text-slate-500">
-                © {new Date().getFullYear()} Hassan Naqvi. All rights reserved.
+                © {new Date().getFullYear()} CoreWebLabs. All rights reserved.
               </p>
             </div>
             

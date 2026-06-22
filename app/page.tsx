@@ -120,7 +120,7 @@ export default async function HomePage() {
               align="left"
               eyebrow="Portfolio" 
               title="Featured Case Studies" 
-              text="Explore my latest WordPress projects, from custom enterprise sites to complex WooCommerce builds."
+              text="Explore our latest web projects, from custom enterprise sites to complex WooCommerce builds."
               outlineText="PROJECTS"
               className="mb-0"
             />
@@ -143,8 +143,8 @@ export default async function HomePage() {
         <div className="section-container">
           <SectionHeading 
             eyebrow="Testimonials" 
-            title="What my clients are saying" 
-            text="Trusted by businesses worldwide to deliver reliable, high-performing WordPress solutions."
+            title="What our clients are saying" 
+            text="Trusted by businesses worldwide to deliver reliable, high-performing web solutions."
             outlineText="TRUSTED"
           />
           <ReviewsCarousel reviews={featuredReviews} />
@@ -168,7 +168,7 @@ export default async function HomePage() {
                 Let's build something <span className="text-blue-950">extraordinary</span> together.
               </h2>
               <p className="mt-8 text-lg text-white/80 max-w-2xl mx-auto">
-                Whether you need a new build, a performance boost, or ongoing maintenance, I'm here to help your WordPress site succeed.
+                Whether you need a new build, a performance boost, or ongoing maintenance, we're here to help your web presence succeed.
               </p>
               <div className="mt-12 flex flex-wrap justify-center gap-6">
                 <Magnetic>
@@ -177,7 +177,7 @@ export default async function HomePage() {
                   </Link>
                 </Magnetic>
                 <Link href="/about" className="inline-flex items-center gap-3 rounded-full border border-white/30 bg-white/10 px-10 py-5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20">
-                  Learn More About Me
+                  Learn More About Us
                 </Link>
               </div>
             </div>

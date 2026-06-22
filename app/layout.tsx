@@ -21,13 +21,13 @@ function getBaseUrl() {
 export const metadata: Metadata = {
   metadataBase: getBaseUrl(),
   title: {
-    default: "Hassan Naqvi - WordPress Developer & Elementor Expert",
-    template: "%s | WordPress Developer Portfolio"
+    template: "%s | CoreWebLabs",
+    default: "CoreWebLabs - High-Performance Web Solutions",
   },
-  description: "Hassan Naqvi is a freelance WordPress developer for Elementor, WooCommerce, custom plugins, speed optimization, and maintenance.",
+  description: "CoreWebLabs builds expert WordPress, Next.js, and custom web solutions for modern businesses.",
   openGraph: {
-    title: "Hassan Naqvi - WordPress Developer & Elementor Expert",
-    description: "Fast, modern, conversion-focused WordPress websites for businesses and freelancers.",
+    title: "CoreWebLabs - High-Performance Web Solutions",
+    description: "CoreWebLabs builds expert WordPress, Next.js, and custom web solutions for modern businesses.",
     type: "website"
   },
   alternates: {
