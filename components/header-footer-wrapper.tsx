@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
-export function HeaderFooterWrapper({ children }: { children: React.ReactNode }) {
+export function HeaderFooterWrapper({ children, menuItems }: { children: React.ReactNode, menuItems?: any }) {
   const pathname = usePathname();
   
   // Hide header and footer on report and proposal pages
@@ -12,7 +12,7 @@ export function HeaderFooterWrapper({ children }: { children: React.ReactNode })
 
   return (
     <>
-      {!isReportPage && <SiteHeader />}
+      {!isReportPage && <SiteHeader menuItems={menuItems} />}
       <main className="min-h-screen">
         {children}
       </main>

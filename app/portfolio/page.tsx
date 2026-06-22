@@ -18,12 +18,13 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   const { category } = await searchParams;
   const projects = await getProjects();
   const categories = [
-    "Dentists 🦷",
-    "Law Firms ⚖️",
-    "Roofing Companies 🏠",
-    "HVAC Companies ❄️",
-    "Plumbing Companies 🔧",
-    "Medical Clinics"
+    "Healthcare and Wellness",
+    "Security and Transportation",
+    "Moving Services",
+    "Retail Parks And Shopping",
+    "Educational",
+    "Law Firms",
+    "Other"
   ];
   const filteredProjects = category
     ? projects.filter((project) => slugify(project.category) === category)

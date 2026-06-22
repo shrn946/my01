@@ -4,6 +4,7 @@ import { HeaderFooterWrapper } from "@/components/header-footer-wrapper";
 import { ScrollProgressBar } from "@/components/scroll-progress-bar";
 import { PageTransition } from "@/components/page-transition";
 import { Toaster } from "@/components/ui/toaster";
+import { getMenuSettings } from "@/lib/data";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -34,12 +35,14 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const menuItems = await getMenuSettings();
+  
   return (
     <html lang="en" className={jakarta.variable} suppressHydrationWarning>
       <body className="font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground">
         <ScrollProgressBar />
-        <HeaderFooterWrapper>
+        <HeaderFooterWrapper menuItems={menuItems}>
           <PageTransition>
             {children}
           </PageTransition>

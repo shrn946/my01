@@ -34,8 +34,8 @@ export function ReviewsCarousel({ reviews }: { reviews: any[] }) {
     <div className="relative">
       <div ref={emblaRef} className="overflow-hidden">
         <div className="-ml-4 flex">
-          {reviews.map((review) => (
-            <div key={review.id ?? `${review.client}-${review.company}`} className="min-w-0 flex-[0_0_100%] pl-4 md:flex-[0_0_50%] lg:flex-[0_0_33.333%]">
+          {reviews.map((review, index) => (
+            <div key={review.id || `${review.client}-${review.company}-${index}`} className="min-w-0 flex-[0_0_100%] pl-4 md:flex-[0_0_50%] lg:flex-[0_0_33.333%]">
               <article className="h-full rounded-lg border border-black/5 bg-white p-6 shadow-soft">
                 <div className="flex items-center gap-4">
                   <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">

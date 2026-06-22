@@ -26,11 +26,13 @@ export default async function ReviewsPage() {
           />
           
           {reviews.length ? (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
               {reviews.map((review, index) => (
-                <FadeIn key={`${review.client}-${review.company}`} delay={index * 0.05}>
-                  <ReviewCard review={review} />
-                </FadeIn>
+                <div key={review.id || `${review.client}-${review.company}-${index}`} className="break-inside-avoid">
+                  <FadeIn delay={(index % 15) * 0.05}>
+                    <ReviewCard review={review} />
+                  </FadeIn>
+                </div>
               ))}
             </div>
           ) : (

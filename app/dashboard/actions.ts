@@ -69,7 +69,7 @@ async function crawlDesignData(url: string) {
       };
     });
     return analysis;
-  } catch (e) { return null; } finally { if (browser) await browser.close(); }
+  } catch (e) { console.error("Design Crawl Error:", e); return null; } finally { if (browser) await browser.close(); }
 }
 
 export async function quickAnalyzeWebsite(url: string) {
@@ -288,7 +288,8 @@ export async function quickAnalyzeWebsite(url: string) {
       topIssues: audit.issues.length > 0
         ? audit.issues.join("\n")
         : "No major HTML-level issues detected",
-      beforeAfterImage: null as string | null
+      beforeAfterImage: null as string | null,
+      designAnalysis
     };
 
     // Check for valid DATABASE_URL before creating

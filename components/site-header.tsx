@@ -2,23 +2,16 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
 import { Magnetic } from "./magnetic";
 
-const navItems = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
-  { label: "Portfolio", href: "/portfolio" },
-  { label: "Blog", href: "/blog" },
-  { label: "Reviews", href: "/reviews" },
-  { label: "Contact", href: "/contact" }
-];
 
-export function SiteHeader() {
+
+export function SiteHeader({ menuItems }: { menuItems?: any }) {
+  const navItems = menuItems ? menuItems.filter((item: any) => item.visible !== false) : [];
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -45,13 +38,28 @@ export function SiteHeader() {
         
         <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-600 lg:flex">
           {navItems.map((item) => (
-            <Link 
-              key={item.href} 
-              href={item.href} 
-              className="relative py-2 transition-colors hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
-            >
-              {item.label}
-            </Link>
+            item.children ? (
+              <div key={item.label} className="group relative py-2">
+                <Link href={item.href} className="relative flex items-center gap-1 transition-colors hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">
+                  {item.label} <ChevronDown size={14} className="transition-transform duration-300 group-hover:rotate-180" />
+                </Link>
+                <div className="absolute left-0 top-[calc(100%-0.5rem)] hidden w-48 flex-col rounded-xl border border-black/5 bg-white p-2 shadow-xl group-hover:flex">
+                  {item.children.filter((child: any) => child.visible !== false).map((child: any) => (
+                    <Link key={child.href} href={child.href} className="rounded-lg px-4 py-2 hover:bg-slate-50 hover:text-primary transition-colors">
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <Link 
+                key={item.href} 
+                href={item.href} 
+                className="relative py-2 transition-colors hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
+              >
+                {item.label}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -85,14 +93,29 @@ export function SiteHeader() {
           >
             <nav className="flex flex-col gap-4">
               {navItems.map((item) => (
-                <Link 
-                  key={item.href} 
-                  href={item.href} 
-                  onClick={() => setOpen(false)} 
-                  className="text-lg font-bold text-slate-800 transition-colors hover:text-primary"
-                >
-                  {item.label}
-                </Link>
+                <div key={item.label} className="flex flex-col gap-2">
+                  <Link 
+                    href={item.href} 
+                    onClick={() => setOpen(false)} 
+                    className="text-lg font-bold text-slate-800 transition-colors hover:text-primary"
+                  >
+                    {item.label}
+                  </Link>
+                  {item.children && (
+                    <div className="ml-2 flex flex-col gap-2 border-l-2 border-slate-100 pl-4 mt-1">
+                      {item.children.filter((child: any) => child.visible !== false).map((child: any) => (
+                        <Link 
+                          key={child.href} 
+                          href={child.href} 
+                          onClick={() => setOpen(false)} 
+                          className="text-base font-semibold text-slate-600 hover:text-primary"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
               <Link 
                 href="/contact" 

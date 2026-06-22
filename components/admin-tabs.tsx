@@ -15,7 +15,8 @@ const tabIcons: Record<string, ReactNode> = {
   Blog: <FileText size={16} />,
   Reviews: <Star size={16} />,
   Messages: <MessageSquare size={16} />,
-  Portfolio: <FolderKanban size={16} />
+  Portfolio: <FolderKanban size={16} />,
+  Menu: <LayoutDashboard size={16} />
 };
 
 export function AdminTabs({ tabs }: { tabs: { label: string; children: ReactNode }[] }) {

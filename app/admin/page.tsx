@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { AdminTabs } from "@/components/admin-tabs";
 import { BlogEditor } from "@/components/blog-editor";
+import { AdminMenu } from "@/components/admin-menu";
 import { LogoutButton } from "@/components/logout-button";
 import { MediaImageField } from "@/components/media-image-field";
 import { TestEmailButton } from "@/components/test-email-button";
@@ -271,6 +272,14 @@ export default async function AdminPage() {
                       </div>
                     </AdminBlock>
                   </div>
+                )
+              },
+              {
+                label: "Menu",
+                children: (
+                  <AdminBlock title="Site Navigation Menu">
+                    <AdminMenu />
+                  </AdminBlock>
                 )
               }
             ]}

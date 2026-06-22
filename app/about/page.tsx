@@ -8,7 +8,7 @@ import { Magnetic } from "@/components/magnetic";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "About Hassan Naqvi, a freelance WordPress developer specializing in Elementor, WooCommerce, plugins, and performance."
+  description: "About Hassan Naqvi, a freelance developer specializing in Next.js, React, WordPress, Elementor, and WooCommerce."
 };
 
 export default function AboutPage() {
@@ -28,7 +28,7 @@ export default function AboutPage() {
               <SectionHeading 
                 align="left"
                 eyebrow="Introduction" 
-                title={`${profile.name}, your dedicated WordPress partner.`} 
+                title={`${profile.name}, your dedicated WordPress, Next.js & React partner.`} 
                 outlineText="STORY"
               />
               <div className="space-y-8 text-lg leading-relaxed text-slate-600">
@@ -68,7 +68,7 @@ export default function AboutPage() {
                       "Building for the <span className="text-primary italic">long-term</span>."
                     </h3>
                     <p className="mt-8 text-lg leading-relaxed text-slate-300">
-                      I don't just build websites; I build reliable digital foundations. Every project is an opportunity to solve a unique business challenge through smart WordPress architecture and elegant design.
+                      I don't just build websites; I build reliable digital foundations. Every project is an opportunity to solve a unique business challenge through smart WordPress, Next.js, and React architecture and elegant design.
                     </p>
                     
                     <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -98,7 +98,7 @@ export default function AboutPage() {
           <SectionHeading 
             eyebrow="Expertise" 
             title="My Technical Toolkit" 
-            text="I specialize in the WordPress ecosystem, with deep expertise in various tools and technologies."
+            text="I specialize in modern JavaScript frameworks like Next.js and React, alongside the entire WordPress ecosystem."
             outlineText="SKILLS"
           />
           
@@ -133,7 +133,7 @@ export default function AboutPage() {
           
           <div className="relative mx-auto max-w-4xl space-y-12 before:absolute before:left-4 before:top-2 before:h-[calc(100%-16px)] before:w-px before:bg-slate-200 lg:before:left-1/2 lg:before:-translate-x-1/2">
             {[
-              { year: "2024 - Present", title: "Senior WordPress Consultant", desc: "Leading complex enterprise WordPress projects and high-performance WooCommerce builds for global clients." },
+              { year: "2024 - Present", title: "Senior Web Developer", desc: "Leading complex enterprise WordPress projects and high-performance Next.js & React builds for global clients." },
               { year: "2021 - 2023", title: "Full-Stack WordPress Developer", desc: "Specialized in custom plugin development and advanced Elementor design systems." },
               { year: "2018 - 2021", title: "Elementor Expert & UI/UX Designer", desc: "Focused on creating visually stunning and conversion-optimized websites using Elementor Pro." },
               { year: "2016 - 2018", title: "Junior WordPress Developer", desc: "Started the journey by mastering theme customization and basic plugin architecture." },

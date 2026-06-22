@@ -13,7 +13,8 @@ import {
   getSearchLimitStats,
   getFinderLeads,
   getSearchSettings,
-  importLeadsAction
+  importLeadsAction,
+  searchSimilarLeadsByUrl
 } from "./actions";
 import * as XLSX from "xlsx";
 import { 
@@ -247,6 +248,8 @@ export default function LeadFinderPage() {
     city: "",
     niche: ""
   });
+  const [searchMode, setSearchMode] = useState<"keyword" | "smart">("keyword");
+  const [smartUrl, setSmartUrl] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [maxResults, setMaxResults] = useState(10);
@@ -821,6 +824,41 @@ export default function LeadFinderPage() {
     }
   };
 
+  const handleSmartSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!smartUrl) {
+      toast({ title: "URL Required", description: "Please enter a target website URL.", variant: "destructive" });
+      return;
+    }
+
+    setIsSearching(true);
+    setResults([]);
+
+    try {
+      const res = await searchSimilarLeadsByUrl(smartUrl, maxResults);
+      if (res.success && res.data) {
+        const finderLeads = await getFinderLeads();
+        setResults(finderLeads);
+        if (res.stats) {
+          setStats(res.stats);
+        } else {
+          await fetchStats();
+        }
+        toast({ 
+          title: "AI Search Completed", 
+          description: `Discovered and analyzed ${res.data.length} businesses matching the URL intent.` 
+        });
+      } else {
+        toast({ title: "Search Failed", description: res.error || "Unable to complete search.", variant: "destructive" });
+        await fetchStats();
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "An unexpected error occurred during AI lead discovery.", variant: "destructive" });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   // Lead Finder Operations
   const handleSave = async (leadId: string) => {
     const res = await saveLeadFromFinder(leadId);
@@ -1098,193 +1136,273 @@ export default function LeadFinderPage() {
               </div>
             )}
           </div>
+                        {/* Search Mode Toggle */}
+          <div className="flex items-center gap-2 mb-4 bg-muted/30 p-1.5 rounded-xl border w-fit">
+            <button
+              type="button"
+              onClick={() => setSearchMode("keyword")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                searchMode === "keyword" 
+                  ? "bg-white text-primary shadow-sm ring-1 ring-black/5 dark:bg-slate-800 dark:ring-white/10" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Keyword Search
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchMode("smart")}
+              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                searchMode === "smart" 
+                  ? "bg-white text-primary shadow-sm ring-1 ring-black/5 dark:bg-slate-800 dark:ring-white/10" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" /> AI Smart Search
+            </button>
+          </div>
 
-          <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-4">
-            <div className="space-y-1 md:col-span-3 relative" ref={nicheContainerRef}>
-              <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Niche / Keyword</Label>
-              <Input 
-                name="niche" 
-                placeholder="e.g. Dentists, Roofing" 
-                value={formData.niche} 
-                onChange={handleChange} 
-                onFocus={() => setShowNicheDropdown(true)}
-                onKeyDown={handleNicheKeyDown}
-                className="h-11 rounded-xl"
-                disabled={isSearching || isLimitExceeded()}
-                autoComplete="off"
-              />
-              <AnimatePresence>
-                {showNicheDropdown && filteredNiches.length > 0 && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute z-50 left-0 right-0 mt-1 bg-white border border-muted dark:bg-slate-900 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1"
-                  >
-                    {filteredNiches.map((niche, idx) => (
-                      <button
-                        key={niche}
-                        type="button"
-                        onClick={() => selectNiche(niche)}
-                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                          idx === activeNicheIndex 
-                            ? "bg-primary/10 text-primary font-bold" 
-                            : "text-foreground hover:bg-muted/50"
-                        }`}
+          {searchMode === "keyword" ? (
+            <>
+              <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-4">
+                <div className="space-y-1 md:col-span-3 relative" ref={nicheContainerRef}>
+                  <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Niche / Keyword</Label>
+                  <Input 
+                    name="niche" 
+                    placeholder="e.g. Dentists, Roofing" 
+                    value={formData.niche} 
+                    onChange={handleChange} 
+                    onFocus={() => setShowNicheDropdown(true)}
+                    onKeyDown={handleNicheKeyDown}
+                    className="h-11 rounded-xl"
+                    disabled={isSearching || isLimitExceeded()}
+                    autoComplete="off"
+                  />
+                  <AnimatePresence>
+                    {showNicheDropdown && filteredNiches.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 left-0 right-0 mt-1 bg-white border border-muted dark:bg-slate-900 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1"
                       >
-                        {niche}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            {/* Country Autocomplete */}
-            <div className="space-y-1 md:col-span-2 relative" ref={countryContainerRef}>
-              <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Country</Label>
-              <Input 
-                name="country" 
-                placeholder="e.g. United States" 
-                value={formData.country} 
-                onChange={handleChange} 
-                onFocus={() => setShowCountryDropdown(true)}
-                onKeyDown={handleCountryKeyDown}
-                className="h-11 rounded-xl"
-                disabled={isSearching || isLimitExceeded()}
-                autoComplete="off"
-              />
-              <AnimatePresence>
-                {showCountryDropdown && filteredCountries.length > 0 && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute z-50 left-0 right-0 mt-1 bg-white border border-muted dark:bg-slate-900 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1"
-                  >
-                    {filteredCountries.map((country, idx) => (
-                      <button
-                        key={country}
-                        type="button"
-                        onClick={() => selectCountry(country)}
-                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                          idx === activeCountryIndex 
-                            ? "bg-primary/10 text-primary font-bold" 
-                            : "text-foreground hover:bg-muted/50"
-                        }`}
+                        {filteredNiches.map((niche, idx) => (
+                          <button
+                            key={niche}
+                            type="button"
+                            onClick={() => selectNiche(niche)}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              idx === activeNicheIndex 
+                                ? "bg-primary/10 text-primary font-bold" 
+                                : "text-foreground hover:bg-muted/50"
+                            }`}
+                          >
+                            {niche}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {/* Country Autocomplete */}
+                <div className="space-y-1 md:col-span-2 relative" ref={countryContainerRef}>
+                  <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Country</Label>
+                  <Input 
+                    name="country" 
+                    placeholder="e.g. United States" 
+                    value={formData.country} 
+                    onChange={handleChange} 
+                    onFocus={() => setShowCountryDropdown(true)}
+                    onKeyDown={handleCountryKeyDown}
+                    className="h-11 rounded-xl"
+                    disabled={isSearching || isLimitExceeded()}
+                    autoComplete="off"
+                  />
+                  <AnimatePresence>
+                    {showCountryDropdown && filteredCountries.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 left-0 right-0 mt-1 bg-white border border-muted dark:bg-slate-900 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1"
                       >
-                        {country}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* City Autocomplete */}
-            <div className="space-y-1 md:col-span-2 relative" ref={cityContainerRef}>
-              <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">City</Label>
-              <Input 
-                name="city" 
-                placeholder="e.g. Texas, London" 
-                value={formData.city} 
-                onChange={handleChange} 
-                onFocus={() => setShowCityDropdown(true)}
-                onKeyDown={handleCityKeyDown}
-                className="h-11 rounded-xl"
-                disabled={isSearching || isLimitExceeded()}
-                autoComplete="off"
-              />
-              <AnimatePresence>
-                {showCityDropdown && filteredCities.length > 0 && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute z-50 left-0 right-0 mt-1 bg-white border border-muted dark:bg-slate-900 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1"
-                  >
-                    {filteredCities.map((cityObj, idx) => (
-                      <button
-                        key={`${cityObj.city}-${cityObj.state}`}
-                        type="button"
-                        onClick={() => selectCity(cityObj)}
-                        className={`w-full text-left px-4 py-2 text-sm transition-colors flex justify-between items-center ${
-                          idx === activeCityIndex 
-                            ? "bg-primary/10 text-primary font-bold" 
-                            : "text-foreground hover:bg-muted/50"
-                        }`}
+                        {filteredCountries.map((country, idx) => (
+                          <button
+                            key={country}
+                            type="button"
+                            onClick={() => selectCountry(country)}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              idx === activeCountryIndex 
+                                ? "bg-primary/10 text-primary font-bold" 
+                                : "text-foreground hover:bg-muted/50"
+                            }`}
+                          >
+                            {country}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {/* City Autocomplete */}
+                <div className="space-y-1 md:col-span-2 relative" ref={cityContainerRef}>
+                  <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">City</Label>
+                  <Input 
+                    name="city" 
+                    placeholder="e.g. Houston, London" 
+                    value={formData.city} 
+                    onChange={handleChange} 
+                    onFocus={() => setShowCityDropdown(true)}
+                    onKeyDown={handleCityKeyDown}
+                    className="h-11 rounded-xl"
+                    disabled={isSearching || isLimitExceeded()}
+                    autoComplete="off"
+                  />
+                  <AnimatePresence>
+                    {showCityDropdown && filteredCities.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 left-0 right-0 mt-1 bg-white border border-muted dark:bg-slate-900 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1"
                       >
-                        <span>{cityObj.city}</span>
-                        <span className="text-xs opacity-60">
-                          {cityObj.state}, {cityObj.country}
-                        </span>
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                        {filteredCities.map((cityObj, idx) => (
+                          <button
+                            key={`${cityObj.city}-${cityObj.state}`}
+                            type="button"
+                            onClick={() => selectCity(cityObj)}
+                            className={`w-full flex justify-between items-center px-4 py-2 text-sm transition-colors ${
+                              idx === activeCityIndex 
+                                ? "bg-primary/10 text-primary font-bold" 
+                                : "text-foreground hover:bg-muted/50"
+                            }`}
+                          >
+                            <span>{cityObj.city}</span>
+                            <span className="text-xs opacity-60">
+                              {cityObj.state}, {cityObj.country}
+                            </span>
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-            <div className="space-y-1 md:col-span-2">
-              <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">State / Region</Label>
-              <Input 
-                name="state" 
-                placeholder="e.g. TX, Florida" 
-                value={formData.state} 
-                onChange={handleChange} 
-                className="h-11 rounded-xl"
-                disabled={isSearching || isLimitExceeded()}
-              />
-            </div>
+                <div className="space-y-1 md:col-span-2">
+                  <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">State / Region</Label>
+                  <Input 
+                    name="state" 
+                    placeholder="e.g. TX, Florida" 
+                    value={formData.state} 
+                    onChange={handleChange} 
+                    className="h-11 rounded-xl"
+                    disabled={isSearching || isLimitExceeded()}
+                  />
+                </div>
 
-            <div className="space-y-1 md:col-span-1">
-              <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Max Results</Label>
-              <Select 
-                value={maxResults.toString()} 
-                onValueChange={(val) => setMaxResults(parseInt(val))}
-                disabled={isSearching || isLimitExceeded()}
-              >
-                <SelectTrigger className="h-11 rounded-xl">
-                  <SelectValue placeholder="Select max results" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 Results</SelectItem>
-                  <SelectItem value="10">10 Results</SelectItem>
-                  <SelectItem value="20">20 Results</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col justify-end space-y-1 md:col-span-2">
-              <div className="flex justify-between items-center px-1 text-[10px] font-black uppercase text-muted-foreground">
-                <span>Usage Est.</span>
-                <Badge 
-                  variant={estimate.exceeded ? "destructive" : "secondary"} 
-                  className={`text-[9px] px-1.5 py-0 font-bold ${!estimate.exceeded && !isLimitExceeded() ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" : ""}`}
-                >
-                  {estimate.text}
-                </Badge>
+                <div className="space-y-1 md:col-span-1">
+                  <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Max Results</Label>
+                  <Select 
+                    value={maxResults.toString()} 
+                    onValueChange={(val) => setMaxResults(parseInt(val))}
+                    disabled={isSearching || isLimitExceeded()}
+                  >
+                    <SelectTrigger className="h-11 rounded-xl">
+                      <SelectValue placeholder="Select max results" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5 Results</SelectItem>
+                      <SelectItem value="10">10 Results</SelectItem>
+                      <SelectItem value="20">20 Results</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col justify-end space-y-1 md:col-span-2">
+                  <div className="flex justify-between items-center px-1 text-[10px] font-black uppercase text-muted-foreground">
+                    <span>Usage Est.</span>
+                    <Badge 
+                      variant={estimate.exceeded ? "destructive" : "secondary"} 
+                      className={`text-[9px] px-1.5 py-0 font-bold ${!estimate.exceeded && !isLimitExceeded() ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" : ""}`}
+                    >
+                      {estimate.text}
+                    </Badge>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    disabled={isSearching || !formData.niche || isLimitExceeded() || estimate.exceeded} 
+                    className="w-full h-11 text-md rounded-xl font-bold"
+                  >
+                    {isSearching ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching...</>
+                    ) : (
+                      <><Search className="mr-2 h-4 w-4" /> Find Leads</>
+                    )}
+                  </Button>
+                </div>
+              </form>
+              {estimate.warning && (
+                <div className={`mt-3 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 border ${
+                  estimate.exceeded 
+                    ? "bg-destructive/10 border-destructive/20 text-destructive" 
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-600"
+                }`}>
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span>{estimate.warning}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <form onSubmit={handleSmartSearch} className="grid grid-cols-1 md:grid-cols-12 gap-4 border p-4 rounded-xl bg-primary/5 border-primary/20">
+              <div className="md:col-span-12 mb-2">
+                <h3 className="text-sm font-bold text-primary flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" /> AI Smart Search
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Provide a URL of an ideal client or competitor. Gemini AI will analyze the website to determine its niche, location, and intent, and automatically build an advanced search query to find highly relevant businesses.
+                </p>
               </div>
-              <Button 
-                type="submit" 
-                disabled={isSearching || !formData.niche || isLimitExceeded() || estimate.exceeded} 
-                className="w-full h-11 text-md rounded-xl font-bold"
-              >
-                {isSearching ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching...</>
-                ) : (
-                  <><Search className="mr-2 h-4 w-4" /> Find Leads</>
-                )}
-              </Button>
-            </div>
-          </form>
-          {estimate.warning && (
-            <div className={`mt-3 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 border ${
-              estimate.exceeded 
-                ? "bg-destructive/10 border-destructive/20 text-destructive" 
-                : "bg-amber-500/10 border-amber-500/20 text-amber-600"
-            }`}>
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>{estimate.warning}</span>
-            </div>
+              <div className="space-y-1 md:col-span-8">
+                <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Target Website URL</Label>
+                <Input 
+                  name="smartUrl" 
+                  placeholder="https://example.com" 
+                  value={smartUrl} 
+                  onChange={(e) => setSmartUrl(e.target.value)} 
+                  className="h-11 rounded-xl bg-white dark:bg-slate-900"
+                  disabled={isSearching || isLimitExceeded()}
+                />
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <Label className="text-xs uppercase font-bold tracking-wider text-muted-foreground">Max Results</Label>
+                <Select 
+                  value={maxResults.toString()} 
+                  onValueChange={(val) => setMaxResults(parseInt(val))}
+                  disabled={isSearching || isLimitExceeded()}
+                >
+                  <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900">
+                    <SelectValue placeholder="Select max results" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 Results</SelectItem>
+                    <SelectItem value="10">10 Results</SelectItem>
+                    <SelectItem value="20">20 Results</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col justify-end space-y-1 md:col-span-2">
+                <Button 
+                  type="submit" 
+                  disabled={isSearching || !smartUrl || isLimitExceeded()} 
+                  className="w-full h-11 text-md rounded-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  {isSearching ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
+                  ) : (
+                    <><Sparkles className="mr-2 h-4 w-4" /> AI Match</>
+                  )}
+                </Button>
+              </div>
+            </form>
           )}
         </CardContent>
       </Card>

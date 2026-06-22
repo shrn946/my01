@@ -346,14 +346,31 @@ export async function captureWebsiteScreenshot(leadId: string) {
     // 1. Desktop Screenshot
     try {
       await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
-      await page.waitForTimeout(3000); // Shorter wait for above the fold
+      // Scroll to trigger lazy-loaded elements
+      await page.evaluate(async () => {
+        await new Promise((resolve) => {
+          let totalHeight = 0;
+          let distance = 1000;
+          let timer = setInterval(() => {
+            let scrollHeight = document.body.scrollHeight;
+            window.scrollBy(0, distance);
+            totalHeight += distance;
+            if(totalHeight >= scrollHeight - window.innerHeight){
+              clearInterval(timer);
+              window.scrollTo(0, 0); // Scroll back up
+              resolve(true);
+            }
+          }, 200);
+        });
+      });
+      await page.waitForTimeout(3000); // Wait a bit more for images to render
     } catch (e) {
-      console.warn("Desktop navigation timed out, attempting screenshot anyway");
+      console.warn("Desktop navigation or scroll timed out, attempting screenshot anyway");
     }
     
     const captureId = Date.now();
     const desktopFileName = `desktop-${leadId}-${captureId}.png`;
-    const desktopImage = await page.screenshot({ fullPage: false, animations: "disabled", scale: "css" }); 
+    const desktopImage = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" }); 
     const desktopPublicPath = await storeGeneratedImage(
       desktopImage,
       `screenshots/${desktopFileName}`,
@@ -363,13 +380,30 @@ export async function captureWebsiteScreenshot(leadId: string) {
     await page.setViewportSize({ width: 390, height: 844 });
     try {
       await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
-      await page.waitForTimeout(3000); // Shorter wait for above the fold
+      // Scroll to trigger lazy-loaded elements
+      await page.evaluate(async () => {
+        await new Promise((resolve) => {
+          let totalHeight = 0;
+          let distance = 1000;
+          let timer = setInterval(() => {
+            let scrollHeight = document.body.scrollHeight;
+            window.scrollBy(0, distance);
+            totalHeight += distance;
+            if(totalHeight >= scrollHeight - window.innerHeight){
+              clearInterval(timer);
+              window.scrollTo(0, 0); // Scroll back up
+              resolve(true);
+            }
+          }, 200);
+        });
+      });
+      await page.waitForTimeout(3000); // Wait a bit more for images to render
     } catch (e) {
-      console.warn("Mobile navigation timed out, attempting screenshot anyway");
+      console.warn("Mobile navigation or scroll timed out, attempting screenshot anyway");
     }
     
     const mobileFileName = `mobile-${leadId}-${captureId}.png`;
-    const mobileImage = await page.screenshot({ fullPage: false, animations: "disabled", scale: "css" });
+    const mobileImage = await page.screenshot({ fullPage: true, animations: "disabled", scale: "css" });
     const mobilePublicPath = await storeGeneratedImage(
       mobileImage,
       `screenshots/${mobileFileName}`,

@@ -21,28 +21,22 @@ export function ProjectCard({ project }: { project: any }) {
         className="relative aspect-[4/3] overflow-hidden bg-slate-100 rounded-3xl shadow-inner"
         whileHover="hover"
       >
-        <Link href={`/portfolio/${project.slug}`}>
           <div className="relative w-full h-full overflow-hidden">
             <motion.div
-              className="absolute top-0 left-0 w-full"
-              style={{ height: "400%" }}
-              variants={{
-                hover: { y: "-75%" }
+              className="absolute inset-0 w-full h-full bg-no-repeat bg-top"
+              style={{ 
+                backgroundImage: `url(${project.image || TALL_PLACEHOLDER})`,
+                backgroundSize: "100% auto"
               }}
-              initial={{ y: 0 }}
+              variants={{
+                hover: { backgroundPosition: "50% 100%" }
+              }}
+              initial={{ backgroundPosition: "50% 0%" }}
               transition={{ duration: 6, ease: "linear" }}
-            >
-              <Image 
-                src={TALL_PLACEHOLDER} 
-                alt={project.title} 
-                fill
-                className="object-cover object-top"
-              />
-            </motion.div>
+            />
           </div>
 
-          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
-        </Link>
+          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5 pointer-events-none" />
 
         {/* Tool Tags Overlay */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
@@ -83,11 +77,9 @@ export function ProjectCard({ project }: { project: any }) {
           )}
         </div>
         
-        <Link href={`/portfolio/${project.slug}`}>
-          <h3 className="text-lg font-bold text-ink transition-colors group-hover:text-primary">
-            {project.title}
-          </h3>
-        </Link>
+        <h3 className="text-lg font-bold text-ink transition-colors group-hover:text-primary">
+          {project.title}
+        </h3>
         
         <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500 flex-1">
           {project.description}

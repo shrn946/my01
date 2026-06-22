@@ -236,6 +236,7 @@ model Settings {
   portfolioUrl    String?
   demoWebsiteUrls String?
   geminiModel     String?  @default("gemini-3.1-flash-lite")
+  navItems        Json?
   updatedAt       DateTime @updatedAt
 
   googleSearchEnabled Boolean @default(true)

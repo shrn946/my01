@@ -197,7 +197,7 @@ export async function getProjects(featured = false): Promise<ProjectItem[]> {
       }
     },
     [`projects-${featured}`],
-    { tags: ["projects"], revalidate: 3600 }
+    { tags: ["projects"], revalidate: 1 }
   )();
 }
 
@@ -291,7 +291,7 @@ export async function getReviews(featured = false): Promise<ReviewItem[]> {
       }
     },
     [`reviews-${featured}`],
-    { tags: ["reviews"], revalidate: 3600 }
+    { tags: ["reviews"], revalidate: 1 }
   )();
 }
 
@@ -386,4 +386,40 @@ export async function getMediaAssets() {
   } catch {
     return [];
   }
+}
+
+export async function getMenuSettings() {
+  const DEFAULT_MENU = [
+    { id: "home", label: "Home", href: "/", visible: true },
+    { id: "about", label: "About", href: "/about", visible: true },
+    { id: "services", label: "Services", href: "/services", visible: true },
+    { id: "portfolio", label: "Portfolio", href: "/portfolio", visible: true },
+    { 
+      id: "blog-dropdown",
+      label: "Blog", 
+      href: "/blog",
+      visible: true,
+      children: [
+        { id: "articles", label: "Articles", href: "/blog", visible: true },
+        { id: "videos", label: "Videos", href: "/videos", visible: true },
+        { id: "addons", label: "Free Addons", href: "/free-addons", visible: true }
+      ]
+    },
+    { id: "reviews", label: "Reviews", href: "/reviews", visible: true },
+    { id: "contact", label: "Contact", href: "/contact", visible: true }
+  ];
+
+  return unstable_cache(
+    async () => {
+      try {
+        const prisma = getPrisma();
+        const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+        return (settings?.navItems as any) ?? DEFAULT_MENU;
+      } catch {
+        return DEFAULT_MENU;
+      }
+    },
+    ["menu-settings"],
+    { tags: ["settings"], revalidate: 3600 }
+  )();
 }

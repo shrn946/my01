@@ -545,7 +545,8 @@ export async function searchAndAnalyzeLeads(
     city: string;
     niche: string;
   },
-  maxResults: number = 10
+  maxResults: number = 10,
+  customQuery?: string
 ) {
   const prisma = getPrisma();
   const todayStr = getTodayString();
@@ -562,7 +563,7 @@ export async function searchAndAnalyzeLeads(
   try {
     const { country, state, city, niche } = formData;
     const searchLocation = [city, state, country].filter(Boolean).join(" ");
-    const searchQuery = `${niche} in ${searchLocation}`;
+    const searchQuery = customQuery || `${niche} in ${searchLocation}`;
 
     let searchItems: any[] = [];
     let activeProvider: "google" | "serpapi" = "google";
@@ -797,7 +798,94 @@ export async function searchAndAnalyzeLeads(
   }
 }
 
-// 5. Action to Save / Import a Lead Finder lead
+// 5. AI Smart Search: Analyze a URL to find similar leads
+export async function searchSimilarLeadsByUrl(url: string, maxResults: number = 10) {
+  try {
+    const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
+    const res = await fetch(normalizedUrl, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 0 }
+    });
+    if (!res.ok) throw new Error("Failed to fetch the target URL");
+
+    const html = await res.text();
+    const $ = cheerio.load(html);
+    const pageText = $("body").text().replace(/\s+/g, " ").trim().substring(0, 4000);
+    const title = $("title").text().trim();
+
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) throw new Error("Gemini API key is not configured.");
+
+    const prisma = getPrisma();
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+    const prompt = `Analyze this business website's content and generate a search strategy to find similar businesses.
+Target Website: ${normalizedUrl}
+Title: ${title}
+Content Snippet: ${pageText}
+
+Respond ONLY with a valid JSON object in this exact format:
+{
+  "niche": "e.g. Dental Clinic, Commercial Cleaning, etc",
+  "city": "e.g. New York (if mentioned, otherwise leave empty)",
+  "state": "e.g. NY (if mentioned, otherwise leave empty)",
+  "country": "e.g. United States (if mentioned, otherwise leave empty)",
+  "refinedSearchQuery": "A highly targeted Google search query to find similar independent businesses (e.g. 'independent commercial cleaners in New York' or 'local dental clinics -yelp -zocdoc')"
+}`;
+
+    const geminiRes = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0 },
+      }),
+    });
+
+    if (!geminiRes.ok) {
+      const errorText = await geminiRes.text();
+      console.error("Gemini API Error:", errorText);
+      throw new Error(`Gemini AI request failed: ${geminiRes.status} ${geminiRes.statusText}`);
+    }
+
+    const geminiData = await geminiRes.json();
+    const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "{}";
+    
+    // Parse JSON
+    const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    let analysis;
+    try {
+      analysis = JSON.parse(jsonStr);
+    } catch (e) {
+      throw new Error("Failed to parse Gemini AI response.");
+    }
+
+    if (!analysis.niche) throw new Error("Could not determine business niche.");
+
+    // Now execute search using the refined parameters
+    const searchParams = {
+      niche: analysis.niche,
+      city: analysis.city || "",
+      state: analysis.state || "",
+      country: analysis.country || ""
+    };
+
+    // Override the query logic inside searchAndAnalyzeLeads by passing the refined query if we could
+    // But since searchAndAnalyzeLeads is already written, we can just call it and it will build its own query.
+    // However, the prompt specifically asked "The AI should intelligently refine search queries to improve lead quality".
+    // We should modify searchAndAnalyzeLeads to accept an optional customQuery!
+
+    return await searchAndAnalyzeLeads(searchParams, maxResults, analysis.refinedSearchQuery);
+
+  } catch (error: any) {
+    console.error("AI Smart Search Error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// 6. Action to Save / Import a Lead Finder lead
 export async function saveLeadFromFinder(leadId: string) {
   const prisma = getPrisma();
   try {
