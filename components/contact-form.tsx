@@ -10,7 +10,7 @@ export function ContactForm() {
   const [state, action, pending] = useActionState(createContactMessage, initialState);
 
   return (
-    <form action={action} className="rounded-[2.5rem] border border-black/5 bg-white p-8 shadow-premium lg:p-12">
+    <form action={action} className="rounded-[2.5rem] border border-black/5 bg-white p-6 sm:p-8 shadow-premium lg:p-12">
       <div className="grid gap-6 sm:grid-cols-2">
         <Field label="Full Name" name="name" placeholder="John Doe" required />
         <Field label="Email Address" name="email" type="email" placeholder="john@example.com" required />
