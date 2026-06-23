@@ -466,6 +466,16 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSelectAfterImage = async (url: string) => {
+    if (!result?.leadId) return;
+    const newContent = { ...(result.reportContent || {}), afterImage: url };
+    await saveReportEdits(result.leadId, newContent);
+    // Also update proposalImage to keep it in sync for proposals
+    await updateLead(result.leadId, { proposalImage: url });
+    setResult((prev: any) => ({ ...prev, proposalImage: url, reportContent: newContent }));
+    toast({ title: "After Image selected from media" });
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-green-500";
     if (score >= 50) return "text-yellow-500";
@@ -943,7 +953,7 @@ export default function DashboardPage() {
                          {result.reportContent?.isAfterImageLocked ? "Locked" : <Save className="h-4 w-4" />}
                        </Button>
                      </div>
-                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center">
+                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
                        {result.reportContent?.afterImage ? (
                          <img 
                            src={`${result.reportContent?.afterImage}?v=${new Date().getTime()}`} 
@@ -958,6 +968,14 @@ export default function DashboardPage() {
                            <p className="text-xs text-indigo-300">Or generate the report — After image appears here after URL is provided</p>
                          </div>
                        )}
+                       <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                        <MediaSelector 
+                          currentImage={result.reportContent?.afterImage} 
+                          media={media} 
+                          onSelect={handleSelectAfterImage} 
+                          label="After"
+                        />
+                      </div>
                      </div>
                    </div>
                 </div>
