@@ -126,7 +126,7 @@ export function HeroSlider({ slides }: { slides: any[] }) {
                           className="text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl leading-[1.1]"
                         >
                           {slide.title.split(" ").map((word: string, i: number) => (
-                            <span key={i} className="inline-block mr-[0.3em] overflow-hidden">
+                            <span key={i} className="inline-block mr-[0.3em] overflow-hidden py-2 -my-2 drop-shadow-lg">
                               <motion.span
                                 initial={{ y: "100%" }}
                                 animate={{ y: 0 }}
@@ -140,13 +140,13 @@ export function HeroSlider({ slides }: { slides: any[] }) {
                         </motion.h1>
                         <motion.p 
                           variants={headingVariants}
-                          className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-200 opacity-80"
+                          className="mt-8 max-w-2xl text-xl font-medium leading-relaxed text-slate-100 drop-shadow-md"
                         >
                           {slide.subtitle}
                         </motion.p>
                         <motion.div variants={headingVariants} className="mt-12 flex gap-4">
                           <Magnetic>
-                            <Link href={slide.buttonLink} className="group inline-flex items-center gap-3 rounded-full bg-primary px-10 py-5 text-sm font-bold text-white transition-all hover:bg-blue-600 hover:shadow-2xl hover:shadow-primary/40 active:scale-95">
+                            <Link href={slide.buttonLink} className="group inline-flex items-center gap-3 rounded-full bg-primary px-12 py-5 text-base font-black text-white border border-primary/50 shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-blue-600 hover:shadow-2xl hover:shadow-primary/50 active:scale-95">
                               {slide.buttonText} <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                             </Link>
                           </Magnetic>
