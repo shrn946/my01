@@ -676,6 +676,7 @@ export default function LeadsPage() {
               {paginatedLeads.map((lead, idx) => {
                 const hasEmail = lead.email && lead.email.trim() !== "";
                 const isSelected = selectedLeads.includes(lead.id);
+                const isContacted = lead.status === "Contacted";
 
                 return (
                   <div
@@ -683,7 +684,11 @@ export default function LeadsPage() {
                     className="animate-in fade-in slide-in-from-bottom-2 duration-300"
                     style={{ animationFillMode: "both", animationDelay: `${idx * 30}ms` }}
                   >
-                    <Card className={`overflow-hidden border transition-all bg-card ${isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-muted hover:shadow-md hover:border-primary/25'}`}>
+                    <Card className={`overflow-hidden border transition-all ${
+                      isSelected ? 'border-primary bg-primary/5 shadow-sm' : 
+                      isContacted ? 'border-emerald-200 bg-emerald-50/50 hover:border-emerald-300 hover:shadow-md' :
+                      'bg-card border-muted hover:shadow-md hover:border-primary/25'
+                    }`}>
                       {/* Responsive Card Body */}
                       <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-4 items-stretch lg:items-center relative">
                         {/* Checkbox section */}
@@ -700,12 +705,16 @@ export default function LeadsPage() {
                         {/* Column: Business Info */}
                         <div className="p-6 lg:p-0 lg:col-span-4 space-y-2 lg:py-4">
                           <div>
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
                               <h3 className="font-extrabold text-lg lg:text-md truncate text-foreground leading-tight" title={lead.businessName}>
                                 {lead.businessName}
                               </h3>
-                              {hasEmail ? (
-                                <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-extrabold text-[8px] uppercase">Email Found</Badge>
+                              {isContacted ? (
+                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-200 font-extrabold text-[9px] uppercase px-2 py-0.5 shadow-sm flex items-center gap-1">
+                                  <CheckCircle2 className="h-3 w-3" /> Proposal Sent
+                                </Badge>
+                              ) : hasEmail ? (
+                                <Badge className="bg-blue-500/10 text-blue-500 border border-blue-500/20 font-extrabold text-[8px] uppercase">Email Found</Badge>
                               ) : (
                                 <Badge className="bg-rose-500/10 text-rose-500 border border-rose-500/20 font-extrabold text-[8px] uppercase">No Email</Badge>
                               )}
