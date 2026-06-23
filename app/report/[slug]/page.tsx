@@ -436,7 +436,7 @@ export default async function ReportPage({
               <p className="mt-2 text-sm text-slate-400 flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Focused scope based on selected categories only.</p>
             </div>
             <Button className="bg-white text-slate-950 hover:bg-slate-100 h-12 px-7" asChild>
-              <a href={`mailto:hassan@example.com?subject=${encodeURIComponent(aiAudit.proposal_content.subject)}`}>
+              <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hassannaqvi@coreweblabs.com'}?subject=${encodeURIComponent(aiAudit.proposal_content.subject)}`}>
                 Discuss This Proposal <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>

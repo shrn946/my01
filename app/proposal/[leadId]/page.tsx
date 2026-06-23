@@ -253,9 +253,9 @@ export default async function ProposalPage({
                 <p className="mt-3 text-blue-100">The attached full audit contains the complete selected-category findings and action plan.</p>
               </div>
               <div className="space-y-3 shrink-0 text-sm font-bold">
-                <div className="flex items-center gap-3"><Phone className="h-5 w-5" /> +92 312 1234567</div>
-                <div className="flex items-center gap-3"><Mail className="h-5 w-5" /> hassan@example.com</div>
-                <div className="flex items-center gap-3"><Globe className="h-5 w-5" /> www.hassanrizwan.com</div>
+                <div className="flex items-center gap-3"><Phone className="h-5 w-5" /> +{process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '923226682496'}</div>
+                <div className="flex items-center gap-3"><Mail className="h-5 w-5" /> {process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hassannaqvi@coreweblabs.com'}</div>
+                <div className="flex items-center gap-3"><Globe className="h-5 w-5" /> www.coreweblabs.com</div>
               </div>
             </div>
           </footer>
