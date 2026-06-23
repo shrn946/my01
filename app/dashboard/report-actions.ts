@@ -1,7 +1,6 @@
 "use server";
 
 import { getPrisma } from "@/lib/prisma";
-import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { generateAuditExports, generateProposalPng, captureWebsiteScreenshot } from "@/lib/lead-actions";
 import { formatDeveloperComments, generateAiAudit } from "@/lib/ai-audit";
@@ -137,7 +136,7 @@ export async function saveReportEdits(
     history: [
       ...current.history,
       {
-        id: crypto.randomUUID(),
+        id: Math.random().toString(36).substring(2, 15),
         savedAt: new Date().toISOString(),
         developerComments: current.developerComments,
         recommendations: current.recommendations,
@@ -175,7 +174,7 @@ export async function uploadLeadReportMedia(formData: FormData) {
   const section = String(formData.get("section") || "appendix");
   const caption = String(formData.get("caption") || "").trim() || file.name;
   const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-  const objectName = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  const objectName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${extension}`;
   const url = await storeGeneratedFile(
     Buffer.from(await file.arrayBuffer()),
     `report-media/${leadId}/${objectName}`,
@@ -210,7 +209,7 @@ export async function uploadLeadReportMedia(formData: FormData) {
   }
 
   const item = reportMediaItemSchema.parse({
-    id: crypto.randomUUID(),
+    id: Math.random().toString(36).substring(2, 15),
     url,
     fileName: file.name,
     type,
