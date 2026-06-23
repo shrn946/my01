@@ -350,14 +350,11 @@ export default async function ReportPage({
                   <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
                     {(lead.beforeAfterImage || lead.desktopImage) ? (
                       <div 
-                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out" 
+                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out bg-top hover:bg-bottom" 
                         style={{ 
                           backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`, 
-                          backgroundSize: '100% auto',
-                          backgroundPosition: 'top center'
+                          backgroundSize: '100% auto'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundPosition = 'bottom center'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundPosition = 'top center'}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-600">No before image</div>
@@ -370,14 +367,11 @@ export default async function ReportPage({
                   <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
                     {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
                       <div 
-                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out" 
+                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out bg-top hover:bg-bottom" 
                         style={{ 
                           backgroundImage: `url('${(lead.reportContent as any)?.afterImage || lead.proposalImage}')`, 
-                          backgroundSize: '100% auto',
-                          backgroundPosition: 'top center'
+                          backgroundSize: '100% auto'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundPosition = 'bottom center'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundPosition = 'top center'}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-600">No after image</div>
