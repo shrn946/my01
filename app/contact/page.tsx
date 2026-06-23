@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hassan@coreweblabs.com";
+  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hassannaqvi@coreweblabs.com";
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "923226682496";
 
   return (
