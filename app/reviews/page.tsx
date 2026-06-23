@@ -22,7 +22,7 @@ export default async function ReviewsPage() {
           <SectionHeading 
             eyebrow="Testimonials" 
             title="What clients say after launch" 
-            text="I've had the pleasure of working with businesses of all sizes to deliver exceptional WordPress results. Here's what they have to say."
+            text="We've had the pleasure of working with businesses of all sizes to deliver exceptional WordPress results. Here's what they have to say."
           />
           
           {reviews.length ? (

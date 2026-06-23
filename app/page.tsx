@@ -142,8 +142,8 @@ export default async function HomePage() {
         <div className="section-container">
           <SectionHeading 
             eyebrow="Testimonials" 
-            title="What our clients are saying" 
-            text="Trusted by businesses worldwide to deliver reliable, high-performing web solutions."
+            title="What clients say after launch" 
+            text="We've had the pleasure of working with businesses of all sizes to deliver exceptional WordPress results. Here's what they have to say."
             outlineText="TRUSTED"
           />
           <ReviewsCarousel reviews={featuredReviews} />
