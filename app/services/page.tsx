@@ -8,7 +8,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Hassan Naqvi offers WordPress, Elementor, WooCommerce, custom plugin, speed optimization, bug fixing, maintenance, and landing page services."
+  description: "CoreWebLabs offers expert Next.js, React, WordPress, WooCommerce, custom development, and long-term maintenance services."
 };
 
 export default function ServicesPage() {
@@ -20,8 +20,8 @@ export default function ServicesPage() {
         <div className="section-container">
           <SectionHeading 
             eyebrow="Expertise" 
-            title="WordPress services tailored for your growth" 
-            text="I provide end-to-end WordPress solutions designed to improve performance, boost conversions, and simplify management." 
+            title="Web solutions tailored for your growth" 
+            text="We provide end-to-end web development solutions designed to improve performance, boost conversions, and simplify management." 
           />
           
           <div className="grid gap-8 md:grid-cols-2">
@@ -70,7 +70,7 @@ export default function ServicesPage() {
         <div className="section-container">
           <SectionHeading 
             eyebrow="Workflow" 
-            title="How I deliver success" 
+            title="How we deliver success" 
           />
           
           <div className="grid gap-8 md:grid-cols-4">
