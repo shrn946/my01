@@ -403,8 +403,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
 
     browser = await launchBrowser();
     const context = await browser.newContext({
-      viewport: { width: 1200, height: 1600 },
-      deviceScaleFactor: 2, // Retina quality
+      viewport: { width: 1200, height: 3500 },
+      deviceScaleFactor: 1, // Fixed memory crash
     });
     const page = await context.newPage();
     
@@ -416,7 +416,7 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
 
     const fileName = `proposal-${mode}-${leadId}-${Date.now()}.png`;
     const proposalImage = await page.screenshot({
-      fullPage: true,
+      fullPage: false,
       animations: "disabled"
     });
     const publicPath = await storeGeneratedImage(
@@ -462,14 +462,14 @@ export async function generateAuditExports(leadId: string) {
 
     browser = await launchBrowser();
     const context = await browser.newContext({
-      viewport: { width: 1440, height: 1200 },
+      viewport: { width: 1200, height: 4000 },
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
     const exportId = Date.now();
     
     try { await page.goto(pngReportUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on report png"); }
-    const image = await page.screenshot({ fullPage: true, animations: "disabled" });
+    const image = await page.screenshot({ fullPage: false, animations: "disabled" });
 
     const [reportImage] = await Promise.all([
       storeGeneratedImage(image, `reports/audit-${leadId}-${exportId}.png`),
