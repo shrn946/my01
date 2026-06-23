@@ -175,6 +175,9 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
           subject: subject,
           html: htmlBody,
           text: customBody.replace(/<[^>]*>?/gm, ''), // Plain text fallback
+          tags: [
+            { name: "lead_id", value: leadId }
+          ]
         });
         
         if (error) {

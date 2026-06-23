@@ -149,6 +149,10 @@ model Lead {
   phone                  String?
   address                String?
   city                   String?
+  instagram              String?
+  facebook               String?
+  linkedin               String?
+  twitter                String?
   category               String?
   source                 String?
   status                 String     @default("New")

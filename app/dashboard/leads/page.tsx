@@ -93,7 +93,12 @@ import {
   MailQuestion,
   Check,
   Wand2,
-  Sparkles
+  Sparkles,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  MousePointerClick
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
@@ -677,6 +682,9 @@ export default function LeadsPage() {
                 const hasEmail = lead.email && lead.email.trim() !== "";
                 const isSelected = selectedLeads.includes(lead.id);
                 const isContacted = lead.status === "Contacted";
+                const isOpened = lead.status === "Opened";
+                const isClicked = lead.status === "Clicked";
+                const hasProposalStatus = isContacted || isOpened || isClicked;
 
                 return (
                   <div
@@ -686,6 +694,8 @@ export default function LeadsPage() {
                   >
                     <Card className={`overflow-hidden border transition-all ${
                       isSelected ? 'border-primary bg-primary/5 shadow-sm' : 
+                      isClicked ? 'border-purple-200 bg-purple-50/40 hover:border-purple-300 hover:shadow-md' :
+                      isOpened ? 'border-blue-200 bg-blue-50/40 hover:border-blue-300 hover:shadow-md' :
                       isContacted ? 'border-emerald-200 bg-emerald-50/50 hover:border-emerald-300 hover:shadow-md' :
                       'bg-card border-muted hover:shadow-md hover:border-primary/25'
                     }`}>
@@ -709,12 +719,17 @@ export default function LeadsPage() {
                               <h3 className="font-extrabold text-lg lg:text-md truncate text-foreground leading-tight" title={lead.businessName}>
                                 {lead.businessName}
                               </h3>
-                              {isContacted ? (
-                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-200 font-extrabold text-[9px] uppercase px-2 py-0.5 shadow-sm flex items-center gap-1">
-                                  <CheckCircle2 className="h-3 w-3" /> Proposal Sent
+                              {hasProposalStatus ? (
+                                <Badge className={`border font-extrabold text-[9px] uppercase px-2 py-0.5 shadow-sm flex items-center gap-1 ${
+                                  isClicked ? 'bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200' :
+                                  isOpened ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200' :
+                                  'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200'
+                                }`}>
+                                  {isClicked ? <MousePointerClick className="h-3 w-3" /> : isOpened ? <Eye className="h-3 w-3" /> : <CheckCircle2 className="h-3 w-3" />} 
+                                  {isClicked ? 'Proposal Clicked' : isOpened ? 'Proposal Read' : 'Proposal Sent'}
                                 </Badge>
                               ) : hasEmail ? (
-                                <Badge className="bg-blue-500/10 text-blue-500 border border-blue-500/20 font-extrabold text-[8px] uppercase">Email Found</Badge>
+                                <Badge className="bg-slate-100 text-slate-500 border border-slate-200 font-extrabold text-[8px] uppercase">Email Found</Badge>
                               ) : (
                                 <Badge className="bg-rose-500/10 text-rose-500 border border-rose-500/20 font-extrabold text-[8px] uppercase">No Email</Badge>
                               )}
@@ -727,6 +742,12 @@ export default function LeadsPage() {
                             >
                               <Globe className="h-3 w-3" /> {lead.website.replace(/^https?:\/\//, "").split("/")[0]} <ExternalLink className="h-2.5 w-2.5" />
                             </a>
+                            <div className="flex items-center gap-3 mt-2">
+                              {lead.instagram && <a href={lead.instagram} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-pink-600 transition-colors"><Instagram className="h-3.5 w-3.5" /></a>}
+                              {lead.facebook && <a href={lead.facebook} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-blue-600 transition-colors"><Facebook className="h-3.5 w-3.5" /></a>}
+                              {lead.twitter && <a href={lead.twitter} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-sky-500 transition-colors"><Twitter className="h-3.5 w-3.5" /></a>}
+                              {lead.linkedin && <a href={lead.linkedin} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-blue-800 transition-colors"><Linkedin className="h-3.5 w-3.5" /></a>}
+                            </div>
                           </div>
 
                           <div className="flex flex-col gap-1 text-xs text-muted-foreground">
