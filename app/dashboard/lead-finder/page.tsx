@@ -138,7 +138,13 @@ const CITY_DETAILS_MAP: Record<string, { state: string; country: string }> = {
   "Madrid": { state: "Madrid", country: "Spain" },
   "Barcelona": { state: "Catalonia", country: "Spain" },
   "Cape Town": { state: "Western Cape", country: "South Africa" },
-  "Johannesburg": { state: "Gauteng", country: "South Africa" }
+  "Johannesburg": { state: "Gauteng", country: "South Africa" },
+  "Riyadh": { state: "Riyadh", country: "Saudi Arabia" },
+  "Jeddah": { state: "Makkah", country: "Saudi Arabia" },
+  "Doha": { state: "Doha", country: "Qatar" },
+  "Kuwait City": { state: "Al Asimah", country: "Kuwait" },
+  "Manama": { state: "Capital Governorate", country: "Bahrain" },
+  "Muscat": { state: "Muscat", country: "Oman" }
 };
 
 const DEFAULT_CITIES = [
@@ -213,7 +219,13 @@ const DEFAULT_CITIES = [
   { city: "Madrid", state: "Madrid", country: "Spain" },
   { city: "Barcelona", state: "Catalonia", country: "Spain" },
   { city: "Cape Town", state: "Western Cape", country: "South Africa" },
-  { city: "Johannesburg", state: "Gauteng", country: "South Africa" }
+  { city: "Johannesburg", state: "Gauteng", country: "South Africa" },
+  { city: "Riyadh", state: "Riyadh", country: "Saudi Arabia" },
+  { city: "Jeddah", state: "Makkah", country: "Saudi Arabia" },
+  { city: "Doha", state: "Doha", country: "Qatar" },
+  { city: "Kuwait City", state: "Al Asimah", country: "Kuwait" },
+  { city: "Manama", state: "Capital Governorate", country: "Bahrain" },
+  { city: "Muscat", state: "Muscat", country: "Oman" }
 ];
 
 const DEFAULT_NICHES = [
@@ -330,13 +342,10 @@ export default function LeadFinderPage() {
     let cities = popularCities;
     if (formData.country) {
       cities = cities.filter(c => c.country.toLowerCase() === formData.country.toLowerCase());
-      return formData.city.trim() === ""
-        ? cities
-        : cities.filter(c => c.city.toLowerCase().includes(formData.city.toLowerCase()));
     }
     return formData.city.trim() === ""
-      ? cities.slice(0, 8)
-      : cities.filter(c => c.city.toLowerCase().includes(formData.city.toLowerCase())).slice(0, 8);
+      ? cities
+      : cities.filter(c => c.city.toLowerCase().includes(formData.city.toLowerCase()));
   })();
 
   const filteredNiches = formData.niche.trim() === ""
@@ -1121,7 +1130,12 @@ export default function LeadFinderPage() {
                   { name: "France", code: "France", flag: "🇫🇷" },
                   { name: "Italy", code: "Italy", flag: "🇮🇹" },
                   { name: "Spain", code: "Spain", flag: "🇪🇸" },
-                  { name: "South Africa", code: "South Africa", flag: "🇿🇦" }
+                  { name: "South Africa", code: "South Africa", flag: "🇿🇦" },
+                  { name: "Saudi Arabia", code: "Saudi Arabia", flag: "🇸🇦" },
+                  { name: "Qatar", code: "Qatar", flag: "🇶🇦" },
+                  { name: "Kuwait", code: "Kuwait", flag: "🇰🇼" },
+                  { name: "Bahrain", code: "Bahrain", flag: "🇧🇭" },
+                  { name: "Oman", code: "Oman", flag: "🇴🇲" }
                 ].map((countryObj) => (
                   <Button
                     key={countryObj.name}
