@@ -19,7 +19,7 @@ export const AUDIT_CATEGORIES: Array<{
   label: string;
   description: string;
 }> = [
-  { value: "redesign", label: "Complete Re-Design", description: "Transform outdated aesthetics into a modern, high-converting experience with premium UI/UX, responsive layouts, and strong brand alignment." },
+  { value: "redesign", label: "Complete Re-Design (Offer Free Demo)", description: "Transform outdated aesthetics into a modern, high-converting experience with premium UI/UX, responsive layouts, and strong brand alignment." },
   { value: "fix_issues", label: "Bug Fixes & UX Repair", description: "Resolve layout breaks, technical glitches, broken links, and friction points that cause visitors to bounce." },
   { value: "loading_speed", label: "Performance & Speed Optimization", description: "Drastically reduce load times, optimize Core Web Vitals, compress assets, and implement advanced caching for lightning-fast speeds." },
   { value: "seo", label: "SEO & Search Visibility", description: "Dominate search rankings through on-page SEO, schema markup, technical metadata, and semantic content structuring." },
