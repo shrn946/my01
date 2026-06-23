@@ -1179,10 +1179,10 @@ export default function LeadFinderPage() {
             {popularCities.length > 0 && (
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-dashed">
                 <span className="text-xs font-black uppercase text-muted-foreground tracking-wider whitespace-nowrap flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 text-primary" /> Top Priority Cities:
+                  <MapPin className="h-3.5 w-3.5 text-primary" /> {formData.country ? `${formData.country} Cities:` : 'Top Priority Cities:'}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {popularCities.slice(0, 10).map((cityObj) => (
+                  {(formData.country ? popularCities.filter(c => c.country.toLowerCase() === formData.country.toLowerCase()) : popularCities.slice(0, 10)).map((cityObj) => (
                     <Button
                       key={`${cityObj.city}-${cityObj.state}`}
                       type="button"
