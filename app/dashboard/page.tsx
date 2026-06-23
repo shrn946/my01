@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage
+  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles
 } from "lucide-react";
-import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead } from "./actions";
+import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments } from "./actions";
 import { getFinderLeads } from "./lead-finder/actions";
 import { 
   setReportGenerating, actionCaptureScreenshot, actionRecommendations,
@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isEnhancingComments, setIsEnhancingComments] = useState(false);
 
   const handleCaptureAfter = async () => {
     if (!afterUrl || !result?.leadId) return;
@@ -398,6 +399,30 @@ export default function DashboardPage() {
       setResult((prev: any) => ({ ...prev, developerComments: editComments, reportContent: res.reportContent, reportStatus: "Not Generated" }));
       setIsEditingComments(false);
       toast({ title: "Developer Comments Saved" });
+    }
+  };
+
+  const handleEnhanceDashboardComments = async () => {
+    if (!editComments) {
+      toast({ title: "No Comments", description: "Please write some notes first.", variant: "destructive" });
+      return;
+    }
+    setIsEnhancingComments(true);
+    try {
+      const enhanced = await enhanceDeveloperComments(editComments);
+      if (enhanced) {
+        setEditComments(enhanced);
+        if (result?.leadId) {
+           await updateLeadDeveloperComments(result.leadId, enhanced);
+        }
+        toast({ title: "Enhanced!", description: "Your comments have been professionally rewritten." });
+      } else {
+        throw new Error("Failed");
+      }
+    } catch (error) {
+      toast({ title: "Enhancement Failed", description: "Failed to rewrite comments.", variant: "destructive" });
+    } finally {
+      setIsEnhancingComments(false);
     }
   };
 
@@ -987,12 +1012,24 @@ export default function DashboardPage() {
                            <div className="h-4 w-px bg-indigo-200 mx-2" />
                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Advanced Developer Editor</p>
                         </div>
-                        <Textarea 
-                          value={editComments} 
-                          onChange={e => setEditComments(e.target.value)}
-                          placeholder="Type your professional audit comments here... (e.g., 'Your website has a strong foundation, but the hero section lacks a clear call to action...')"
-                          className="min-h-[200px] border-0 focus-visible:ring-0 text-md leading-relaxed p-6"
-                        />
+                        <div className="relative">
+                          <Textarea 
+                            value={editComments} 
+                            onChange={e => setEditComments(e.target.value)}
+                            placeholder="Type your professional audit comments here... (e.g., 'Your website has a strong foundation, but the hero section lacks a clear call to action...')"
+                            className="min-h-[200px] border-0 focus-visible:ring-0 text-md leading-relaxed p-6"
+                          />
+                          <Button 
+                            size="icon" 
+                            variant="outline" 
+                            className="absolute bottom-4 right-4 rounded-xl h-10 w-10 hover:bg-primary hover:text-white shadow-sm"
+                            onClick={() => handleEnhanceDashboardComments()}
+                            disabled={isEnhancingComments || !editComments}
+                            title="Enhance with AI"
+                          >
+                            {isEnhancingComments ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5" />}
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-[10px] text-muted-foreground italic">Markdown is supported for basic formatting. These comments will appear on the final PNG and Web reports.</p>
                       <p className="text-[10px] text-muted-foreground">The original AI analysis remains preserved. Saved revisions: {result.reportContent?.history?.length || 0}</p>
