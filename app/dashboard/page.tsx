@@ -432,18 +432,45 @@ export default function DashboardPage() {
   const handleReportMediaUpload = async (formData: FormData) => {
     if (!result?.leadId) return;
     setIsUploadingMedia(true);
-    formData.set("leadId", result.leadId);
+    
+    const files = formData.getAll("files");
+    if (!files || files.length === 0) {
+      setIsUploadingMedia(false);
+      return;
+    }
+
     try {
-      const response = await uploadLeadReportMedia(formData);
-      if (!response.success || !response.item) {
-        throw new Error(response.error || "Upload failed");
+      const uploadedItems = [];
+      for (const file of files) {
+        if (!(file instanceof File) || file.size === 0) continue;
+        
+        const singleFormData = new FormData();
+        singleFormData.set("leadId", result.leadId);
+        singleFormData.set("file", file);
+        singleFormData.set("type", formData.get("type") || "general");
+        singleFormData.set("section", formData.get("section") || "appendix");
+        
+        let caption = String(formData.get("caption") || "").trim();
+        if (files.length > 1 && caption) caption = `${caption} - ${file.name}`;
+        singleFormData.set("caption", caption);
+        singleFormData.set("includeInEmail", formData.get("includeInEmail") || "false");
+
+        const response = await uploadLeadReportMedia(singleFormData);
+        if (!response.success || !response.item) {
+          throw new Error(response.error || `Upload failed for ${file.name}`);
+        }
+        uploadedItems.push(response.item);
       }
+
       setReportMedia((current) => {
-        const next = [...current, response.item];
+        const next = [...current, ...uploadedItems];
         setResult((resultState: any) => ({ ...resultState, reportMedia: next, reportStatus: "Not Generated" }));
         return next;
       });
-      toast({ title: "Screenshot uploaded", description: "It will be included in the selected report section." });
+      toast({ title: "Upload complete", description: `Successfully uploaded ${uploadedItems.length} image(s).` });
+      
+      const form = document.getElementById("report-media-upload-form") as HTMLFormElement;
+      if (form) form.reset();
     } catch (error) {
       toast({ title: "Upload failed", description: error instanceof Error ? error.message : "Unable to upload image", variant: "destructive" });
     } finally {
@@ -1205,10 +1232,10 @@ export default function DashboardPage() {
                     </div>
                   </CardHeader>
                 <CardContent className="space-y-6">
-                  <form action={handleReportMediaUpload} className="grid md:grid-cols-2 gap-4 rounded-2xl border bg-slate-50 p-5">
+                  <form id="report-media-upload-form" action={handleReportMediaUpload} className="grid md:grid-cols-2 gap-4 rounded-2xl border bg-slate-50 p-5">
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="report-file">Image</Label>
-                      <Input id="report-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" required />
+                      <Label htmlFor="report-file">Images (You can select multiple)</Label>
+                      <Input id="report-file" name="files" type="file" multiple accept="image/jpeg,image/png,image/webp" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="report-media-type">Image Type</Label>
