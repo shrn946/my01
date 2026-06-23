@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
     "playwright",
     "playwright-core"
   ],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   outputFileTracingIncludes: {
     "/dashboard/**/*": [
       "./node_modules/playwright-core/browsers.json"
