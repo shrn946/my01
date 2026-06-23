@@ -790,7 +790,7 @@ export async function updateLeadDeveloperComments(leadId: string, comments: stri
 export async function enhanceDeveloperComments(rawComments: string) {
   try {
     const apiKey = process.env.GEMINI_API_KEY?.trim();
-    if (!apiKey) return null;
+    if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
 
     const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
@@ -823,13 +823,17 @@ Response constraints: Return ONLY the rewritten text. No introductions, no greet
     });
     clearTimeout(timeout);
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Gemini API Error: ${response.status} - ${errText}`);
+    }
     const json = await response.json();
     const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return text ? text.trim() : null;
-  } catch (error) {
+    if (!text) throw new Error("Gemini returned an empty response");
+    return text.trim();
+  } catch (error: any) {
     console.error("ENHANCE_COMMENTS_ERROR:", error);
-    return null;
+    throw new Error(error.message || "Failed to rewrite comments");
   }
 }
 

@@ -419,8 +419,8 @@ export default function DashboardPage() {
       } else {
         throw new Error("Failed");
       }
-    } catch (error) {
-      toast({ title: "Enhancement Failed", description: "Failed to rewrite comments.", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Enhancement Failed", description: error.message || "Failed to rewrite comments.", variant: "destructive" });
     } finally {
       setIsEnhancingComments(false);
     }
