@@ -347,35 +347,57 @@ export default async function ReportPage({
                 {/* Before */}
                 <div className="space-y-4">
                   <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
-                  <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
-                    {(lead.beforeAfterImage || lead.desktopImage) ? (
-                      <div 
-                        className="w-full h-full bg-no-repeat transition-all duration-[15s] ease-linear bg-top hover:bg-bottom" 
-                        style={{ 
-                          backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`, 
-                          backgroundSize: '100% auto'
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-600">No before image</div>
-                    )}
+                  <div className="w-full aspect-[16/10] rounded-xl border border-white/10 shadow-2xl bg-slate-900 overflow-hidden group flex flex-col relative ring-1 ring-white/5">
+                    {/* Browser Header */}
+                    <div className="h-8 bg-slate-800/80 border-b border-white/5 flex items-center px-4 shrink-0 backdrop-blur-md relative z-10">
+                      <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                      </div>
+                    </div>
+                    {/* Image Container */}
+                    <div className="flex-1 relative overflow-hidden bg-slate-950">
+                      {(lead.beforeAfterImage || lead.desktopImage) ? (
+                        <div 
+                          className="absolute inset-0 w-full h-full bg-no-repeat transition-all duration-[15s] ease-linear bg-top hover:bg-bottom" 
+                          style={{ 
+                            backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`, 
+                            backgroundSize: '100% auto'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-600 text-sm font-medium">No before image</div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {/* After */}
                 <div className="space-y-4">
                   <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
-                  <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
-                    {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
-                      <div 
-                        className="w-full h-full bg-no-repeat transition-all duration-[15s] ease-linear bg-top hover:bg-bottom" 
-                        style={{ 
-                          backgroundImage: `url('${(lead.reportContent as any)?.afterImage || lead.proposalImage}')`, 
-                          backgroundSize: '100% auto'
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-600">No after image</div>
-                    )}
+                  <div className="w-full aspect-[16/10] rounded-xl border border-white/10 shadow-2xl bg-slate-900 overflow-hidden group flex flex-col relative ring-1 ring-white/5">
+                    {/* Browser Header */}
+                    <div className="h-8 bg-slate-800/80 border-b border-white/5 flex items-center px-4 shrink-0 backdrop-blur-md relative z-10">
+                      <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                      </div>
+                    </div>
+                    {/* Image Container */}
+                    <div className="flex-1 relative overflow-hidden bg-slate-950">
+                      {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
+                        <div 
+                          className="absolute inset-0 w-full h-full bg-no-repeat transition-all duration-[15s] ease-linear bg-top hover:bg-bottom" 
+                          style={{ 
+                            backgroundImage: `url('${(lead.reportContent as any)?.afterImage || lead.proposalImage}')`, 
+                            backgroundSize: '100% auto'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-600 text-sm font-medium">No after image</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
