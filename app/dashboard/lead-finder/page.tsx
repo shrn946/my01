@@ -413,13 +413,17 @@ export default function LeadFinderPage() {
   };
 
   const handleExportToExcel = () => {
-    if (results.length === 0) {
+    const leadsToExport = selectedLeads.length > 0
+      ? results.filter((lead) => selectedLeads.includes(lead.id))
+      : results;
+
+    if (leadsToExport.length === 0) {
       toast({ title: "No Leads to Export", description: "Search or discover leads before exporting.", variant: "destructive" });
       return;
     }
 
     try {
-      const excelData = results.map((lead) => ({
+      const excelData = leadsToExport.map((lead) => ({
         "Business Name": lead.businessName,
         "Website URL": lead.website,
         "Email": lead.email || "",
@@ -441,7 +445,7 @@ export default function LeadFinderPage() {
       XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
 
       XLSX.writeFile(workbook, `leads-finder-export-${Date.now()}.xlsx`);
-      toast({ title: "Export Successful", description: `Exported ${results.length} leads to Excel.` });
+      toast({ title: "Export Successful", description: `Exported ${leadsToExport.length} leads to Excel.` });
     } catch (error: any) {
       toast({ title: "Export Failed", description: error.message || "An error occurred during export.", variant: "destructive" });
     }
