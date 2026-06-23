@@ -13,14 +13,14 @@ import { services } from "@/lib/seed-data";
 import { slugify } from "@/lib/utils";
 
 export default async function HomePage() {
-  const [slides, featuredProjects, featuredPosts, featuredReviews] = await Promise.all([
+  const [slides, allProjects, featuredPosts, featuredReviews] = await Promise.all([
     getHeroSlides(true),
-    getProjects(true),
+    getProjects(false),
     getBlogPosts(true),
     getReviews(true)
   ]);
 
-  const retailProjects = featuredProjects.filter(p => slugify(p.category) === "retail-parks-and-shopping");
+  const retailProjects = allProjects.filter(p => slugify(p.category) === "retail-parks-and-shopping");
 
   return (
     <>
