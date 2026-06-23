@@ -45,6 +45,9 @@ export default function DashboardPage() {
   const [emailBody, setEmailBody] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [isEnhancingComments, setIsEnhancingComments] = useState(false);
+  const [isFullScreenCapture, setIsFullScreenCapture] = useState(true);
+  const [isUploadingCustomBefore, setIsUploadingCustomBefore] = useState(false);
+  const [isUploadingCustomAfter, setIsUploadingCustomAfter] = useState(false);
 
   const handleCaptureAfter = async () => {
     if (!afterUrl || !result?.leadId) return;
@@ -55,7 +58,7 @@ export default function DashboardPage() {
 
       // Temporarily update the lead with the after URL for screenshot capture
       await updateLead(result.leadId, { website: afterUrl });
-      const screenshotRes = await actionCaptureScreenshot(result.leadId);
+      const screenshotRes = await actionCaptureScreenshot(result.leadId, isFullScreenCapture);
       
       // Revert the URL back to the original immediately
       await updateLead(result.leadId, { website: result.website });
@@ -842,10 +845,10 @@ export default function DashboardPage() {
                   {/* Before Image */}
                   <div className="p-6 border-r border-indigo-100">
                     <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Before (Existing)</p>
-                    <div className="flex gap-2 mb-3">
+                    <div className="flex gap-2 mb-3 items-center flex-wrap">
                       <Button size="sm" onClick={async () => {
                           setIsCapturingBefore(true);
-                          const res = await actionCaptureScreenshot(result.leadId);
+                          const res = await actionCaptureScreenshot(result.leadId, isFullScreenCapture);
                           if (res.success && res.desktopPath) {
                             handleSelectImage("beforeAfterImage", res.desktopPath);
                             toast({title: "Before Image Captured"});
@@ -854,6 +857,26 @@ export default function DashboardPage() {
                       }} disabled={isCapturingBefore}>
                         {isCapturingBefore ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fetch Before"}
                       </Button>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer border rounded-md px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors">
+                        {isUploadingCustomBefore ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" /> : <Upload className="h-4 w-4 text-slate-500" />}
+                        <span className="text-slate-600 font-medium">Upload</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            setIsUploadingCustomBefore(true);
+                            const formData = new FormData();
+                            formData.append("file", e.target.files[0]);
+                            formData.append("leadId", result.leadId);
+                            formData.append("type", "before_image");
+                            const res = await uploadLeadReportMedia(formData);
+                            if (res.success && res.item) handleSelectImage("beforeAfterImage", res.item.url);
+                            setIsUploadingCustomBefore(false);
+                          }
+                        }} disabled={isUploadingCustomBefore} />
+                      </label>
+                      <label className="flex items-center gap-1.5 ml-2 cursor-pointer">
+                        <input type="checkbox" checked={isFullScreenCapture} onChange={(e) => setIsFullScreenCapture(e.target.checked)} className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 h-3.5 w-3.5" />
+                        <span className="text-xs text-slate-500">Full Screen</span>
+                      </label>
                     </div>
                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
                       {(result.beforeAfterImage || result.desktopImage) ? (
@@ -883,16 +906,34 @@ export default function DashboardPage() {
                   {/* After Image */}
                    <div className="p-6">
                      <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">After (Proposed / Preview)</p>
-                     <div className="flex gap-2 mb-3">
+                     <div className="flex gap-2 mb-3 flex-wrap items-center">
                        <Input 
                          placeholder="Enter URL to fetch After screenshot..." 
                          value={afterUrl}
                          onChange={(e) => setAfterUrl(e.target.value)}
-                         className="h-9"
+                         className="h-9 min-w-[200px]"
                        />
                        <Button size="sm" onClick={handleCaptureAfter} disabled={isCapturingAfter || !afterUrl}>
                          {isCapturingAfter ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fetch After"}
                        </Button>
+                       <label className="flex items-center gap-2 text-sm cursor-pointer border rounded-md px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors">
+                        {isUploadingCustomAfter ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" /> : <Upload className="h-4 w-4 text-slate-500" />}
+                        <span className="text-slate-600 font-medium">Upload</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            setIsUploadingCustomAfter(true);
+                            const formData = new FormData();
+                            formData.append("file", e.target.files[0]);
+                            formData.append("leadId", result.leadId);
+                            formData.append("type", "after_image");
+                            const res = await uploadLeadReportMedia(formData);
+                            if (res.success && res.item) {
+                              setResult((prev: any) => ({...prev, proposalImage: res.item.url, reportContent: {...prev.reportContent, afterImage: res.item.url}}));
+                            }
+                            setIsUploadingCustomAfter(false);
+                          }
+                        }} disabled={isUploadingCustomAfter} />
+                      </label>
                        <Button 
                          size="sm" 
                          variant="secondary" 

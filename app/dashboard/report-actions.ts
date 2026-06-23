@@ -26,8 +26,8 @@ export async function setReportGenerating(leadId: string) {
   revalidatePath("/dashboard");
 }
 
-export async function actionCaptureScreenshot(leadId: string) {
-  const result = await captureWebsiteScreenshot(leadId);
+export async function actionCaptureScreenshot(leadId: string, fullPage: boolean = false) {
+  const result = await captureWebsiteScreenshot(leadId, fullPage);
   revalidatePath("/dashboard");
   return result;
 }
@@ -181,15 +181,31 @@ export async function uploadLeadReportMedia(formData: FormData) {
     file.type,
   );
 
+  const prisma = getPrisma();
   // If this is meant to be the main screenshot
   if (type === "main_screenshot") {
-    const prisma = getPrisma();
     await prisma.lead.update({
       where: { id: leadId },
       data: { desktopImage: url, reportStatus: "Not Generated" },
     });
     revalidatePath("/dashboard");
     return { success: true, item: { url, caption, section, type, id: "main", includeInEmail: false, fileName: file.name, createdAt: new Date().toISOString() } };
+  } else if (type === "before_image") {
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { beforeAfterImage: url, reportStatus: "Not Generated" },
+    });
+    revalidatePath("/dashboard");
+    return { success: true, item: { url, caption, section, type, id: "before", includeInEmail: false, fileName: file.name, createdAt: new Date().toISOString() } };
+  } else if (type === "after_image") {
+    const lead = await prisma.lead.findUnique({where: {id: leadId}});
+    const reportContent = getReportContent(lead?.reportContent as any);
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { proposalImage: url, reportContent: { ...reportContent, afterImage: url } as any, reportStatus: "Not Generated" },
+    });
+    revalidatePath("/dashboard");
+    return { success: true, item: { url, caption, section, type, id: "after", includeInEmail: false, fileName: file.name, createdAt: new Date().toISOString() } };
   }
 
   const item = reportMediaItemSchema.parse({

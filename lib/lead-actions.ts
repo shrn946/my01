@@ -328,7 +328,7 @@ export async function runPageSpeed(leadId: string) {
   return analyzeWebsite(leadId); // Alias to new function
 }
 
-export async function captureWebsiteScreenshot(leadId: string) {
+export async function captureWebsiteScreenshot(leadId: string, fullPage: boolean = false) {
   let browser;
   try {
     const prisma = getPrisma();
@@ -338,7 +338,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     browser = await launchBrowser();
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
-      deviceScaleFactor: 2, // Retina quality
+      deviceScaleFactor: fullPage ? 1 : 2, // Retina quality
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     });
     const page = await context.newPage();
@@ -352,7 +352,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     
     const captureId = Date.now();
     const desktopFileName = `desktop-${leadId}-${captureId}.png`;
-    const desktopImage = await page.screenshot({ fullPage: false, animations: "disabled" }); 
+    const desktopImage = await page.screenshot({ fullPage: fullPage, animations: "disabled" }); 
     const desktopPublicPath = await storeGeneratedImage(
       desktopImage,
       `screenshots/${desktopFileName}`,
@@ -364,7 +364,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     await page.waitForTimeout(500);
     
     const mobileFileName = `mobile-${leadId}-${captureId}.png`;
-    const mobileImage = await page.screenshot({ fullPage: false, animations: "disabled" });
+    const mobileImage = await page.screenshot({ fullPage: fullPage, animations: "disabled" });
     const mobilePublicPath = await storeGeneratedImage(
       mobileImage,
       `screenshots/${mobileFileName}`,

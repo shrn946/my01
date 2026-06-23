@@ -330,32 +330,6 @@ export default async function ReportPage({
         )}
 
         <section className="print-section rounded-3xl bg-slate-950 text-white p-10 md:p-12">
-          {reportContent.includeBeforeAfter && (
-            <div className="mb-12">
-              <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Before / After Comparison</h2>
-              <div className="mt-8 grid md:grid-cols-2 gap-8">
-                {/* Before */}
-                <div className="space-y-4">
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
-                  {(lead.beforeAfterImage || lead.desktopImage) ? (
-                    <img src={lead.beforeAfterImage || lead.desktopImage!} alt="Before" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
-                  ) : (
-                    <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No before image</div>
-                  )}
-                </div>
-                {/* After */}
-                <div className="space-y-4">
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
-                  {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
-                    <img src={(lead.reportContent as any)?.afterImage || lead.proposalImage!} alt="After" className="w-full rounded-2xl border border-white/10 shadow-lg object-contain bg-slate-900" />
-                  ) : (
-                    <div className="w-full h-full aspect-video flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-600">No after image</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Action Plan</h2>
           <div className="mt-7 grid md:grid-cols-2 gap-4">
             {finalRecommendations.map((item, index) => (
@@ -365,7 +339,56 @@ export default async function ReportPage({
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-col md:flex-row gap-5 items-center justify-between border-t border-white/10 pt-8">
+
+          {reportContent.includeBeforeAfter && (
+            <div className="mt-16 mb-8">
+              <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Target className="h-7 w-7 text-blue-400" /> Before / After Comparison</h2>
+              <div className="mt-8 grid md:grid-cols-2 gap-8">
+                {/* Before */}
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Before (Existing Website)</p>
+                  <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
+                    {(lead.beforeAfterImage || lead.desktopImage) ? (
+                      <div 
+                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out" 
+                        style={{ 
+                          backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`, 
+                          backgroundSize: '100% auto',
+                          backgroundPosition: 'top center'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundPosition = 'bottom center'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundPosition = 'top center'}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-600">No before image</div>
+                    )}
+                  </div>
+                </div>
+                {/* After */}
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">After (Proposed Redesign)</p>
+                  <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
+                    {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
+                      <div 
+                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out" 
+                        style={{ 
+                          backgroundImage: `url('${(lead.reportContent as any)?.afterImage || lead.proposalImage}')`, 
+                          backgroundSize: '100% auto',
+                          backgroundPosition: 'top center'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundPosition = 'bottom center'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundPosition = 'top center'}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-600">No after image</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-12 flex flex-col md:flex-row gap-5 items-center justify-between border-t border-white/10 pt-8">
             <div>
               <p className="font-black text-xl">{aiAudit.proposal_content.call_to_action}</p>
               <p className="mt-2 text-sm text-slate-400 flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Focused scope based on selected categories only.</p>
