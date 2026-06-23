@@ -350,7 +350,7 @@ export default async function ReportPage({
                   <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
                     {(lead.beforeAfterImage || lead.desktopImage) ? (
                       <div 
-                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out bg-top hover:bg-bottom" 
+                        className="w-full h-full bg-no-repeat transition-all duration-[15s] ease-linear bg-top hover:bg-bottom" 
                         style={{ 
                           backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`, 
                           backgroundSize: '100% auto'
@@ -367,7 +367,7 @@ export default async function ReportPage({
                   <div className="w-full aspect-[4/5] rounded-2xl border border-white/10 shadow-lg bg-slate-900 overflow-hidden group">
                     {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
                       <div 
-                        className="w-full h-full bg-no-repeat transition-all duration-[6s] ease-in-out bg-top hover:bg-bottom" 
+                        className="w-full h-full bg-no-repeat transition-all duration-[15s] ease-linear bg-top hover:bg-bottom" 
                         style={{ 
                           backgroundImage: `url('${(lead.reportContent as any)?.afterImage || lead.proposalImage}')`, 
                           backgroundSize: '100% auto'
