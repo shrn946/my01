@@ -10,6 +10,7 @@ import { ReviewsCarousel } from "@/components/reviews-carousel";
 import { FeaturedCarousel } from "@/components/featured-carousel";
 import { getHeroSlides, getProjects, getBlogPosts, getReviews } from "@/lib/data";
 import { services } from "@/lib/seed-data";
+import { slugify } from "@/lib/utils";
 
 export default async function HomePage() {
   const [slides, featuredProjects, featuredPosts, featuredReviews] = await Promise.all([
@@ -18,6 +19,8 @@ export default async function HomePage() {
     getBlogPosts(true),
     getReviews(true)
   ]);
+
+  const retailProjects = featuredProjects.filter(p => slugify(p.category) === "retail-parks-and-shopping");
 
   return (
     <>
@@ -132,7 +135,7 @@ export default async function HomePage() {
             </Magnetic>
           </div>
           <div className="mt-8">
-            <FeaturedCarousel projects={featuredProjects} />
+            <FeaturedCarousel projects={retailProjects} />
           </div>
         </div>
       </section>
