@@ -476,61 +476,12 @@ export default function DashboardPage() {
       return;
     }
 
-    setReportState({ active: true, step: 0, completed: false, totalSteps: 5 });
+    setReportState({ active: true, step: 0, completed: false, totalSteps: 4 });
     setResult((prev: any) => ({ ...prev, reportStatus: "Generating" }));
 
     try {
       await setReportGenerating(result.leadId);
       let currentStep = 0;
-
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      
-      let beforeImage = result.beforeAfterImage;
-      let screenshotRes: any = { success: true, desktopPath: result.desktopImage, mobilePath: result.mobileImage };
-
-      // Step 1: Capture the desktop and mobile screenshots of the ORIGINAL site URL
-      if (!beforeImage || !result.desktopImage) {
-        toast({ title: "Capturing Website Screenshot...", description: "Fetching original website screenshot for the report." });
-        const beforeRes = await actionCaptureScreenshot(result.leadId);
-        if (beforeRes.success && beforeRes.desktopPath) {
-          beforeImage = beforeRes.desktopPath;
-          screenshotRes = beforeRes;
-          await updateLead(result.leadId, { 
-            beforeAfterImage: beforeImage,
-            desktopImage: beforeRes.desktopPath,
-            mobileImage: beforeRes.mobilePath || undefined
-          });
-        }
-      }
-
-      // Step 2: If afterUrl is provided, capture After image SEPARATELY
-      // — stored ONLY in reportContent.afterImage, never in desktopImage
-      if (result.reportContent?.includeBeforeAfter && afterUrl && !result.reportContent?.isAfterImageLocked) {
-        toast({ title: "Capturing After Screenshot...", description: "Fetching proposal URL for the After panel." });
-        const originalDesktopImage = result.desktopImage;
-        const originalMobileImage = result.mobileImage;
-        await updateLead(result.leadId, { website: afterUrl });
-        const afterRes = await actionCaptureScreenshot(result.leadId);
-        await updateLead(result.leadId, { website: result.website }); // Always revert URL
-        if (afterRes.success && afterRes.desktopPath) {
-          const updatedReportContent = { ...result.reportContent, afterImage: afterRes.desktopPath };
-          await updateLead(result.leadId, { reportContent: updatedReportContent as any });
-          if (originalDesktopImage || originalMobileImage) {
-            await updateLead(result.leadId, {
-              desktopImage: originalDesktopImage,
-              mobileImage: originalMobileImage,
-            });
-          }
-          setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
-        }
-      }
-
-      setResult((prev: any) => ({
-        ...prev,
-        beforeAfterImage: beforeImage || prev.beforeAfterImage,
-        desktopImage: screenshotRes.desktopPath || prev.desktopImage,
-        mobileImage: screenshotRes.mobilePath || prev.mobileImage,
-      }));
 
       setReportState(s => ({ ...s, step: ++currentStep }));
       const aiRes = await actionRecommendations(result.leadId, selectedCategories);
@@ -592,13 +543,12 @@ export default function DashboardPage() {
         description: err instanceof Error ? err.message : "Failed to generate report",
         variant: "destructive"
       });
-      setReportState({ active: false, step: 0, completed: false, totalSteps: 5 });
+      setReportState({ active: false, step: 0, completed: false, totalSteps: 4 });
       setResult((prev: any) => ({ ...prev, reportStatus: "Not Generated" }));
     }
   };
 
   const activeSteps = [
-    "Capturing Homepage Screenshot",
     "Generating Selected Category Analysis",
     "Creating Proposal Image",
     "Building Focused PNG Report",

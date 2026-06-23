@@ -44,7 +44,6 @@ export default async function ReportPage({
     AUDIT_CATEGORIES.find((item) => item.value === category)?.label || category;
   const reportContent = getReportContent(aiFields.reportContent);
   const reportMedia = getReportMedia(aiFields.reportMedia);
-  const mainDesktopScreenshot = lead.beforeAfterImage || lead.desktopImage || reportMedia.find(m => m.id === 'main')?.url;
   const mediaFor = (section: string) => reportMedia.filter((item) => item.section === section);
   const finalComments = lead.developerComments || reportContent.developerComments || aiAudit.developer_comments
     .map((comment: any) => `${comment.heading}: ${comment.finding}\nRecommendation: ${comment.recommendation}`)
@@ -76,36 +75,6 @@ export default async function ReportPage({
             </div>
           </header>
           <main className="p-12 space-y-10">
-            <div className="relative mx-auto w-full flex items-end justify-center py-6">
-              {/* Desktop Frame */}
-              <div className="relative w-[75%] -mr-[5%] z-0">
-                <div className="relative overflow-hidden rounded-t-[2rem] border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
-                  {mainDesktopScreenshot ? (
-                    <img src={mainDesktopScreenshot} alt="Website desktop view" className="w-full h-full object-cover object-top bg-muted/10" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
-                  )}
-                </div>
-                {/* Keyboard Base */}
-                <div className="relative z-0 -mt-1 mx-[-3%] h-5 rounded-b-2xl bg-slate-300 border border-slate-400 shadow-xl flex justify-center">
-                  <div className="w-1/4 h-1.5 bg-slate-400 rounded-b-md"></div>
-                </div>
-              </div>
-              {/* Mobile Frame */}
-              <div className="relative w-[22%] z-10 -mb-6">
-                <div className="relative overflow-hidden rounded-[2.5rem] border-[8px] border-slate-800 bg-slate-900 aspect-[9/19] shadow-2xl">
-                  {/* Notch */}
-                  <div className="absolute top-0 inset-x-0 h-5 flex justify-center z-20">
-                    <div className="w-1/2 h-full bg-slate-800 rounded-b-2xl"></div>
-                  </div>
-                  {lead.mobileImage ? (
-                    <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top bg-muted/10" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
-                  )}
-                </div>
-              </div>
-            </div>
             {reportMedia.length > 0 && (
               <section>
                 <h2 className="text-2xl font-black mb-5">Visual Evidence</h2>
@@ -244,40 +213,6 @@ export default async function ReportPage({
             <p className="mt-4 text-slate-700 leading-relaxed">{aiAudit.full_report_data.executive_summary}</p>
           </CardContent>
         </Card>
-
-        <section className="print-section space-y-6">
-          <h2 className="print-heading text-3xl font-black flex items-center gap-2"><Monitor className="h-7 w-7 text-indigo-600" /> Website Screenshot</h2>
-          <div className="relative mx-auto w-full max-w-4xl flex items-end justify-center pt-8 pb-12">
-            {/* Desktop Frame */}
-            <div className="relative w-[80%] -mr-[5%] z-0">
-              <div className="relative overflow-hidden rounded-t-[2rem] border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl group">
-                {mainDesktopScreenshot ? (
-                  <img src={mainDesktopScreenshot} alt="Website desktop view" className="w-full h-full object-cover object-top bg-muted/10" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
-                )}
-              </div>
-              {/* Keyboard Base */}
-              <div className="relative z-0 -mt-1 mx-[-3%] h-6 rounded-b-3xl bg-slate-300 border border-slate-400 shadow-xl flex justify-center">
-                <div className="w-1/4 h-2 bg-slate-400 rounded-b-md"></div>
-              </div>
-            </div>
-            {/* Mobile Frame */}
-            <div className="relative w-[22%] z-10 -mb-8">
-              <div className="relative overflow-hidden rounded-[2.5rem] border-[8px] border-slate-800 bg-slate-900 aspect-[9/19] shadow-2xl group">
-                {/* Notch */}
-                <div className="absolute top-0 inset-x-0 h-5 flex justify-center z-20">
-                  <div className="w-1/2 h-full bg-slate-800 rounded-b-2xl"></div>
-                </div>
-                {lead.mobileImage ? (
-                  <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top bg-muted/10" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
 
         <section className="space-y-8">
           <h2 className="print-heading text-3xl font-black">Selected Category Analysis</h2>
