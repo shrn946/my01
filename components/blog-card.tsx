@@ -9,7 +9,7 @@ export function BlogCard({ post }: { post: any }) {
       <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-black/5 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-premium">
         <div className="relative aspect-[16/10] overflow-hidden">
           <Image 
-            src={PLACEHOLDER_IMAGE} 
+            src={post.image || PLACEHOLDER_IMAGE} 
             alt={post.title} 
             fill 
             className="object-cover transition-transform duration-700 group-hover:scale-110" 
