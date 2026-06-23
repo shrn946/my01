@@ -48,8 +48,8 @@ function professionalEmailHtml({
   ).join("");
 
   const mediaHtml = media.map((item) => `
-    <tr><td style="padding:20px 0 0;">
-      <img src="${item.url}" alt="${escapeHtml(item.caption)}" style="display:block;width:100%;max-width:600px;height:auto;border-radius:12px;border:1px solid #e4e4e7;">
+    <tr><td style="padding:20px 0 0; text-align:center;">
+      <img src="${item.url}" width="500" alt="${escapeHtml(item.caption)}" style="display:block;width:100%;max-width:500px;height:auto;border-radius:12px;border:1px solid #e4e4e7;margin:0 auto;">
       <p style="margin:8px 0 0;color:#71717a;font-size:13px;line-height:20px;text-align:center;">${escapeHtml(item.caption)}</p>
     </td></tr>`).join("");
 
@@ -79,7 +79,7 @@ function professionalEmailHtml({
             <div style="background-color:#f8fafc;padding:24px;border-radius:16px;border:1px solid #e2e8f0;display:inline-block;width:100%;box-sizing:border-box;">
               <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#475569;text-align:center;text-transform:uppercase;letter-spacing:0.5px;">Preview Summary</p>
               <a href="${reportUrl}" style="display:block;text-decoration:none;">
-                <img src="${proposalImage}" alt="Website proposal summary" style="display:block;width:100%;max-width:100%;height:auto;border-radius:8px;border:1px solid #cbd5e1;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);background-color:#ffffff;">
+                <img src="${proposalImage}" width="500" alt="Website proposal summary" style="display:block;width:100%;max-width:500px;height:auto;border-radius:8px;border:1px solid #cbd5e1;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);background-color:#ffffff;margin:0 auto;">
               </a>
             </div>
           </td></tr>` : ""}
