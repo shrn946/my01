@@ -16,16 +16,14 @@ const nextConfig: NextConfig = {
       "./node_modules/@sparticuz/chromium/bin/**/*"
     ]
   },
-  experimental: {
-    outputFileTracingExcludes: {
-      "/**/*": [
-        "./node_modules/@swc/core/**/*",
-        "./node_modules/esbuild/**/*",
-        "./node_modules/terser/**/*",
-        "./node_modules/rollup/**/*",
-        "./node_modules/@napi-rs/**/*"
-      ]
-    }
+  outputFileTracingExcludes: {
+    "/**/*": [
+      "./node_modules/@swc/core/**/*",
+      "./node_modules/esbuild/**/*",
+      "./node_modules/terser/**/*",
+      "./node_modules/rollup/**/*",
+      "./node_modules/@napi-rs/**/*"
+    ]
   },
   images: {
     remotePatterns: [
