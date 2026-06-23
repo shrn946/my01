@@ -466,37 +466,20 @@ export async function generateAuditExports(leadId: string) {
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
-    try { await page.goto(fullReportUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on full report pdf"); }
-    await page.emulateMedia({ media: "screen" });
-
     const exportId = Date.now();
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "12mm", right: "10mm", bottom: "12mm", left: "10mm" },
-    });
-    
-    try { await page.goto(proposalUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on proposal pdf"); }
-    const proposalPdfBytes = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
-    });
     
     try { await page.goto(pngReportUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on report png"); }
     const image = await page.screenshot({ fullPage: true, animations: "disabled" });
 
-    const [reportPdf, reportImage, proposalPdf] = await Promise.all([
-      storeGeneratedFile(pdf, `reports/audit-${leadId}-${exportId}.pdf`, "application/pdf"),
+    const [reportImage] = await Promise.all([
       storeGeneratedImage(image, `reports/audit-${leadId}-${exportId}.png`),
-      storeGeneratedFile(proposalPdfBytes, `reports/proposal-${leadId}-${exportId}.pdf`, "application/pdf"),
     ]);
 
-    await saveLeadReportPaths(prisma, leadId, reportPdf, reportImage, proposalPdf);
+    await saveLeadReportPaths(prisma, leadId, null, reportImage, null);
 
     revalidatePath("/dashboard");
     revalidatePath(`/report/${leadId}`);
-    return { success: true, reportPdf, reportImage, proposalPdf };
+    return { success: true, reportPdf: null, reportImage, proposalPdf: null };
   } catch (error) {
     console.error("Audit export generation error:", error);
     return {

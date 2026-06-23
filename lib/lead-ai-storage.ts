@@ -47,9 +47,9 @@ export async function saveLeadAiAnalysis(
 export async function saveLeadReportPaths(
   prisma: PrismaClient,
   leadId: string,
-  reportPdf: string,
-  reportImage: string,
-  proposalPdf: string,
+  reportPdf: string | null,
+  reportImage: string | null,
+  proposalPdf: string | null,
 ) {
   await prisma.$executeRaw`
     UPDATE "Lead"
