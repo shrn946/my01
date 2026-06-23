@@ -345,27 +345,9 @@ export async function captureWebsiteScreenshot(leadId: string) {
     
     // 1. Desktop Screenshot
     try {
-      await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
-      // Scroll to trigger lazy-loaded elements
-      await page.evaluate(async () => {
-        await new Promise((resolve) => {
-          let totalHeight = 0;
-          let distance = 1000;
-          let timer = setInterval(() => {
-            let scrollHeight = document.body.scrollHeight;
-            window.scrollBy(0, distance);
-            totalHeight += distance;
-            if(totalHeight >= scrollHeight - window.innerHeight){
-              clearInterval(timer);
-              window.scrollTo(0, 0); // Scroll back up
-              resolve(true);
-            }
-          }, 200);
-        });
-      });
-      await page.waitForTimeout(3000); // Wait a bit more for images to render
+      await page.goto(lead.website, { waitUntil: "load", timeout: 20000 });
     } catch (e) {
-      console.warn("Desktop navigation or scroll timed out, attempting screenshot anyway");
+      console.warn("Desktop navigation timed out, attempting screenshot anyway");
     }
     
     const captureId = Date.now();
@@ -376,31 +358,10 @@ export async function captureWebsiteScreenshot(leadId: string) {
       `screenshots/${desktopFileName}`,
     );
 
-    // 2. Mobile Screenshot
+    // 2. Mobile Screenshot (Resize viewport without reloading)
     await page.setViewportSize({ width: 390, height: 844 });
-    try {
-      await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
-      // Scroll to trigger lazy-loaded elements
-      await page.evaluate(async () => {
-        await new Promise((resolve) => {
-          let totalHeight = 0;
-          let distance = 1000;
-          let timer = setInterval(() => {
-            let scrollHeight = document.body.scrollHeight;
-            window.scrollBy(0, distance);
-            totalHeight += distance;
-            if(totalHeight >= scrollHeight - window.innerHeight){
-              clearInterval(timer);
-              window.scrollTo(0, 0); // Scroll back up
-              resolve(true);
-            }
-          }, 200);
-        });
-      });
-      await page.waitForTimeout(3000); // Wait a bit more for images to render
-    } catch (e) {
-      console.warn("Mobile navigation or scroll timed out, attempting screenshot anyway");
-    }
+    // Add a tiny delay to allow responsive layouts to adjust
+    await page.waitForTimeout(500);
     
     const mobileFileName = `mobile-${leadId}-${captureId}.png`;
     const mobileImage = await page.screenshot({ fullPage: false, animations: "disabled" });
