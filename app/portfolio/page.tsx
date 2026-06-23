@@ -5,6 +5,7 @@ import { InnerHero } from "@/components/inner-hero";
 import { SectionHeading } from "@/components/section-heading";
 import { ProjectCard } from "@/components/project-card";
 import { FadeIn } from "@/components/fade-in";
+import { PortfolioGrid } from "@/components/portfolio-grid";
 import { getProjects } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 
@@ -76,13 +77,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                 </div>
               </div>
               
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {filteredProjects.map((project, index) => (
-                  <FadeIn key={project.slug} delay={index * 0.05}>
-                    <ProjectCard project={project} />
-                  </FadeIn>
-                ))}
-              </div>
+              <PortfolioGrid projects={filteredProjects} />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-dashed border-slate-200 bg-white p-20 text-center">

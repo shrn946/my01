@@ -155,7 +155,7 @@ async function captureAndSeed() {
         });
       });
       await page.waitForTimeout(3000);
-      await page.screenshot({ path: filepath, type: 'jpeg', quality: 80, fullPage: true });
+      await page.screenshot({ path: filepath, type: 'jpeg', quality: 80, fullPage: true, animations: 'disabled' });
       console.log(`Success: ${site.title}`);
     } catch (error) {
       console.log(`Error capturing ${site.title}: ${error.message}`);
@@ -173,7 +173,7 @@ async function captureAndSeed() {
           });
         });
         await page.waitForTimeout(3000);
-        await page.screenshot({ path: filepath, type: 'jpeg', quality: 80, fullPage: true });
+        await page.screenshot({ path: filepath, type: 'jpeg', quality: 80, fullPage: true, animations: 'disabled' });
         console.log(`Success (retry): ${site.title}`);
       } catch (e2) {
         console.log(`Failed to capture ${site.title}`);

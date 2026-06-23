@@ -370,7 +370,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     
     const captureId = Date.now();
     const desktopFileName = `desktop-${leadId}-${captureId}.png`;
-    const desktopImage = await page.screenshot({ fullPage: false }); 
+    const desktopImage = await page.screenshot({ fullPage: false, animations: "disabled" }); 
     const desktopPublicPath = await storeGeneratedImage(
       desktopImage,
       `screenshots/${desktopFileName}`,
@@ -403,7 +403,7 @@ export async function captureWebsiteScreenshot(leadId: string) {
     }
     
     const mobileFileName = `mobile-${leadId}-${captureId}.png`;
-    const mobileImage = await page.screenshot({ fullPage: false });
+    const mobileImage = await page.screenshot({ fullPage: false, animations: "disabled" });
     const mobilePublicPath = await storeGeneratedImage(
       mobileImage,
       `screenshots/${mobileFileName}`,
@@ -456,7 +456,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
 
     const fileName = `proposal-${mode}-${leadId}-${Date.now()}.png`;
     const proposalImage = await page.screenshot({
-      fullPage: true
+      fullPage: true,
+      animations: "disabled"
     });
     const publicPath = await storeGeneratedImage(
       proposalImage,
@@ -524,7 +525,7 @@ export async function generateAuditExports(leadId: string) {
     });
     await page.goto(pngReportUrl, { waitUntil: "networkidle", timeout: 60_000 });
     await page.waitForTimeout(1_000);
-    const image = await page.screenshot({ fullPage: true });
+    const image = await page.screenshot({ fullPage: true, animations: "disabled" });
 
     const [reportPdf, reportImage, proposalPdf] = await Promise.all([
       storeGeneratedFile(pdf, `reports/audit-${leadId}-${exportId}.pdf`, "application/pdf"),

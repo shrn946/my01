@@ -40,7 +40,7 @@ async function main() {
   
   if (reviews.length === 0) {
     // try taking a screenshot to see what's wrong
-    await page.screenshot({ path: 'freelancer-debug.png' });
+    await page.screenshot({ path: 'freelancer-debug.png', animations: 'disabled' });
     console.log("Saved freelancer-debug.png");
   }
 
