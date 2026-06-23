@@ -146,7 +146,7 @@ export const projects = [
     solution: 'Designed a clean, modern interface with a focus on trust and patient testimonials.',
     result: 'Improved patient engagement and booking rates.',
     tools: ['Next.js', 'Tailwind CSS', 'Framer Motion'],
-    image: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80',
+    image: '/portfolio-screenshots/manordentalcentre.png',
     gallery: [
       'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1598256989800-fea5ce5146f2?auto=format&fit=crop&w=800&q=80'
