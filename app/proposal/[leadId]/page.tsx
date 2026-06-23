@@ -130,37 +130,7 @@ export default async function ProposalPage({
         </header>
 
         <main className="p-14 space-y-14">
-          <section className="grid grid-cols-[1.35fr_0.65fr] gap-10 items-center">
-            <div className="relative mx-auto w-full max-w-[800px] flex items-end">
-              {/* Desktop Frame */}
-              <div className="relative w-[80%] -mr-[5%] z-0">
-                <div className="relative overflow-hidden rounded-t-2xl border-[12px] border-slate-900 bg-slate-900 aspect-[16/10] shadow-2xl">
-                  {lead.desktopImage ? (
-                    <img src={lead.desktopImage} alt="Website desktop view" className="w-full h-full object-cover object-top bg-muted/10" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-slate-100">Desktop view</div>
-                  )}
-                </div>
-                {/* Keyboard Base */}
-                <div className="relative z-0 -mt-1 mx-[-3%] h-4 rounded-b-xl bg-slate-300 border border-slate-400 shadow-xl flex justify-center">
-                  <div className="w-1/4 h-1 bg-slate-400 rounded-b-sm"></div>
-                </div>
-              </div>
-              {/* Mobile Frame */}
-              <div className="relative w-[25%] z-10 -mb-4">
-                <div className="relative overflow-hidden rounded-[2rem] border-[8px] border-slate-800 bg-slate-900 aspect-[9/19] shadow-2xl">
-                  {/* Notch */}
-                  <div className="absolute top-0 inset-x-0 h-4 flex justify-center z-20">
-                    <div className="w-1/2 h-full bg-slate-800 rounded-b-xl"></div>
-                  </div>
-                  {lead.mobileImage ? (
-                    <img src={lead.mobileImage} alt="Website mobile view" className="w-full h-full object-cover object-top bg-muted/10" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold bg-slate-100">Mobile view</div>
-                  )}
-                </div>
-              </div>
-            </div>
+          <section>
             <div>
               <p className="text-xs font-black uppercase tracking-widest text-indigo-600">Executive Proposal</p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">Focused on the work that matters now</h2>
