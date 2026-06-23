@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles
+  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload
 } from "lucide-react";
 import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments } from "./actions";
 import { getFinderLeads } from "./lead-finder/actions";
