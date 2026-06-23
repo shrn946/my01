@@ -3,7 +3,7 @@ import { InnerHero } from "@/components/inner-hero";
 import { SectionHeading } from "@/components/section-heading";
 import { FadeIn } from "@/components/fade-in";
 import { profile } from "@/lib/profile";
-import { CheckCircle2, Award, Rocket, Code, Heart, Sparkles } from "lucide-react";
+import { CheckCircle2, Award, Rocket, Code, Heart, Sparkles, Zap } from "lucide-react";
 import { Magnetic } from "@/components/magnetic";
 
 export const metadata: Metadata = {
@@ -103,21 +103,42 @@ export default function AboutPage() {
           />
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {profile.skills.map((skill, index) => (
-              <FadeIn key={skill} delay={index * 0.05} className="bento-card group hover:border-primary/20 bg-white">
-                <h4 className="font-black text-ink transition-colors group-hover:text-primary">{skill}</h4>
-                <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            {profile.skills.map((skill, index) => {
+              const prof = 85 + (index % 15);
+              return (
+                <FadeIn key={skill} delay={index * 0.05} className="group relative overflow-hidden rounded-3xl border border-black/5 bg-white p-6 shadow-sm hover:shadow-premium transition-all duration-500 hover:-translate-y-1">
+                  {/* Background progress fill */}
                   <div 
-                    className="h-full bg-gradient-to-r from-primary to-blue-600 transition-all duration-1000 ease-out" 
-                    style={{ width: `${85 + (index % 15)}%` }} 
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-blue-600 opacity-50 transition-all duration-1000 ease-out group-hover:opacity-100 group-hover:h-full group-hover:from-primary/5 group-hover:to-blue-600/5 -z-0" 
+                    style={{ width: `${prof}%` }} 
                   />
-                </div>
-                <div className="mt-3 flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  <span>Proficiency</span>
-                  <span>{85 + (index % 15)}%</span>
-                </div>
-              </FadeIn>
-            ))}
+                  
+                  <div className="relative z-10 flex justify-between items-start mb-6">
+                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors duration-300 border border-slate-100">
+                      <Zap size={18} />
+                    </div>
+                    <span className="text-3xl font-black text-slate-200 group-hover:text-primary transition-colors duration-500 tracking-tighter">
+                      {prof}<span className="text-sm tracking-normal">%</span>
+                    </span>
+                  </div>
+                  
+                  <h4 className="relative z-10 text-lg font-black text-ink mb-2 group-hover:text-primary transition-colors">{skill}</h4>
+                  
+                  <div className="relative z-10 flex items-center gap-2 mt-4">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div 
+                        className="h-full bg-gradient-to-r from-primary to-blue-600 transition-all duration-1000 ease-out group-hover:scale-x-105 origin-left" 
+                        style={{ width: `${prof}%` }} 
+                      />
+                    </div>
+                  </div>
+                  <div className="relative z-10 mt-2 flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <span>Proficiency</span>
+                    <span className="text-primary group-hover:text-blue-600 transition-colors">Advanced</span>
+                  </div>
+                </FadeIn>
+              )
+            })}
           </div>
         </div>
       </section>
