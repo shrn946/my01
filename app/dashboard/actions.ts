@@ -772,3 +772,64 @@ export async function getLeadStats() {
   }
 }
 
+export async function updateLeadDeveloperComments(leadId: string, comments: string) {
+  const prisma = getPrisma();
+  try {
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { developerComments: comments }
+    });
+    revalidatePath("/dashboard/leads");
+    return true;
+  } catch (error) {
+    console.error("UPDATE_DEVELOPER_COMMENTS_ERROR:", error);
+    return false;
+  }
+}
+
+export async function enhanceDeveloperComments(rawComments: string) {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) return null;
+
+    const prisma = getPrisma();
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+    const prompt = `You are a professional senior web developer auditing a client website.
+Rewrite the following raw, informal developer notes into a highly professional, persuasive, and technically accurate "Expert Audit Findings" paragraph or bullet points suitable for a client proposal.
+Keep it concise, authoritative, and focused on business impact (e.g. lost conversions, SEO penalties).
+
+Raw Notes:
+${rawComments}
+
+Response constraints: Return ONLY the rewritten text. No introductions, no greetings, no Markdown wrappers if it's just plain text.`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) return null;
+    const json = await response.json();
+    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+    return text ? text.trim() : null;
+  } catch (error) {
+    console.error("ENHANCE_COMMENTS_ERROR:", error);
+    return null;
+  }
+}
+

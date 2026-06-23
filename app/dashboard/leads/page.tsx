@@ -13,7 +13,9 @@ import {
   sendLeadEmailFromDashboard,
   deleteLead,
   getLeadStats,
-  getPaginatedLeads
+  getPaginatedLeads,
+  updateLeadDeveloperComments,
+  enhanceDeveloperComments
 } from "../actions";
 import { 
   Table, 
@@ -89,7 +91,9 @@ import {
   Tag,
   ArrowUpDown,
   MailQuestion,
-  Check
+  Check,
+  Wand2,
+  Sparkles
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
@@ -137,6 +141,7 @@ export default function LeadsPage() {
   const [isSending, setIsSending] = useState(false);
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
+  const [isEnhancingComments, setIsEnhancingComments] = useState(false);
 
   // Pagination & Deletion states
   const [currentPage, setCurrentPage] = useState(1);
@@ -272,6 +277,37 @@ export default function LeadsPage() {
       toast({ title: "Update Failed", description: res.error, variant: "destructive" });
     }
     setIsUpdatingCategory(false);
+  };
+
+  const handleUpdateDeveloperComments = async (val: string) => {
+    if (selectedLead && val !== selectedLead.developerComments) {
+      await updateLeadDeveloperComments(selectedLead.id, val);
+      setSelectedLead((prev: any) => ({ ...prev, developerComments: val }));
+      setLeads((prev) => prev.map((l) => (l.id === selectedLead.id ? { ...l, developerComments: val } : l)));
+    }
+  };
+
+  const handleEnhanceComments = async () => {
+    if (!selectedLead?.developerComments) {
+      toast({ title: "No Comments", description: "Please write some notes first.", variant: "destructive" });
+      return;
+    }
+    setIsEnhancingComments(true);
+    try {
+      const enhanced = await enhanceDeveloperComments(selectedLead.developerComments);
+      if (enhanced) {
+        await updateLeadDeveloperComments(selectedLead.id, enhanced);
+        setSelectedLead((prev: any) => ({ ...prev, developerComments: enhanced }));
+        setLeads((prev) => prev.map((l) => (l.id === selectedLead.id ? { ...l, developerComments: enhanced } : l)));
+        toast({ title: "Enhanced!", description: "Your comments have been professionally rewritten." });
+      } else {
+        throw new Error("Failed");
+      }
+    } catch (error) {
+      toast({ title: "Enhancement Failed", description: "Failed to rewrite comments.", variant: "destructive" });
+    } finally {
+      setIsEnhancingComments(false);
+    }
   };
 
   const handleExport = () => {
@@ -832,6 +868,29 @@ export default function LeadsPage() {
                                       <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5"><FileText className="h-4 w-4 text-primary" /> Top Audit Findings</h4>
                                       <div className="bg-slate-900 text-slate-300 p-5 rounded-2xl text-xs font-mono leading-relaxed max-h-40 overflow-y-auto">
                                         {selectedLead.topIssues || "No critical HTML elements missing."}
+                                      </div>
+                                    </div>
+
+                                    {/* Developer Comments */}
+                                    <div className="space-y-2">
+                                      <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-primary" /> Developer Comments</h4>
+                                      <div className="relative">
+                                        <Textarea 
+                                          placeholder="Type rough notes here... e.g. 'Site is slow, missing H1, needs better contrast'"
+                                          className="min-h-[120px] resize-none rounded-2xl bg-white border pr-12 text-xs"
+                                          defaultValue={selectedLead.developerComments || ""}
+                                          onBlur={(e) => handleUpdateDeveloperComments(e.target.value)}
+                                        />
+                                        <Button 
+                                          size="icon" 
+                                          variant="outline" 
+                                          className="absolute bottom-2 right-2 rounded-xl h-8 w-8 hover:bg-primary hover:text-white"
+                                          onClick={() => handleEnhanceComments()}
+                                          disabled={isEnhancingComments || !selectedLead.developerComments}
+                                          title="Enhance with AI"
+                                        >
+                                          {isEnhancingComments ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                        </Button>
                                       </div>
                                     </div>
 

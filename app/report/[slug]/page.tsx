@@ -46,8 +46,8 @@ export default async function ReportPage({
   const reportMedia = getReportMedia(aiFields.reportMedia);
   const mainDesktopScreenshot = lead.beforeAfterImage || lead.desktopImage || reportMedia.find(m => m.id === 'main')?.url;
   const mediaFor = (section: string) => reportMedia.filter((item) => item.section === section);
-  const finalComments = reportContent.developerComments || aiAudit.developer_comments
-    .map((comment) => `${comment.heading}: ${comment.finding}\nRecommendation: ${comment.recommendation}`)
+  const finalComments = lead.developerComments || reportContent.developerComments || aiAudit.developer_comments
+    .map((comment: any) => `${comment.heading}: ${comment.finding}\nRecommendation: ${comment.recommendation}`)
     .join("\n\n");
   const finalRecommendations = reportContent.recommendations.length
     ? reportContent.recommendations
