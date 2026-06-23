@@ -1,6 +1,7 @@
 "use server";
 
 import { getPrisma } from "@/lib/prisma";
+import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { generateAuditExports, generateProposalPng, captureWebsiteScreenshot } from "@/lib/lead-actions";
 import { formatDeveloperComments, generateAiAudit } from "@/lib/ai-audit";
