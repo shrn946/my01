@@ -1064,9 +1064,19 @@ export default function LeadFinderPage() {
                   { name: "United States", code: "USA", flag: "🇺🇸" },
                   { name: "United Kingdom", code: "UK", flag: "🇬🇧" },
                   { name: "Canada", code: "Canada", flag: "🇨🇦" },
-                  { name: "Germany", code: "Germany", flag: "🇩🇪" },
                   { name: "Australia", code: "Australia", flag: "🇦🇺" },
-                  { name: "New Zealand", code: "New Zealand", flag: "🇳🇿" }
+                  { name: "New Zealand", code: "New Zealand", flag: "🇳🇿" },
+                  { name: "United Arab Emirates", code: "UAE", flag: "🇦🇪" },
+                  { name: "Ireland", code: "Ireland", flag: "🇮🇪" },
+                  { name: "Singapore", code: "Singapore", flag: "🇸🇬" },
+                  { name: "Germany", code: "Germany", flag: "🇩🇪" },
+                  { name: "Netherlands", code: "Netherlands", flag: "🇳🇱" },
+                  { name: "Sweden", code: "Sweden", flag: "🇸🇪" },
+                  { name: "Switzerland", code: "Switzerland", flag: "🇨🇭" },
+                  { name: "France", code: "France", flag: "🇫🇷" },
+                  { name: "Italy", code: "Italy", flag: "🇮🇹" },
+                  { name: "Spain", code: "Spain", flag: "🇪🇸" },
+                  { name: "South Africa", code: "South Africa", flag: "🇿🇦" }
                 ].map((countryObj) => (
                   <Button
                     key={countryObj.name}
