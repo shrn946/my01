@@ -758,6 +758,15 @@ export default function LeadFinderPage() {
           (searchSettings.locationsAustralia || []).forEach(c => addCityWithFallback(c, "Australia"));
           (searchSettings.locationsNewZealand || []).forEach(c => addCityWithFallback(c, "New Zealand"));
 
+          // 3. Add all other DEFAULT_CITIES that aren't in settings
+          DEFAULT_CITIES.forEach(defaultCity => {
+            const key = `${defaultCity.city.toLowerCase()}-${defaultCity.country.toLowerCase()}`;
+            if (!seenCities.has(key)) {
+              seenCities.add(key);
+              loadedCities.push(defaultCity);
+            }
+          });
+
           if (loadedCities.length > 0) {
             setPopularCities(loadedCities);
           }
