@@ -118,7 +118,27 @@ const CITY_DETAILS_MAP: Record<string, { state: string; country: string }> = {
   // New Zealand
   "Auckland": { state: "Auckland", country: "New Zealand" },
   "Wellington": { state: "Wellington", country: "New Zealand" },
-  "Christchurch": { state: "Canterbury", country: "New Zealand" }
+  "Christchurch": { state: "Canterbury", country: "New Zealand" },
+
+  // New Countries
+  "Dubai": { state: "Dubai", country: "United Arab Emirates" },
+  "Abu Dhabi": { state: "Abu Dhabi", country: "United Arab Emirates" },
+  "Dublin": { state: "Dublin", country: "Ireland" },
+  "Cork": { state: "Cork", country: "Ireland" },
+  "Singapore": { state: "Singapore", country: "Singapore" },
+  "Amsterdam": { state: "North Holland", country: "Netherlands" },
+  "Rotterdam": { state: "South Holland", country: "Netherlands" },
+  "Stockholm": { state: "Stockholm", country: "Sweden" },
+  "Zurich": { state: "Zurich", country: "Switzerland" },
+  "Geneva": { state: "Geneva", country: "Switzerland" },
+  "Paris": { state: "Île-de-France", country: "France" },
+  "Lyon": { state: "Auvergne-Rhône-Alpes", country: "France" },
+  "Rome": { state: "Lazio", country: "Italy" },
+  "Milan": { state: "Lombardy", country: "Italy" },
+  "Madrid": { state: "Madrid", country: "Spain" },
+  "Barcelona": { state: "Catalonia", country: "Spain" },
+  "Cape Town": { state: "Western Cape", country: "South Africa" },
+  "Johannesburg": { state: "Gauteng", country: "South Africa" }
 };
 
 const DEFAULT_CITIES = [
@@ -175,7 +195,25 @@ const DEFAULT_CITIES = [
   { city: "Adelaide", state: "SA", country: "Australia" },
   { city: "Auckland", state: "Auckland", country: "New Zealand" },
   { city: "Wellington", state: "Wellington", country: "New Zealand" },
-  { city: "Christchurch", state: "Canterbury", country: "New Zealand" }
+  { city: "Christchurch", state: "Canterbury", country: "New Zealand" },
+  { city: "Dubai", state: "Dubai", country: "United Arab Emirates" },
+  { city: "Abu Dhabi", state: "Abu Dhabi", country: "United Arab Emirates" },
+  { city: "Dublin", state: "Dublin", country: "Ireland" },
+  { city: "Cork", state: "Cork", country: "Ireland" },
+  { city: "Singapore", state: "Singapore", country: "Singapore" },
+  { city: "Amsterdam", state: "North Holland", country: "Netherlands" },
+  { city: "Rotterdam", state: "South Holland", country: "Netherlands" },
+  { city: "Stockholm", state: "Stockholm", country: "Sweden" },
+  { city: "Zurich", state: "Zurich", country: "Switzerland" },
+  { city: "Geneva", state: "Geneva", country: "Switzerland" },
+  { city: "Paris", state: "Île-de-France", country: "France" },
+  { city: "Lyon", state: "Auvergne-Rhône-Alpes", country: "France" },
+  { city: "Rome", state: "Lazio", country: "Italy" },
+  { city: "Milan", state: "Lombardy", country: "Italy" },
+  { city: "Madrid", state: "Madrid", country: "Spain" },
+  { city: "Barcelona", state: "Catalonia", country: "Spain" },
+  { city: "Cape Town", state: "Western Cape", country: "South Africa" },
+  { city: "Johannesburg", state: "Gauteng", country: "South Africa" }
 ];
 
 const DEFAULT_NICHES = [
@@ -292,6 +330,9 @@ export default function LeadFinderPage() {
     let cities = popularCities;
     if (formData.country) {
       cities = cities.filter(c => c.country.toLowerCase() === formData.country.toLowerCase());
+      return formData.city.trim() === ""
+        ? cities
+        : cities.filter(c => c.city.toLowerCase().includes(formData.city.toLowerCase()));
     }
     return formData.city.trim() === ""
       ? cities.slice(0, 8)
