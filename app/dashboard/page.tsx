@@ -981,8 +981,8 @@ export default function DashboardPage() {
                         <Edit3 className="h-5 w-5" />
                       </div>
                       <div>
-                        <CardTitle className="text-xl">Developer Comments</CardTitle>
-                        <CardDescription>AI-generated, evidence-based findings prioritized for the client.</CardDescription>
+                        <CardTitle className="text-xl">Custom Comments</CardTitle>
+                        <CardDescription>Add your own comments, requirements, observations, or special instructions for this report. These comments are included exactly as entered and can be used to highlight specific issues, business goals, design preferences, functionality requests, or other important details that should be considered during report generation.</CardDescription>
                       </div>
                     </div>
                     {isEditingComments ? (
@@ -1194,7 +1194,7 @@ export default function DashboardPage() {
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                      <CardDescription>Upload issue screenshots, competitors, branding references, and before/after examples. Captions are shared with AI during generation.</CardDescription>
+                      <CardDescription>Upload issue screenshots, competitor websites, branding references, design inspirations, and before/after examples. Captions and notes are included in the report generation process to provide additional context.</CardDescription>
                     </div>
                   </CardHeader>
                 <CardContent className="space-y-6">

@@ -409,8 +409,7 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     const page = await context.newPage();
     
     try {
-      await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 30000 });
-      await page.waitForTimeout(3000);
+      await page.goto(proposalUrl, { waitUntil: "load", timeout: 20000 });
     } catch (e) {
       console.warn("Proposal generation navigation timed out, attempting screenshot anyway");
     }
@@ -467,9 +466,8 @@ export async function generateAuditExports(leadId: string) {
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
-    await page.goto(fullReportUrl, { waitUntil: "networkidle", timeout: 60_000 });
+    try { await page.goto(fullReportUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on full report pdf"); }
     await page.emulateMedia({ media: "screen" });
-    await page.waitForTimeout(2_000);
 
     const exportId = Date.now();
     const pdf = await page.pdf({
@@ -477,15 +475,15 @@ export async function generateAuditExports(leadId: string) {
       printBackground: true,
       margin: { top: "12mm", right: "10mm", bottom: "12mm", left: "10mm" },
     });
-    await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 60_000 });
-    await page.waitForTimeout(1_000);
+    
+    try { await page.goto(proposalUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on proposal pdf"); }
     const proposalPdfBytes = await page.pdf({
       format: "A4",
       printBackground: true,
       margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
     });
-    await page.goto(pngReportUrl, { waitUntil: "networkidle", timeout: 60_000 });
-    await page.waitForTimeout(1_000);
+    
+    try { await page.goto(pngReportUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on report png"); }
     const image = await page.screenshot({ fullPage: true, animations: "disabled" });
 
     const [reportPdf, reportImage, proposalPdf] = await Promise.all([
