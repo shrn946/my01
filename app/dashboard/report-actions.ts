@@ -219,7 +219,6 @@ export async function uploadLeadReportMedia(formData: FormData) {
     createdAt: new Date().toISOString(),
   });
 
-  const prisma = getPrisma();
   const aiFields = await getLeadAiFields(prisma, leadId);
   const media = [...getReportMedia(aiFields.reportMedia), item];
   await saveLeadReportMedia(prisma, leadId, media);
