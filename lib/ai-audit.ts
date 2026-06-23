@@ -507,10 +507,12 @@ ${selected.join("\n")}
 Analyze the entire website layout, design, content structure, responsiveness, user experience, performance, SEO, and visual presentation based on the provided data and the full-page desktop/mobile screenshots.
 
 Crucial Requirements:
-1. If the website is responsive and mobile-friendly, clearly mention this as a positive point (strength) in the report and proposal.
-2. Highlight both strengths and weaknesses instead of only listing issues.
-3. Identify design weaknesses, outdated layouts, UX issues, branding inconsistencies, content hierarchy problems, mobile usability issues, performance concerns, and SEO opportunities.
-4. Analyze and write content ONLY for the selected categories. Do not mention, recommend, or create sections for unselected categories.
+1. Start the proposal with a simple, direct assessment of the website. Mention that the website design looks outdated, may not meet modern user expectations, and could benefit from a visual refresh.
+2. Highlight key improvement areas such as SEO optimization, technical performance, mobile responsiveness, page speed, user experience, security, and conversion-focused enhancements.
+3. Keep the tone professional, friendly, and focused on the value these improvements can bring to the business.
+4. If the website is responsive and mobile-friendly, clearly mention this as a positive point (strength) in the report and proposal.
+5. Highlight both strengths and weaknesses instead of only listing issues.
+6. Analyze and write content ONLY for the selected categories. Do not mention, recommend, or create sections for unselected categories.
 
 Category boundaries:
 - redesign: design modernization, visual hierarchy, UX/UI, navigation, mobile layout, branding, trust, calls to action, conversion.
