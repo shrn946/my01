@@ -386,11 +386,11 @@ export default async function ReportPage({
                     </div>
                     {/* Image Container */}
                     <div className="flex-1 relative overflow-hidden bg-slate-950">
-                      {((lead.reportContent as any)?.afterImage || lead.proposalImage) ? (
+                      {(lead.reportContent as any)?.afterImage ? (
                         <div 
                           className="absolute inset-0 w-full h-full bg-no-repeat transition-all duration-[30s] ease-linear bg-top hover:bg-bottom" 
                           style={{ 
-                            backgroundImage: `url('${(lead.reportContent as any)?.afterImage || lead.proposalImage}')`, 
+                            backgroundImage: `url('${(lead.reportContent as any)?.afterImage}')`, 
                             backgroundSize: '100% auto'
                           }}
                         />
