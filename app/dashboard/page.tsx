@@ -469,9 +469,7 @@ export default function DashboardPage() {
   const handleSelectAfterImage = async (url: string) => {
     if (!result?.leadId) return;
     const newContent = { ...(result.reportContent || {}), afterImage: url };
-    await saveReportEdits(result.leadId, newContent);
-    // Also update proposalImage to keep it in sync for proposals
-    await updateLead(result.leadId, { proposalImage: url });
+    await updateLead(result.leadId, { proposalImage: url, reportContent: newContent as any });
     setResult((prev: any) => ({ ...prev, proposalImage: url, reportContent: newContent }));
     toast({ title: "After Image selected from media" });
   };
