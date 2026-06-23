@@ -275,7 +275,16 @@ export default function LeadsPage() {
   };
 
   const handleExport = () => {
-    const dataToExport = leads.map(lead => ({
+    const leadsToExport = selectedLeads.length > 0
+      ? leads.filter(lead => selectedLeads.includes(lead.id))
+      : leads;
+
+    if (leadsToExport.length === 0) {
+      toast({ title: "No Leads to Export", description: "There are no leads available to export.", variant: "destructive" });
+      return;
+    }
+
+    const dataToExport = leadsToExport.map(lead => ({
       "Business Name": lead.businessName,
       "Website": lead.website,
       "Email": lead.email,
