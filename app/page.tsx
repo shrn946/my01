@@ -7,6 +7,7 @@ import { Counter } from "@/components/counter";
 import { Magnetic } from "@/components/magnetic";
 import { ProjectCard } from "@/components/project-card";
 import { ReviewsCarousel } from "@/components/reviews-carousel";
+import { FeaturedCarousel } from "@/components/featured-carousel";
 import { getHeroSlides, getProjects, getBlogPosts, getReviews } from "@/lib/data";
 import { services } from "@/lib/seed-data";
 
@@ -130,10 +131,8 @@ export default async function HomePage() {
               </Link>
             </Magnetic>
           </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {featuredProjects.slice(0, 3).map((project, index) => (
-              <ProjectCard key={project.slug} project={project} />
-            ))}
+          <div className="mt-8">
+            <FeaturedCarousel projects={featuredProjects} />
           </div>
         </div>
       </section>
