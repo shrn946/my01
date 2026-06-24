@@ -57,8 +57,8 @@ export default async function ReportPage({
 
   if (format === "png") {
     return (
-      <div className="min-h-screen bg-slate-100 p-10 font-sans text-slate-950">
-        <div className="mx-auto w-[1100px] overflow-hidden rounded-[3rem] bg-white shadow-2xl">
+      <div className="min-h-screen bg-slate-100 p-10 font-sans text-slate-950 flex flex-col items-center justify-center">
+        <div id="report-shell" className="w-[1100px] overflow-hidden rounded-[3rem] bg-white shadow-2xl">
           <header className="bg-slate-950 p-12 text-white">
             <div className="flex items-start justify-between gap-8">
               <div>

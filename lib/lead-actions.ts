@@ -261,7 +261,7 @@ export async function captureWebsiteScreenshot(leadId: string, fullPage: boolean
     
     // 1. Desktop Screenshot
     try {
-      await page.goto(lead.website, { waitUntil: "load", timeout: 20000 });
+      await page.goto(lead.website, { waitUntil: "networkidle", timeout: 30000 });
     } catch (e) {
       console.warn("Desktop navigation timed out, attempting screenshot anyway");
     }
@@ -325,7 +325,8 @@ export async function generateProposalPng(leadId: string, mode: "design" | "tech
     const page = await context.newPage();
     
     try {
-      await page.goto(proposalUrl, { waitUntil: "load", timeout: 20000 });
+      await page.goto(proposalUrl, { waitUntil: "networkidle", timeout: 30000 });
+      await page.waitForSelector(".proposal-shell", { state: "visible", timeout: 15000 });
     } catch (e) {
       console.warn("Proposal generation navigation timed out, attempting screenshot anyway");
     }
@@ -384,7 +385,10 @@ export async function generateAuditExports(leadId: string) {
     const page = await context.newPage();
     const exportId = Date.now();
     
-    try { await page.goto(pngReportUrl, { waitUntil: "load", timeout: 30_000 }); } catch(e) { console.warn("Timeout on report png"); }
+    try { 
+      await page.goto(pngReportUrl, { waitUntil: "networkidle", timeout: 45000 }); 
+      await page.waitForSelector("#report-shell", { state: "visible", timeout: 15000 });
+    } catch(e) { console.warn("Timeout on report png"); }
     const image = await page.screenshot({ fullPage: true, animations: "disabled" });
 
     const [reportImage] = await Promise.all([
