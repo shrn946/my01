@@ -893,7 +893,7 @@ export default function DashboardPage() {
                             setIsUploadingCustomBefore(true);
                             const formData = new FormData();
                             formData.append("file", e.target.files[0]);
-                            formData.append("leadId", result.leadId);
+                            formData.append("leadId", result.id);
                             formData.append("type", "before_image");
                             const res = await uploadLeadReportMedia(formData);
                             if (res.success && res.item) handleSelectImage("beforeAfterImage", res.item.url);
@@ -952,7 +952,7 @@ export default function DashboardPage() {
                             setIsUploadingCustomAfter(true);
                             const formData = new FormData();
                             formData.append("file", e.target.files[0]);
-                            formData.append("leadId", result.leadId);
+                            formData.append("leadId", result.id);
                             formData.append("type", "after_image");
                             const res = await uploadLeadReportMedia(formData);
                             if (res.success && res.item) {
