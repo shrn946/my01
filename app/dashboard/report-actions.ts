@@ -111,15 +111,13 @@ export async function actionProposalPng(leadId: string) {
 }
 
 export async function actionPublicReport(leadId: string) {
-  const exportResult = await generateAuditExports(leadId);
-  if (!exportResult.success) return exportResult;
   const prisma = getPrisma();
   await prisma.lead.update({
     where: { id: leadId },
     data: { reportStatus: "Generated" }
   });
   revalidatePath("/dashboard");
-  return exportResult;
+  return { success: true, reportPdf: null, reportImage: null, proposalPdf: null, error: undefined };
 }
 
 export async function saveReportEdits(
