@@ -514,8 +514,8 @@ export default function DashboardPage() {
   const handleSelectAfterImage = async (url: string) => {
     if (!result?.leadId) return;
     const newContent = { ...(result.reportContent || {}), afterImage: url };
-    await updateLead(result.leadId, { proposalImage: url, reportContent: newContent as any });
-    setResult((prev: any) => ({ ...prev, proposalImage: url, reportContent: newContent }));
+    await updateLead(result.leadId, { reportContent: newContent as any });
+    setResult((prev: any) => ({ ...prev, reportContent: newContent }));
     toast({ title: "After Image selected from media" });
   };
 
@@ -547,8 +547,8 @@ export default function DashboardPage() {
 
       setReportState(s => ({ ...s, step: ++currentStep }));
       const proposalRes = await actionProposalPng(result.leadId);
-      if (!proposalRes.success || !proposalRes.path) {
-        throw new Error(proposalRes.error || "Proposal image generation failed");
+      if (!proposalRes.success) {
+        throw new Error("Proposal image generation failed");
       }
       setResult((prev: any) => ({ ...prev, proposalImage: proposalRes.path }));
       

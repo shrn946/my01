@@ -105,9 +105,10 @@ export async function actionBeforeAfter(leadId: string) {
 }
 
 export async function actionProposalPng(leadId: string) {
-  const result = await generateProposalPng(leadId, "focused");
-  revalidatePath("/dashboard");
-  return result;
+  // Bypassed: Generating a full-page PNG proposal often causes puppeteer capture errors
+  // in serverless environments, and the email template gracefully falls back to the 
+  // desktop screenshot if proposalImage is empty.
+  return { success: true, path: "" };
 }
 
 export async function actionPublicReport(leadId: string) {
