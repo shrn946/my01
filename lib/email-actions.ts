@@ -63,7 +63,12 @@ function professionalEmailHtml({
 
           <!-- Header -->
           <tr><td class="email-pad" style="padding:40px;background-color:#ffffff;text-align:center;border-bottom:1px solid #f1f5f9;">
-            <p style="margin:0;color:#2563eb;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;">${escapeHtml(companyName)}</p>
+            <table role="presentation" align="center" cellspacing="0" cellpadding="0" style="margin:0 auto;">
+              <tr>
+                <td style="width:40px;height:40px;background-color:#2563eb;border-radius:12px;text-align:center;vertical-align:middle;color:#ffffff;font-size:20px;font-weight:900;line-height:40px;">C</td>
+                <td style="padding-left:12px;font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-0.5px;vertical-align:middle;">CoreWeb<span style="color:#2563eb;">Labs</span></td>
+              </tr>
+            </table>
             <h1 style="margin:16px 0 0;font-size:26px;line-height:34px;color:#0f172a;font-weight:800;">Website Audit & Recommendations</h1>
             <p style="margin:12px 0 0;color:#64748b;font-size:16px;">Prepared for <strong>${escapeHtml(businessName)}</strong></p>
           </td></tr>
