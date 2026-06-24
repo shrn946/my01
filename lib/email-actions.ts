@@ -100,9 +100,20 @@ function professionalEmailHtml({
 
           <!-- Footer -->
           <tr><td class="email-pad" style="padding:40px;background-color:#0f172a;text-align:center;">
-            <h2 style="margin:0;font-size:20px;color:#ffffff;font-weight:600;">Ready to discuss the recommended improvements?</h2>
-            <p style="margin:16px 0 24px;color:#94a3b8;font-size:15px;line-height:24px;">Reply to this email or book a short consultation to review priorities and next steps.</p>
-            <a class="email-button" href="${contactUrl}" style="display:inline-block;padding:12px 24px;border-radius:8px;background-color:#ffffff;color:#0f172a;text-decoration:none;font-size:14px;font-weight:600;">Book a Consultation</a>
+            <h2 style="margin:0;font-size:22px;color:#ffffff;font-weight:700;">Ready to discuss the recommended improvements?</h2>
+            <p style="margin:16px 0 28px;color:#e2e8f0;font-size:16px;line-height:26px;">Would you be open to a short consultation to review the priorities? reply on this email for further discussion.</p>
+            <a class="email-button" href="https://www.coreweblabs.com/contact" style="display:inline-block;padding:16px 32px;border-radius:10px;background-color:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;box-shadow:0 4px 14px 0 rgba(59,130,246,0.39);">Book a Consultation</a>
+            
+            <div style="margin-top:40px;padding-top:32px;border-top:1px solid #1e293b;color:#94a3b8;font-size:15px;line-height:26px;">
+              <p style="margin:0 0 12px;">
+                <span style="color:#cbd5e1;font-weight:600;">Freelancer Profile:</span> 
+                <a href="https://www.freelancer.com/u/wordpressexp01" style="color:#60a5fa;text-decoration:none;">freelancer.com/u/wordpressexp01</a>
+              </p>
+              <p style="margin:0;">
+                <span style="color:#cbd5e1;font-weight:600;">WhatsApp:</span> 
+                <a href="https://wa.me/" style="color:#4ade80;text-decoration:none;font-weight:600;">Contact us on WhatsApp</a>
+              </p>
+            </div>
           </td></tr>
 
         </table>
