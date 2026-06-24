@@ -743,7 +743,7 @@ Response constraints: Return ONLY the rewritten text. No introductions, no greet
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(endpoint, {
+    let response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -755,6 +755,20 @@ Response constraints: Return ONLY the rewritten text. No introductions, no greet
       }),
       signal: controller.signal
     });
+
+    if (!response.ok && response.status === 404) {
+      // Fallback if the user typed an invalid model name
+      const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+      response = await fetch(fallbackEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+        }),
+      });
+    }
+
     clearTimeout(timeout);
 
     if (!response.ok) {
@@ -790,7 +804,7 @@ ${text}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(endpoint, {
+    let response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -802,6 +816,20 @@ ${text}`;
       }),
       signal: controller.signal
     });
+
+    if (!response.ok && response.status === 404) {
+      // Fallback if the user typed an invalid model name
+      const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+      response = await fetch(fallbackEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+        }),
+      });
+    }
+
     clearTimeout(timeout);
 
     if (!response.ok) {

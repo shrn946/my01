@@ -594,7 +594,8 @@ async function callGemini(prompt: string, images: ReportMediaItem[] = [], modelO
   const timeout = setTimeout(() => controller.abort(), 55_000);
   try {
     const imageParts = await loadImageParts(images);
-    const request = async (useJsonSchema: boolean) => {
+    const request = async (useJsonSchema: boolean, modelName: string) => {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`;
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
@@ -611,8 +612,13 @@ async function callGemini(prompt: string, images: ReportMediaItem[] = [], modelO
       });
       return { response, payload: await response.json() };
     };
-    let result = await request(true);
-    if (!result.response.ok && result.response.status === 400) result = await request(false);
+    let result = await request(true, model);
+    if (!result.response.ok && result.response.status === 404) {
+      result = await request(true, "gemini-2.0-flash");
+    }
+    if (!result.response.ok && result.response.status === 400) {
+      result = await request(false, "gemini-2.0-flash");
+    }
     if (!result.response.ok) throw new Error(result.payload?.error?.message || `Gemini request failed with ${result.response.status}`);
     const text = result.payload?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || "").join("");
     if (!text) throw new Error("Gemini returned no structured content");
