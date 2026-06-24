@@ -469,11 +469,11 @@ export default async function ReportPage({
                     <ReportImageHover image={lead.beforeAfterImage || lead.desktopImage || ""} label="before" />
                   </div>
                   <div className="space-y-5">
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Proposed Strategy</p>
-                      <p className="text-xs text-blue-300 font-medium">* It is just demo preview final website could be different design</p>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Proposed Strategy</p>
+                    <div className="space-y-3">
+                      <ReportImageHover image={(lead.reportContent as any)?.afterImage || ""} label="after" />
+                      <p className="text-xs text-blue-300 font-medium text-center">* It is just demo preview final website could be different design</p>
                     </div>
-                    <ReportImageHover image={(lead.reportContent as any)?.afterImage || ""} label="after" />
                   </div>
                 </div>
               </div>
