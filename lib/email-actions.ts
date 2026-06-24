@@ -205,14 +205,15 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
 
     if (status === "Sent") {
       const followUpDate = new Date();
-      followUpDate.setDate(followUpDate.getDate() + 5);
+      followUpDate.setDate(followUpDate.getDate() + 10); // 1.5 weeks (10 days)
 
       await prisma.lead.update({
         where: { id: leadId },
         data: {
           status: "Contacted",
           lastContactedAt: new Date(),
-          followUpDate
+          followUpDate,
+          followUpStatus: "Scheduled"
         }
       });
     }

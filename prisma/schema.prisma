@@ -167,6 +167,7 @@ model Lead {
   topIssues              String?
   notes                  String?
   followUpDate           DateTime?
+  followUpStatus         String?    @default("None")
   lastContactedAt        DateTime?
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @updatedAt
@@ -247,6 +248,10 @@ model Settings {
   googleApiKey        String?
   googleSearchCx      String?
   googleSearchLimit   Int     @default(40)
+
+  followUpEnabled     Boolean @default(true)
+  followUpSubject     String? @default("Checking in regarding your website")
+  followUpBody        String? @default("Hi,\n\nI just wanted to follow up on the website audit I sent over recently. Have you had a chance to look at it?\n\nLet me know if you have any questions or if you'd like to schedule a quick call to go over the recommendations.\n\nBest regards,")
 
   serpApiSearchEnabled Boolean @default(true)
   serpApiKey           String?

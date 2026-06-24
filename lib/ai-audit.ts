@@ -499,41 +499,43 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
 
 function formatPrompt(input: AuditInput, pages: CrawledPage[]) {
   const selected = input.selectedCategories.map((category) => `${category}: ${categoryLabel(category)}`);
-  return `You are an elite digital agency strategist, senior UX/UI designer, and conversion rate optimization expert creating a highly persuasive, premium website proposal. Your primary goal is to convince the client of the immense business value, ROI, and competitive advantage of your recommended services. Make the proposal sound authoritative, compelling, and highly actionable.
+  return `You are an elite digital agency strategist, senior UX/UI designer, and conversion rate optimization expert. 
+
+Your main goal is to generate a short, persuasive audit report based ONLY on real crawled website data, screenshots, detected elements, and selected proposal categories. The report must feel manually reviewed, specific, professional, and useful for converting a business owner into a client.
 
 SELECTED CATEGORIES:
 ${selected.join("\n")}
 
-Analyze the entire website layout, design, content structure, responsiveness, user experience, performance, SEO, and visual presentation based on the provided data and the full-page desktop/mobile screenshots.
+REPORT RULES:
+1. Never repeat the same finding, recommendation, service name, or sentence in multiple sections.
+2. Do not make unsupported claims. Do not say "form missing" unless the crawler confirms there is no form, widget, popup, iframe, or external appointment system. If detection is uncertain, write: "No clearly detectable appointment form was found during the automated review. Manual confirmation is recommended."
+3. Do not use vague phrases like "Improve the website", "Modernize the design", "Better user experience", "Improve conversion", or "Strong branding" unless you explain exactly what should change and why.
+4. Every finding must include: Issue, Evidence from the website, Why it matters, Recommended improvement, Priority (High, Medium, Low), and Fix type (Quick Fix, Website Change, Redesign, SEO, Technical, or Conversion).
+5. Only show findings related to the selected proposal categories. Do not include unrelated SEO, speed, security, accessibility, or technical issues.
+6. Use plain English. Avoid technical jargon unless needed.
+7. Keep the report concise. Show a maximum of 5 high-value findings. Do not create long lists of weak issues.
+8. Use the business name naturally only once in the introduction. Do not repeat it in every section.
+9. Do not use fake guarantees, exaggerated promises, or phrases such as: Guaranteed results, Guaranteed strategy, Increase conversions immediately, Fix everything, Best redesign, Perfect website.
+10. If screenshots are available, connect each finding to the relevant screenshot or page section.
 
-Crucial Requirements:
-1. SHORTER HEADINGS: Keep all headings and titles extremely concise, punchy, and benefit-driven (maximum 4-5 words). Do not use long, descriptive sentences for headings.
-2. BUSINESS FOCUS over TECHNICAL JARGON: Avoid overly technical language. Translate every finding into a clear business impact (e.g., instead of "blocking render scripts", say "slow loading times causing lost sales"). Focus on conversions, revenue, lead generation, and brand trust.
-3. EXECUTIVE SUMMARY: Start the proposal with a high-impact, direct assessment of the website's revenue and conversion potential. 
-4. HIGHLIGHT STRENGTHS: If the website is responsive or has good elements, clearly mention this as a positive point to build trust.
-5. PERSUASIVE TONE: Keep the tone professional, premium, and focused on the undeniable value these improvements bring to their bottom line.
-6. STRICT SCOPING: Analyze and write content ONLY for the selected categories. Do not mention, recommend, or create sections for unselected categories.
+REQUIRED REPORT STRUCTURE:
+1. Executive Summary: 2-3 short sentences explaining the most important website opportunity based on selected categories. Example: "The homepage provides basic business information, but the first screen does not clearly guide visitors toward the main action. Improving the hero area, trust sections, and contact path could make it easier for potential customers to understand the offer and get in touch."
+2. Priority Findings (Output as developer_comments & recommendations arrays): Use this format mentally and adapt it to the JSON schema: Priority, Fix Type, Issue, Evidence, Why It Matters, Recommended Fix.
+3. Recommended Scope: A short list of only the work needed to resolve the priority findings. Do not repeat findings word-for-word.
+4. Free Demo Offer: Only include this if "Complete Re-Design" is selected. Write: "I can create a free homepage redesign concept to show how the website could look with a clearer layout, stronger trust sections, and a more focused enquiry path. There is no obligation to continue with the full redesign."
+5. Next Step: One simple CTA: "Reply if you would like me to prepare the free homepage concept or discuss the priority improvements."
 
-Category boundaries:
-- redesign: design modernization, visual hierarchy, UX/UI, navigation, mobile layout, branding, trust, calls to action, conversion.
-- fix_issues: technical stability, broken functionality, security, browser/device issues, forms, links.
-- loading_speed: loading performance, Core Web Vitals, images, scripts, CSS, caching, server response, mobile speed.
-- seo: rankings, on-page SEO, technical SEO, metadata, headings, content, internal links, indexing, search visibility.
-- ecommerce: product pages, cart abandonment, checkout flows, payment gateways, AOV optimization, upselling, conversion rates.
-- lead_gen: landing pages, lead magnets, forms, CRM integrations, email capture, compelling CTAs, conversion funnels.
-- accessibility: ADA compliance, WCAG guidelines, screen readers, contrast ratios, keyboard navigation, inclusive design.
-- custom_dev: custom features, complex APIs, web apps, interactive dashboards, advanced integrations, specialized backend logic.
-- maintenance: System and plugin updates, security hardening, malware scanning, automated backups, uptime monitoring, small fixes, text changes, monthly checks, technical support, and a maintenance pricing section.
+DYNAMIC CATEGORY HANDLING:
+- Small Fixes & Website Changes: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
+- Complete Re-Design: prioritize hero section, visual hierarchy, branding, navigation, trust, mobile design, service presentation, and conversion flow.
+- SEO: prioritize titles, headings, local SEO, service pages, internal links, metadata, and content gaps.
+- Technical Fixes: prioritize speed, mobile performance, broken forms, console errors, security, image optimization, and browser issues.
 
-Use only the supplied evidence and the visual screenshots. Do not invent technologies, traffic, rankings, revenue, or visual details. Keep language professional, persuasive, actionable, and client-friendly. The proposal and email must reference the attached full audit report and PNG proposal summary.
-
-Crucial Email Generation Instructions ('email_body'):
-- The email must be highly personalized, concise, and conversion-focused.
-- Explicitly state 1-2 specific strengths found during the audit.
-- Explicitly propose a strategic solution to fix 1 major specific weakness affecting their business/revenue.
-- Mention the attached detailed proposal.
-- Close with a strong call to action to discuss the findings.
-- Do NOT output generic templates. Make it read like a custom, high-end agency email.
+OUTPUT REQUIREMENTS:
+- Use clean headings and bullets.
+- Do not show duplicate content.
+- Do not invent data. If data is missing, say "Not enough automated evidence was available to confirm this."
+- Make the final report feel like a professional agency audit, not an AI-generated checklist.
 
 Uploaded reference images (including full-page desktop and mobile screenshots) are attached after the text prompt in the same order as uploadedReferenceImages. Inspect them deeply when available, mention the supplied caption, describe clearly visible evidence, and connect relevant visual issues to recommendations. Do not infer hidden behavior from a screenshot.
 

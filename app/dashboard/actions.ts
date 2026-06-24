@@ -817,3 +817,39 @@ ${text}`;
     throw new Error(error.message || "Failed to autocorrect text");
   }
 }
+
+export async function cancelFollowUp(leadId: string) {
+  const prisma = getPrisma();
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { followUpStatus: "Cancelled", followUpDate: null }
+  });
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin/leads");
+  revalidatePath("/dashboard/leads");
+  return { success: true };
+}
+
+export async function rescheduleFollowUp(leadId: string, date: Date) {
+  const prisma = getPrisma();
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { followUpStatus: "Scheduled", followUpDate: date }
+  });
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin/leads");
+  revalidatePath("/dashboard/leads");
+  return { success: true };
+}
+
+export async function markFollowUpReplied(leadId: string) {
+  const prisma = getPrisma();
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { followUpStatus: "Replied", followUpDate: null }
+  });
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin/leads");
+  revalidatePath("/dashboard/leads");
+  return { success: true };
+}

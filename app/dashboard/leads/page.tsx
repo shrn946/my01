@@ -15,7 +15,11 @@ import {
   getLeadStats,
   getPaginatedLeads,
   updateLeadDeveloperComments,
-  enhanceDeveloperComments
+  enhanceDeveloperComments,
+  cancelFollowUp,
+  rescheduleFollowUp,
+  markFollowUpReplied,
+  autoCorrectText
 } from "../actions";
 import { 
   Table, 
@@ -69,6 +73,8 @@ import {
   MoreHorizontal,
   FileText,
   Image as ImageIcon,
+  Save,
+  Clock,
   CheckCircle2,
   Calendar,
   Globe,
@@ -77,7 +83,6 @@ import {
   Send,
   History,
   RefreshCcw,
-  Save,
   Monitor,
   Smartphone,
   Loader2,
@@ -156,6 +161,10 @@ export default function LeadsPage() {
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
   const [isEnhancingComments, setIsEnhancingComments] = useState(false);
+  const [isCorrectingEmailSubject, setIsCorrectingEmailSubject] = useState(false);
+  const [isCorrectingEmailBody, setIsCorrectingEmailBody] = useState(false);
+  const [followUpDateInput, setFollowUpDateInput] = useState("");
+  const [isSchedulingFollowUp, setIsSchedulingFollowUp] = useState(false);
 
   // Pagination & Deletion states
   const [currentPage, setCurrentPage] = useState(1);
@@ -986,6 +995,53 @@ export default function LeadsPage() {
                                           {!selectedLead.email && (
                                             <p className="text-[10px] text-center text-rose-500 font-semibold mt-1">An email address is required to launch outreach campaigns.</p>
                                           )}
+
+                                          {selectedLead.followUpStatus && selectedLead.followUpStatus !== "None" && (
+                                            <div className="mt-6 bg-muted/30 p-4 rounded-xl border border-muted">
+                                              <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Follow-Up Status</h5>
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                  {selectedLead.followUpStatus === "Scheduled" ? <Clock className="h-4 w-4 text-blue-500" /> : 
+                                                   selectedLead.followUpStatus === "Sent" ? <Send className="h-4 w-4 text-emerald-500" /> : 
+                                                   selectedLead.followUpStatus === "Replied" ? <CheckCircle2 className="h-4 w-4 text-indigo-500" /> : 
+                                                   <X className="h-4 w-4 text-rose-500" />}
+                                                  <span className="font-semibold text-sm">
+                                                    {selectedLead.followUpStatus} 
+                                                    {selectedLead.followUpStatus === "Scheduled" && selectedLead.followUpDate && ` for ${format(new Date(selectedLead.followUpDate), "MMM d, yyyy")}`}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                              
+                                              {selectedLead.followUpStatus === "Scheduled" && (
+                                                <div className="mt-4 grid grid-cols-2 gap-2">
+                                                  <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="h-9 text-xs rounded-lg"
+                                                    onClick={async () => {
+                                                      await cancelFollowUp(selectedLead.id);
+                                                      fetchLeadsAndStats();
+                                                      setSelectedLead({...selectedLead, followUpStatus: "Cancelled"});
+                                                    }}
+                                                  >
+                                                    Cancel
+                                                  </Button>
+                                                  <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="h-9 text-xs rounded-lg text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                                                    onClick={async () => {
+                                                      await markFollowUpReplied(selectedLead.id);
+                                                      fetchLeadsAndStats();
+                                                      setSelectedLead({...selectedLead, followUpStatus: "Replied"});
+                                                    }}
+                                                  >
+                                                    Mark Replied
+                                                  </Button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
                                       ) : (
                                         <motion.div 
@@ -1033,7 +1089,29 @@ export default function LeadsPage() {
                                             </div>
 
                                             <div className="space-y-2">
-                                              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Subject Line</label>
+                                              <div className="flex items-center justify-between">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Subject Line</label>
+                                                <Button 
+                                                  variant="ghost" 
+                                                  size="sm" 
+                                                  className="h-6 text-[10px] gap-1 text-primary hover:bg-primary/10"
+                                                  onClick={async () => {
+                                                    setIsCorrectingEmailSubject(true);
+                                                    try {
+                                                      const corrected = await autoCorrectText(emailSubject);
+                                                      setEmailSubject(corrected);
+                                                      toast({ title: "Subject enhanced" });
+                                                    } catch (e) {
+                                                      toast({ title: "Error", description: "Failed to enhance subject", variant: "destructive" });
+                                                    }
+                                                    setIsCorrectingEmailSubject(false);
+                                                  }}
+                                                  disabled={!emailSubject || isCorrectingEmailSubject}
+                                                >
+                                                  {isCorrectingEmailSubject ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                                  AI Auto-Correct
+                                                </Button>
+                                              </div>
                                               <Input 
                                                 value={emailSubject}
                                                 onChange={(e) => setEmailSubject(e.target.value)}
@@ -1042,7 +1120,29 @@ export default function LeadsPage() {
                                             </div>
 
                                             <div className="space-y-2">
-                                              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Message Body</label>
+                                              <div className="flex items-center justify-between">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Message Body</label>
+                                                <Button 
+                                                  variant="ghost" 
+                                                  size="sm" 
+                                                  className="h-6 text-[10px] gap-1 text-primary hover:bg-primary/10"
+                                                  onClick={async () => {
+                                                    setIsCorrectingEmailBody(true);
+                                                    try {
+                                                      const corrected = await autoCorrectText(emailBody);
+                                                      setEmailBody(corrected);
+                                                      toast({ title: "Message enhanced" });
+                                                    } catch (e) {
+                                                      toast({ title: "Error", description: "Failed to enhance message", variant: "destructive" });
+                                                    }
+                                                    setIsCorrectingEmailBody(false);
+                                                  }}
+                                                  disabled={!emailBody || isCorrectingEmailBody}
+                                                >
+                                                  {isCorrectingEmailBody ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                                  AI Auto-Correct
+                                                </Button>
+                                              </div>
                                               <Textarea 
                                                 className="min-h-[200px] rounded-xl resize-none p-3 text-xs leading-relaxed"
                                                 value={emailBody}

@@ -42,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { 
   Save, 
+  Clock,
   Mail, 
   Globe, 
   Building, 
@@ -65,6 +66,11 @@ const settingsSchema = z.object({
   portfolioUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   demoWebsiteUrls: z.string().optional(),
   geminiModel: z.string().optional(),
+
+  // Follow-up settings
+  followUpEnabled: z.boolean(),
+  followUpSubject: z.string().optional(),
+  followUpBody: z.string().optional(),
 
   // Search API settings
   googleSearchEnabled: z.boolean(),
@@ -102,6 +108,9 @@ export default function SettingsPage() {
       companyName: "",
       portfolioUrl: "",
       demoWebsiteUrls: "",
+      followUpEnabled: true,
+      followUpSubject: "",
+      followUpBody: "",
       googleSearchEnabled: true,
       googleApiKey: "",
       googleSearchCx: "",
@@ -136,6 +145,9 @@ export default function SettingsPage() {
           companyName: emailData.companyName || "",
           portfolioUrl: emailData.portfolioUrl || "",
           demoWebsiteUrls: emailData.demoWebsiteUrls || "",
+          followUpEnabled: (emailData as any).followUpEnabled ?? true,
+          followUpSubject: (emailData as any).followUpSubject || "Checking in regarding your website",
+          followUpBody: (emailData as any).followUpBody || "Hi,\n\nI just wanted to follow up on the website audit I sent over recently. Have you had a chance to look at it?\n\nLet me know if you have any questions or if you'd like to schedule a quick call to go over the recommendations.\n\nBest regards,",
           geminiModel: (emailData as any).geminiModel || "",
           googleSearchEnabled: searchData?.googleSearchEnabled ?? true,
           googleApiKey: searchData?.googleApiKey || "",
@@ -168,6 +180,9 @@ export default function SettingsPage() {
       companyName: values.companyName,
       portfolioUrl: values.portfolioUrl,
       demoWebsiteUrls: values.demoWebsiteUrls,
+      followUpEnabled: values.followUpEnabled,
+      followUpSubject: values.followUpSubject,
+      followUpBody: values.followUpBody,
       geminiModel: values.geminiModel
     };
 
@@ -336,6 +351,89 @@ export default function SettingsPage() {
                     </FormControl>
                     <FormDescription>
                       Get your API key from the Resend dashboard.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Follow-Up Settings */}
+          <Card className="shadow-sm border-muted">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                Automatic Follow-Up Emails
+              </CardTitle>
+              <CardDescription>
+                Configure the automatic follow-up emails sent 1.5 weeks after the initial proposal is sent.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FormField
+                control={form.control}
+                name="followUpEnabled"
+                render={({ field }) => (
+                  <FormItem className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <FormLabel className="text-md font-bold flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-primary" /> Enable Automatic Follow-Ups
+                        </FormLabel>
+                        <FormDescription className="text-xs mt-1">
+                          If enabled, a single follow-up email will be sent automatically to leads that haven't replied.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Select 
+                          value={field.value ? "true" : "false"} 
+                          onValueChange={(val) => field.onChange(val === "true")}
+                        >
+                          <SelectTrigger className="w-32 bg-white rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">Enabled</SelectItem>
+                            <SelectItem value="false">Disabled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="followUpSubject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Follow-Up Subject Line</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Checking in regarding your website" className="rounded-xl font-medium" {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="followUpBody"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Follow-Up Message Body</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Hi there,\n\nJust checking in..." 
+                        className="min-h-[150px] rounded-xl text-sm" 
+                        {...field} 
+                        value={field.value || ""} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      You can use {"{{businessName}}"} to inject the company name.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
