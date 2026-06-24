@@ -95,3 +95,76 @@ export function detectBusinessCategory(
 
   return "Other";
 }
+
+export function formatPhoneNumbers(rawPhone: string | null | undefined, countryContext?: string): string[] {
+  if (!rawPhone) return [];
+  
+  // Split by comma or slash if multiple numbers
+  const rawList = rawPhone.split(/[,/|]/).map(p => p.trim()).filter(Boolean);
+  const validNumbers = new Set<string>();
+
+  rawList.forEach(num => {
+    // Filter out scientific notation or pure floats (e.g. 1.0000000000)
+    if (num.match(/^\d+\.\d+$/)) return;
+    
+    // Extract only digits and leading plus
+    let clean = num.replace(/(?!^\+)[^\d]/g, '');
+    
+    // Ignore obviously invalid lengths
+    if (clean.replace('+', '').length < 7 || clean.replace('+', '').length > 15) return;
+    
+    // Ignore known bad numeric strings from scraping
+    if (clean.includes("3914031309545") || clean.includes("8623138256371")) return;
+
+    // Formatting based on detected or explicit country code
+    let formatted = clean;
+    const countryStr = (countryContext || "").toLowerCase();
+
+    // United States / Canada (+1)
+    if (clean.length === 10 && !clean.startsWith('+')) {
+      formatted = `+1 (${clean.slice(0, 3)}) ${clean.slice(3, 6)}-${clean.slice(6)}`;
+    } else if (clean.startsWith('1') && clean.length === 11) {
+      formatted = `+1 (${clean.slice(1, 4)}) ${clean.slice(4, 7)}-${clean.slice(7)}`;
+    } else if (clean.startsWith('+1') && clean.length === 12) {
+      formatted = `+1 (${clean.slice(2, 5)}) ${clean.slice(5, 8)}-${clean.slice(8)}`;
+    } 
+    // United Kingdom (+44)
+    else if (countryStr.includes("uk") || countryStr.includes("united kingdom") || clean.startsWith('+44') || (clean.startsWith('0') && clean.length === 11)) {
+      if (clean.startsWith('0')) clean = '+44' + clean.slice(1);
+      if (!clean.startsWith('+') && clean.startsWith('44')) clean = '+' + clean;
+      
+      if (clean.startsWith('+44') && clean.length >= 12) {
+        formatted = `+44 ${clean.slice(3, 7)} ${clean.slice(7)}`;
+      } else {
+        formatted = clean;
+      }
+    } 
+    // Australia (+61)
+    else if (countryStr.includes("australia") || clean.startsWith('+61') || (clean.startsWith('0') && clean.length === 10)) {
+      if (clean.startsWith('0')) clean = '+61' + clean.slice(1);
+      if (!clean.startsWith('+') && clean.startsWith('61')) clean = '+' + clean;
+      
+      if (clean.startsWith('+61')) {
+        formatted = `+61 ${clean.slice(3, 6)} ${clean.slice(6, 9)} ${clean.slice(9)}`;
+      } else {
+        formatted = clean;
+      }
+    }
+    // Generic International
+    else {
+      if (!clean.startsWith('+') && clean.length >= 11) {
+        formatted = '+' + clean;
+      } else {
+        formatted = clean; // As is, but clean of spaces/letters
+      }
+    }
+
+    validNumbers.add(formatted);
+  });
+
+  return Array.from(validNumbers);
+}
+
+export function cleanPhoneForHref(formattedPhone: string): string {
+  return formattedPhone.replace(/[^\d+]/g, '');
+}

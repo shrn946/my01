@@ -29,8 +29,7 @@ export default async function ProposalPage({
     ? reportContent.recommendations
     : audit.proposal_content.scope;
 
-  const designAnalysis = lead.designAnalysis as any;
-  const brandColors = designAnalysis?.colors?.background?.filter((color: string) => color !== "rgb(255, 255, 255)").slice(0, 4) || [];
+
   const categoryLabel = (category: string) =>
     AUDIT_CATEGORIES.find((item) => item.value === category)?.label || category;
 
@@ -52,7 +51,7 @@ export default async function ProposalPage({
             <div className="flex justify-between gap-8">
               <div>
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {audit.selected_categories.map((category) => (
+                  {audit.selected_categories.filter((c: string) => c !== "design").map((category) => (
                     <span key={category} className="rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest">
                       {categoryLabel(category)}
                     </span>
@@ -64,31 +63,7 @@ export default async function ProposalPage({
               </div>
             </div>
             
-            <div className="mt-12 grid grid-cols-[1fr_1fr] gap-6">
-              {/* Design Identity */}
-              <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
-                <p className="text-2xl font-black mb-1">Design Identity</p>
-                <p className="text-xs text-slate-400 mb-6">Visual patterns and structure detected on the website.</p>
-                <div className="space-y-5">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Detected Fonts</p>
-                    <div className="flex flex-wrap gap-2">
-                      {designAnalysis?.fonts?.map((font: string) => (
-                        <span key={font} className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold">{font}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Color Palette</p>
-                    <div className="flex gap-2">
-                      {designAnalysis?.colors?.background?.map((color: string, i: number) => (
-                        <div key={i} className="w-8 h-8 rounded-full border border-white/30 shadow-md" style={{ backgroundColor: color }} title={color} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+            <div className="mt-12 max-w-2xl">
               {/* Website Scores */}
               <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-6">
@@ -107,7 +82,10 @@ export default async function ProposalPage({
                       <p className="text-3xl font-black text-white mt-1">{lead.websiteScore || 0}</p>
                     </div>
                     <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Performance</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <span className="hidden sm:inline">Performance</span>
+                        <span className="sm:hidden">Perf.</span>
+                      </p>
                       <p className="text-3xl font-black text-emerald-400 mt-1">{lead.performanceScore || 0}</p>
                     </div>
                   </div>

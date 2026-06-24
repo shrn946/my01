@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload
+  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload, Copy, ChevronDown, ChevronUp
 } from "lucide-react";
 import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments } from "./actions";
 import { getFinderLeads } from "./lead-finder/actions";
@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PhoneList } from "@/components/phone-list";
 
 export default function DashboardPage() {
   const [url, setUrl] = useState("");
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const [isCapturingBefore, setIsCapturingBefore] = useState(false);
   const [socialProposal, setSocialProposal] = useState("");
   const [isShowingProposal, setIsShowingProposal] = useState(false);
+  const [shortReportUrl, setShortReportUrl] = useState("");
   const [media, setMedia] = useState<any[]>([]);
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [recentFinderLeads, setRecentFinderLeads] = useState<any[]>([]);
@@ -48,6 +50,7 @@ export default function DashboardPage() {
   const [isFullScreenCapture, setIsFullScreenCapture] = useState(true);
   const [isUploadingCustomBefore, setIsUploadingCustomBefore] = useState(false);
   const [isUploadingCustomAfter, setIsUploadingCustomAfter] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const handleCaptureAfter = async () => {
     if (!afterUrl || !result?.leadId) return;
@@ -102,10 +105,30 @@ export default function DashboardPage() {
 
   const handleGenerateSocialProposal = async () => {
     if (!result?.leadId) return;
+    
+    setIsShowingProposal(true);
+    setSocialProposal("");
+    setShortReportUrl("");
+    
+    // Generate Short URL
+    const longUrl = `${window.location.origin}/report/${result.leadId}`;
+    try {
+       const shortUrlRes = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+       if (shortUrlRes.ok) {
+          const short = await shortUrlRes.text();
+          setShortReportUrl(short);
+       } else {
+          setShortReportUrl(longUrl);
+       }
+    } catch (e) {
+       setShortReportUrl(longUrl);
+    }
+
     const res = await generateSocialOutreachProposal(result.leadId);
     if (res.success) {
       setSocialProposal(res.message || "");
-      setIsShowingProposal(true);
+    } else {
+      setIsShowingProposal(false);
     }
   };
 
@@ -211,34 +234,23 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadInitialData() {
-      // Load stats
-      const statsData = await getDashboardStats();
+      // Parallelize fetching to speed up initial load
+      const [statsData, mediaData, allLeads, finderLeads] = await Promise.all([
+        getDashboardStats().catch(() => ({ searchesUsed: 0, remainingSearches: 40, totalLeads: 0, leadsSaved: 0, emailsSent: 0 })),
+        getMediaAssetsAction().catch(() => []),
+        getLeads().catch(() => []),
+        getFinderLeads().catch(() => [])
+      ]);
+
       setStats(statsData);
-
-      // Load media
-      const mediaData = await getMediaAssetsAction();
       setMedia(mediaData);
-
-      // Load recent leads
-      try {
-        const allLeads = await getLeads();
-        setRecentLeads(allLeads.slice(0, 5));
-      } catch (err) {
-        console.error("Error loading leads:", err);
-      }
-
-      // Load finder leads (latest 10)
-      try {
-        const finderLeads = await getFinderLeads();
-        setRecentFinderLeads(finderLeads.slice(0, 10));
-      } catch (err) {
-        console.error("Error loading finder leads:", err);
-      }
+      setRecentLeads(allLeads.slice(0, 5));
+      setRecentFinderLeads(finderLeads.slice(0, 10));
 
       // Load last lead if exists
       const lastLeadId = localStorage.getItem("lastLeadId");
       if (lastLeadId) {
-        const lead = await getLeadAction(lastLeadId);
+        const lead = await getLeadAction(lastLeadId).catch(() => null);
         if (lead) {
           setResult({ ...lead, leadId: lead.id });
           setUrl(lead.website || "");
@@ -440,7 +452,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const uploadedItems = [];
+      const uploadedItems: any[] = [];
       for (const file of files) {
         if (!(file instanceof File) || file.size === 0) continue;
         
@@ -740,7 +752,7 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  <InfoItem icon={<Phone />} label="Phone" value={result.phone || "Not Found"} />
+                  <InfoItem icon={<Phone />} label="Phone" value={result.phone ? <PhoneList rawPhone={result.phone} /> : "Not Found"} />
                   <InfoItem icon={<MapPin />} label="Address" value={result.address || "Not Found"} />
                   
                   <div className="flex flex-col p-3 rounded-lg border bg-card/50">
@@ -811,45 +823,20 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              {result.designAnalysis && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Design Identity</CardTitle>
-                    <CardDescription>Visual patterns and structure detected on the website.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Detected Fonts</p>
-                        <div className="flex flex-wrap gap-2">
-                          {result.designAnalysis.fonts?.map((font: string) => (
-                            <Badge key={font} variant="secondary" className="font-bold">{font}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Color Palette</p>
-                        <div className="flex flex-wrap gap-2">
-                          {result.designAnalysis.colors?.background?.map((color: string, i: number) => (
-                            <div key={i} className="w-8 h-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} title={color} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <StructureBadge label="Navbar" active={result.designAnalysis.structure?.hasNavbar} />
-                      <StructureBadge label="Hero Section" active={result.designAnalysis.structure?.hasHero} />
-                      <StructureBadge label="Footer" active={result.designAnalysis.structure?.hasFooter} />
-                      <div className="p-3 rounded-xl border bg-card/50 text-center">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">CTAs</p>
-                        <p className="text-xl font-bold">{result.designAnalysis.structure?.ctaCount || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Advanced Options Toggle for Mobile */}
+              <div className="lg:hidden">
+                <Button 
+                  variant="outline" 
+                  className="w-full font-bold mb-6" 
+                  onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+                >
+                  {isAdvancedOpen ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
+                  {isAdvancedOpen ? "Hide Advanced Options" : "Show Advanced Options (Screenshots, Comments)"}
+                </Button>
+              </div>
 
-              <Card className={`shadow-sm overflow-hidden mb-6 transition-colors ${result.reportContent?.includeBeforeAfter ? 'border-indigo-100' : 'border-slate-200'}`}>
+              <div className={`${!isAdvancedOpen ? "hidden lg:block space-y-6" : "space-y-6"}`}>
+                <Card className={`shadow-sm overflow-hidden mb-6 transition-colors ${result.reportContent?.includeBeforeAfter ? 'border-indigo-100' : 'border-slate-200'}`}>
                 <div className={`p-6 border-b flex justify-between items-center transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-slate-200'}`}>
                     <div className={`flex items-center gap-2 transition-opacity ${result.reportContent?.includeBeforeAfter ? 'opacity-100' : 'opacity-60'}`}>
                       <div className={`p-2 rounded-lg text-white transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-500' : 'bg-slate-400'}`}>
@@ -1119,6 +1106,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+              </div>
 
               {result.aiAnalysis && (
                 <Card>
@@ -1148,6 +1136,7 @@ export default function DashboardPage() {
                   <CardHeader className="flex flex-row items-center justify-between space-y-0">
                     <div>
                       <div className="flex items-center gap-2">
+                        <Mail className="h-5 w-5 text-primary" />
                         <CardTitle className="text-xl">Ready-to-Send Email</CardTitle>
                         <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setHideEmailCard(true)}>
                           <X className="h-4 w-4" />
@@ -1159,6 +1148,7 @@ export default function DashboardPage() {
                       <Button 
                         variant="outline" 
                         size="sm" 
+                        className="font-bold shadow-sm"
                         onClick={() => {
                           if (!isEditingEmailContent) {
                             setEmailSubject(result.aiAnalysis.proposal_content?.email_subject || "");
@@ -1497,14 +1487,30 @@ export default function DashboardPage() {
                 </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
+              {shortReportUrl && (
+                <div className="flex flex-col gap-2 p-3 bg-indigo-50 border border-indigo-100 rounded-xl mb-3">
+                  <p className="text-xs font-bold text-indigo-800 uppercase tracking-wider">Report Link</p>
+                  <p className="text-sm font-semibold text-slate-800 break-words">{result?.businessName ? `Growth Strategy for ${result.businessName}` : "Growth Strategy Report"}</p>
+                  <div className="flex items-center gap-2">
+                    <Input readOnly value={shortReportUrl} className="h-8 text-xs bg-white text-slate-600 font-mono flex-1" />
+                    <Button 
+                      size="sm" 
+                      className="h-8 px-3 shrink-0" 
+                      onClick={() => { navigator.clipboard.writeText(shortReportUrl); toast({title: "Link Copied!"}) }}
+                    >
+                      Copy Link
+                    </Button>
+                  </div>
+                </div>
+              )}
               {socialProposal ? (
                 <Textarea 
                   value={socialProposal} 
                   readOnly 
-                  className="min-h-[220px] text-sm leading-relaxed font-mono bg-muted/30 resize-none rounded-xl" 
+                  className="min-h-[160px] text-sm leading-relaxed font-mono bg-muted/30 resize-none rounded-xl" 
                 />
               ) : (
-                <div className="min-h-[220px] flex items-center justify-center bg-muted/20 rounded-xl border border-dashed">
+                <div className="min-h-[160px] flex items-center justify-center bg-muted/20 rounded-xl border border-dashed">
                   <div className="text-center text-muted-foreground">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
                     <p className="text-sm font-medium">Generating your proposal...</p>
@@ -1515,11 +1521,11 @@ export default function DashboardPage() {
             <DialogFooter className="gap-2">
                 <Button variant="outline" onClick={() => setIsShowingProposal(false)}>Close</Button>
                 <Button 
-                  onClick={() => { navigator.clipboard.writeText(socialProposal); toast({title: "Copied!", description: "Proposal copied to clipboard."}) }}
+                  onClick={() => { navigator.clipboard.writeText(`${socialProposal}\n\nHere is your full report: ${shortReportUrl}`); toast({title: "Copied!", description: "Message & Link copied to clipboard."}) }}
                   disabled={!socialProposal}
                   className="font-bold"
                 >
-                  <Send className="h-4 w-4 mr-2" /> Copy to Clipboard
+                  <Send className="h-4 w-4 mr-2" /> Copy Message & Link
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -1550,6 +1556,50 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Sticky Mobile Action Bar */}
+      {result && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-3 flex gap-2 lg:hidden z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+          <Button 
+            className="flex-1 font-bold h-12" 
+            onClick={handleGenerateReport} 
+            disabled={reportState.active || isCapturingAfter || isCapturingBefore || selectedCategories.length === 0}
+          >
+            {reportState.active ? <Loader2 className="h-5 w-5 animate-spin" /> : "Generate"}
+          </Button>
+          
+          <Button 
+            className="flex-1 font-bold h-12" 
+            variant="secondary"
+            onClick={() => window.open(`/report/${result.leadId}`, "_blank")}
+            disabled={!result.reportContent}
+          >
+            <Eye className="h-4 w-4 mr-1.5" /> Preview
+          </Button>
+
+          <Button 
+            className="flex-1 font-bold h-12" 
+            variant="outline"
+            onClick={() => window.open(`https://wa.me/${result.phone?.replace(/[^\d+]/g, '')}`, '_blank')}
+            disabled={!result.phone}
+          >
+            WA Share
+          </Button>
+
+          <Button 
+            className="flex-shrink-0 h-12 w-12" 
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              navigator.clipboard.writeText(`${window.location.origin}/report/${result.leadId}`);
+              toast({title: "Copied!", description: "Proposal link copied."});
+            }}
+            disabled={!result.reportContent}
+          >
+            <Copy className="h-5 w-5" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1563,15 +1613,15 @@ function StructureBadge({ label, active }: { label: string, active: boolean }) {
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 p-3 rounded-lg border bg-card/50">
       <div className="p-2 bg-primary/10 rounded-md text-primary">
         {icon}
       </div>
-      <div className="overflow-hidden">
+      <div className="overflow-hidden min-w-0 flex-1">
         <p className="text-xs font-semibold text-muted-foreground uppercase">{label}</p>
-        <p className="text-sm font-medium break-words" title={value}>{value}</p>
+        <div className="text-sm font-medium break-words mt-1">{value}</div>
       </div>
     </div>
   );

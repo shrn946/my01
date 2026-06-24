@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Loader2, Save, ExternalLink, Send, Sparkles, Settings2, Clock, Trash2, Tag, Filter
@@ -27,6 +27,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { PhoneList } from "@/components/phone-list";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
@@ -305,6 +316,14 @@ export default function LeadFinderPage() {
   const [maxResults, setMaxResults] = useState(10);
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [wordpressFilter, setWordpressFilter] = useState(false);
+  const [filterEmailOnly, setFilterEmailOnly] = useState(false);
+  const [filterNoEmail, setFilterNoEmail] = useState(false);
+  const [filterMobileIssues, setFilterMobileIssues] = useState(false);
+  const [filterDoctorClinic, setFilterDoctorClinic] = useState(false);
+  const [filterHighPriority, setFilterHighPriority] = useState(false);
+  const [filterCountry, setFilterCountry] = useState("All");
+  const [sortBy, setSortBy] = useState<"newest" | "speed" | "country" | "category" | "email">("newest");
+  const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState({
     googleUsed: 0,
     googleRemaining: 40,
@@ -1039,11 +1058,69 @@ export default function LeadFinderPage() {
   // Get active categories in results for quick filter chips
   const resultsCategories = Array.from(new Set(results.map(r => r.category || "Other")));
 
-  const filteredResults = results.filter(lead => {
-    if (wordpressFilter && !lead.wordpress) return false;
-    if (categoryFilter !== "All" && (lead.category || "Other").toLowerCase() !== categoryFilter.toLowerCase()) return false;
-    return true;
-  });
+  const filteredResults = useMemo(() => {
+    // 1. Remove Duplicates
+    const uniqueMap = new Map();
+    for (const lead of results) {
+      if (!lead.website) continue;
+      try {
+        const domain = new URL(lead.website).hostname.replace("www.", "");
+        if (!uniqueMap.has(domain)) {
+          uniqueMap.set(domain, lead);
+        }
+      } catch {
+        if (!uniqueMap.has(lead.website)) {
+          uniqueMap.set(lead.website, lead);
+        }
+      }
+    }
+    const uniqueResults = Array.from(uniqueMap.values());
+
+    let list = uniqueResults.filter(lead => {
+      if (searchTerm) {
+        const query = searchTerm.toLowerCase();
+        const matches = 
+          (lead.businessName || "").toLowerCase().includes(query) ||
+          (lead.website || "").toLowerCase().includes(query) ||
+          (lead.email || "").toLowerCase().includes(query) ||
+          (lead.phone || "").toLowerCase().includes(query) ||
+          (lead.category || "").toLowerCase().includes(query);
+        if (!matches) return false;
+      }
+
+      if (wordpressFilter && !lead.wordpress) return false;
+      if (categoryFilter !== "All" && (lead.category || "Other").toLowerCase() !== categoryFilter.toLowerCase()) return false;
+      if (filterCountry !== "All" && (lead.country || "Unknown").toLowerCase() !== filterCountry.toLowerCase()) return false;
+      
+      if (filterEmailOnly && !lead.email) return false;
+      if (filterNoEmail && lead.email) return false;
+      if (filterMobileIssues && !lead.mobilePerformanceIssue) return false;
+      if (filterHighPriority && !lead.mobilePerformanceIssue) return false;
+      if (filterDoctorClinic && !["dentist", "medical clinic", "doctor", "health center"].includes(lead.category?.toLowerCase() || "")) return false;
+      
+      return true;
+    });
+
+    list = [...list].sort((a, b) => {
+      if (sortBy === "speed") {
+        return (a.mobileScore || 100) - (b.mobileScore || 100);
+      }
+      if (sortBy === "country") {
+        return (a.country || "").localeCompare(b.country || "");
+      }
+      if (sortBy === "category") {
+        return (a.category || "").localeCompare(b.category || "");
+      }
+      if (sortBy === "email") {
+        if (a.email && !b.email) return -1;
+        if (!a.email && b.email) return 1;
+        return 0;
+      }
+      return 0;
+    });
+
+    return list;
+  }, [results, wordpressFilter, categoryFilter, filterCountry, filterEmailOnly, filterNoEmail, filterMobileIssues, filterHighPriority, filterDoctorClinic, sortBy, searchTerm]);
 
   const totalLeadsCount = filteredResults.length;
   const totalPages = Math.ceil(totalLeadsCount / pageSize) || 1;
@@ -1488,46 +1565,134 @@ export default function LeadFinderPage() {
       {/* Results View */}
       <div className="space-y-6">
         {results.length > 0 && (
-          <div className="flex flex-col gap-2 p-4 bg-muted/30 border rounded-2xl">
-            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Filter className="h-3.5 w-3.5 text-primary" /> Filter Results:
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant={categoryFilter === "All" ? "default" : "outline"}
-                size="sm"
-                className="h-8 text-xs font-bold rounded-xl"
-                onClick={() => setCategoryFilter("All")}
-              >
-                All Categories ({results.length})
-              </Button>
-              {resultsCategories.map(cat => {
-                const count = results.filter(r => (r.category || "Other") === cat).length;
-                return (
+          <div className="flex flex-col gap-4 p-4 bg-muted/30 border rounded-2xl sticky top-4 z-10 backdrop-blur-md shadow-sm">
+            <div className="flex flex-col lg:flex-row justify-between gap-6">
+              <div className="space-y-4 flex-1">
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search websites, emails, business names..." 
+                      className="pl-9 h-10 rounded-xl border-primary/20 bg-white dark:bg-slate-900"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Filter className="h-3.5 w-3.5 text-primary" /> Quick Filters:
+                  </span>
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
-                    key={cat}
-                    variant={categoryFilter === cat ? "default" : "outline"}
+                    variant={filterEmailOnly ? "default" : "outline"}
                     size="sm"
-                    className="h-8 text-xs font-bold rounded-xl"
-                    onClick={() => setCategoryFilter(cat)}
+                    className={`h-8 text-xs font-bold rounded-xl ${filterEmailOnly ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600" : ""}`}
+                    onClick={() => { setFilterEmailOnly(!filterEmailOnly); setFilterNoEmail(false); }}
                   >
-                    {cat} ({count})
+                    <Mail className="w-3.5 h-3.5 mr-1" /> Websites with Email Only
                   </Button>
-                );
-              })}
-              {results.some(r => r.wordpress) && (
-                <>
+                  
+                  <Button
+                    variant={filterNoEmail ? "default" : "outline"}
+                    size="sm"
+                    className={`h-8 text-xs font-bold rounded-xl ${filterNoEmail ? "bg-rose-600 hover:bg-rose-700 text-white border-rose-600" : ""}`}
+                    onClick={() => { setFilterNoEmail(!filterNoEmail); setFilterEmailOnly(false); }}
+                  >
+                    No Email
+                  </Button>
+
                   <div className="w-px h-6 bg-border mx-1"></div>
+
                   <Button
-                    variant={wordpressFilter ? "default" : "outline"}
+                    variant={filterHighPriority ? "default" : "outline"}
                     size="sm"
-                    className={`h-8 text-xs font-bold rounded-xl ${wordpressFilter ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 'text-slate-600'}`}
-                    onClick={() => setWordpressFilter(!wordpressFilter)}
+                    className={`h-8 text-xs font-bold rounded-xl ${filterHighPriority ? "bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shadow-sm" : ""}`}
+                    onClick={() => setFilterHighPriority(!filterHighPriority)}
                   >
-                    WordPress Only ({results.filter(r => r.wordpress).length})
+                    🔥 High Priority Leads
                   </Button>
-                </>
-              )}
+
+                  <Button
+                    variant={filterMobileIssues ? "default" : "outline"}
+                    size="sm"
+                    className={`h-8 text-xs font-bold rounded-xl ${filterMobileIssues ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-600" : ""}`}
+                    onClick={() => setFilterMobileIssues(!filterMobileIssues)}
+                  >
+                    Mobile Speed Issues
+                  </Button>
+
+                  <div className="w-px h-6 bg-border mx-1"></div>
+
+                  <Button
+                    variant={filterDoctorClinic ? "default" : "outline"}
+                    size="sm"
+                    className={`h-8 text-xs font-bold rounded-xl`}
+                    onClick={() => setFilterDoctorClinic(!filterDoctorClinic)}
+                  >
+                    Doctor / Clinic
+                  </Button>
+
+                  {results.some(r => r.wordpress) && (
+                    <Button
+                      variant={wordpressFilter ? "default" : "outline"}
+                      size="sm"
+                      className={`h-8 text-xs font-bold rounded-xl ${wordpressFilter ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 'text-slate-600'}`}
+                      onClick={() => setWordpressFilter(!wordpressFilter)}
+                    >
+                      WordPress Only
+                    </Button>
+                  )}
+                </div>
+
+                {/* Category Filters */}
+                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-dashed">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mr-1">Categories:</span>
+                  <Button
+                    variant={categoryFilter === "All" ? "default" : "outline"}
+                    size="sm"
+                    className="h-7 text-[11px] font-bold rounded-lg"
+                    onClick={() => setCategoryFilter("All")}
+                  >
+                    All ({results.length})
+                  </Button>
+                  {resultsCategories.map(cat => {
+                    const count = results.filter(r => (r.category || "Other") === cat).length;
+                    return (
+                      <Button
+                        key={cat}
+                        variant={categoryFilter === cat ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[11px] font-bold rounded-lg"
+                        onClick={() => setCategoryFilter(cat)}
+                      >
+                        {cat} ({count})
+                      </Button>
+                    );
+                  })}
+                </div>
+                </div>
+              </div>
+
+              {/* Sorting */}
+              <div className="space-y-3 shrink-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  Sort Results:
+                </span>
+                <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
+                  <SelectTrigger className="w-full lg:w-[180px] h-10 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border-primary/20 shadow-sm focus:ring-primary">
+                    <SelectValue placeholder="Sort results..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="speed">Mobile Speed Score</SelectItem>
+                    <SelectItem value="email">Email Availability</SelectItem>
+                    <SelectItem value="country">Country</SelectItem>
+                    <SelectItem value="category">Category</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         )}
@@ -1664,30 +1829,27 @@ export default function LeadFinderPage() {
                           <div className="flex items-center gap-2 min-w-0">
                             <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             {lead.email ? (
-                              <span className="truncate font-semibold text-xs text-foreground" title={lead.email}>
-                                {lead.email}
-                              </span>
+                              <div className="flex items-center gap-1 min-w-0">
+                                <span className="truncate font-semibold text-xs text-foreground" title={lead.email}>
+                                  {lead.email}
+                                </span>
+                                {lead.emailConfidence > 0 && (
+                                  <Badge variant="outline" className={`text-[9px] px-1 py-0 h-4 ml-1 flex-shrink-0 ${lead.emailConfidence >= 90 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : lead.emailConfidence >= 70 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-red-50 text-red-700 border-red-200"}`} title={`Confidence: ${lead.emailConfidence}%`}>
+                                    {lead.emailConfidence}%
+                                  </Badge>
+                                )}
+                              </div>
                             ) : (
                               <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] font-bold h-5 px-1.5 py-0 flex items-center gap-1">
                                 <AlertCircle className="h-2.5 w-2.5" /> No Email
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                            {lead.phone ? (
-                              <button
-                                type="button"
-                                title="Send WhatsApp Message"
-                                onClick={() => openWhatsApp(lead.phone)}
-                                className="truncate font-semibold text-xs text-green-600 hover:text-green-700 hover:underline flex items-center gap-1 cursor-pointer"
-                              >
-                                <WhatsAppIcon className="h-3 w-3 text-green-500" />
-                                {lead.phone}
-                              </button>
-                            ) : (
-                              <span className="truncate font-semibold text-xs text-muted-foreground">No Phone</span>
-                            )}
+                          <div className="flex items-start gap-2 min-w-0 sm:col-span-2">
+                            <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-1" />
+                            <div className="flex-1 min-w-0">
+                              <PhoneList rawPhone={lead.phone} countryContext={lead.country} />
+                            </div>
                           </div>
                           <div className="flex items-center gap-2 sm:col-span-2 min-w-0">
                             <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -1753,11 +1915,22 @@ export default function LeadFinderPage() {
                           <Badge variant="secondary" className={`text-xs ${lead.mobileFriendly ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
                             {lead.mobileFriendly ? "Mobile Ready" : "Viewport Error"}
                           </Badge>
+                          {typeof lead.mobileScore === 'number' && (
+                            <Badge variant="secondary" className={`text-xs flex items-center gap-1 ${lead.mobileScore >= 80 ? "bg-emerald-50 text-emerald-700" : lead.mobileScore >= 50 ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700 font-bold"}`} title={`Mobile PageSpeed: ${lead.mobileScore}/100`}>
+                              {lead.mobileScore < 50 && <AlertCircle className="h-3 w-3" />}
+                              Speed: {lead.mobileScore}
+                            </Badge>
+                          )}
+                          {lead.mobilePerformanceIssue && (
+                            <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-200 text-xs font-bold animate-pulse shadow-sm">
+                              🔥 High Priority Prospect
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
                       {/* Column 2: Scores */}
-                      <div className="hidden sm:flex items-center justify-around gap-4 bg-muted/10 p-4 rounded-2xl border">
+                      <div className="flex items-center justify-around gap-4 bg-muted/10 p-4 rounded-2xl border">
                         <div className="text-center">
                           <div className={`h-14 w-14 rounded-full border-4 flex items-center justify-center font-black text-sm mb-1 ${getScoreColor(lead.qualityScore)}`}>
                             {lead.qualityScore}

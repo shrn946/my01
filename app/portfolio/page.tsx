@@ -44,10 +44,10 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
           />
           
           {/* Modern Filter Bar */}
-          <div className="sticky top-20 z-30 mb-16 flex flex-wrap items-center justify-center gap-2 rounded-[2rem] border border-black/5 bg-white/70 p-2 backdrop-blur-xl shadow-premium">
+          <div className="sticky top-20 z-30 mb-16 flex overflow-x-auto sm:flex-wrap items-center sm:justify-center gap-2 rounded-[2rem] border border-black/5 bg-white/70 p-2 backdrop-blur-xl shadow-premium [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]">
             <Link 
               href="/portfolio" 
-              className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition-all ${!category ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-600 hover:bg-slate-50 hover:text-primary"}`}
+              className={`whitespace-nowrap shrink-0 flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition-all ${!category ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-600 hover:bg-slate-50 hover:text-primary"}`}
             >
               <Grid3X3 size={14} /> All
             </Link>
@@ -58,7 +58,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                 <Link 
                   key={item} 
                   href={`/portfolio?category=${slug}`} 
-                  className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition-all ${active ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-600 hover:bg-slate-50 hover:text-primary"}`}
+                  className={`whitespace-nowrap shrink-0 flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition-all ${active ? "bg-primary text-white shadow-lg shadow-primary/25" : "text-slate-600 hover:bg-slate-50 hover:text-primary"}`}
                 >
                   {item}
                 </Link>

@@ -131,86 +131,6 @@ export async function updateLead(id: string, data: any) {
   }
 }
 
-async function crawlDesignData(url: string) {
-  let browser;
-  try {
-    browser = await launchBrowser();
-    const page = await browser.newPage();
-    await page.setViewportSize({ width: 1280, height: 800 });
-    
-    try {
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
-      await page.waitForTimeout(2000);
-    } catch (e) {
-      console.warn("Design crawl navigation timed out, attempting analysis anyway");
-    }
-
-    const analysis = await page.evaluate(() => {
-      const getStyles = (el: Element) => window.getComputedStyle(el);
-      
-      // 1. Color Extraction
-      const colors = new Set<string>();
-      const bgColors = new Set<string>();
-      const textColors = new Set<string>();
-      
-      const allElements = Array.from(document.querySelectorAll("*"));
-      allElements.slice(0, 1000).forEach(el => {
-        const styles = getStyles(el);
-        if (styles.color) textColors.add(styles.color);
-        if (styles.backgroundColor && styles.backgroundColor !== "rgba(0, 0, 0, 0)" && styles.backgroundColor !== "transparent") {
-          bgColors.add(styles.backgroundColor);
-        }
-      });
-
-      // 2. Font Extraction
-      const fonts = new Set<string>();
-      allElements.slice(0, 500).forEach(el => {
-        const styles = getStyles(el);
-        if (styles.fontFamily) fonts.add(styles.fontFamily.split(",")[0].replace(/['"]/g, ""));
-      });
-
-      // 3. Layout Check
-      const hasGrid = allElements.some(el => getStyles(el).display === "grid");
-      const hasFlex = allElements.some(el => getStyles(el).display === "flex");
-      
-      // 4. Structural Audit
-      const hasHero = !!document.querySelector("header + section, section:first-of-type, .hero, #hero");
-      const hasNavbar = !!document.querySelector("nav, header, .nav, .navbar");
-      const hasFooter = !!document.querySelector("footer, .footer, #footer");
-      const ctaButtons = document.querySelectorAll("button, .btn, .button, a[class*='btn'], a[class*='button']").length;
-
-      // 5. Visual Hierarchy
-      const h1Styles = document.querySelector("h1") ? getStyles(document.querySelector("h1")!) : null;
-
-      return {
-        colors: {
-          text: Array.from(textColors).slice(0, 5),
-          background: Array.from(bgColors).slice(0, 5)
-        },
-        fonts: Array.from(fonts).slice(0, 5),
-        structure: {
-          hasHero,
-          hasNavbar,
-          hasFooter,
-          ctaCount: ctaButtons,
-          hasGrid,
-          hasFlex
-        },
-        typography: {
-          h1FontSize: h1Styles?.fontSize || "N/A",
-          h1FontWeight: h1Styles?.fontWeight || "N/A"
-        }
-      };
-    });
-
-    return analysis;
-  } catch (error) {
-    console.error("Design Crawl Error:", error);
-    return null;
-  } finally {
-    if (browser) await browser.close();
-  }
-}
 
 export async function analyzeWebsite(leadId: string) {
   try {
@@ -218,9 +138,6 @@ export async function analyzeWebsite(leadId: string) {
     console.log(`Starting website analysis for lead: ${leadId}`);
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error("Lead not found");
-
-    // 1. Run Design Crawl 
-    const designAnalysis = await crawlDesignData(lead.website);
 
     // 2. Fetch HTML and Parse (Cheerio)
     const htmlRes = await fetch(lead.website, {
@@ -253,7 +170,7 @@ export async function analyzeWebsite(leadId: string) {
     if (headings.h1 === 0) designScore -= 10;
     if (images < 3) designScore -= 10;
     if (perfScore < 50) designScore -= 10;
-    if (designAnalysis && !designAnalysis.structure.hasHero) designScore -= 10;
+
 
     let conversionScore = 60;
     if (ctas < 2) conversionScore -= 20;
@@ -309,7 +226,6 @@ export async function analyzeWebsite(leadId: string) {
         leadScore: Math.round(websiteScore * 0.8 + 20),
         improvementProposals: proposals,
         topIssues: [...audit.issues, ...proposals].slice(0, 8).join("\n"),
-        designAnalysis: designAnalysis as any,
         status: "Analyzed"
       }
     });

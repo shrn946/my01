@@ -499,7 +499,7 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
 
 function formatPrompt(input: AuditInput, pages: CrawledPage[]) {
   const selected = input.selectedCategories.map((category) => `${category}: ${categoryLabel(category)}`);
-  return `You are an elite digital agency strategist, senior UX/UI designer, and conversion rate optimization expert creating a highly persuasive, premium website proposal. Your primary goal is to convince the client of the immense business value, ROI, and competitive advantage of your recommended services. Make the proposal sound authoritative, compelling, and actionable.
+  return `You are an elite digital agency strategist, senior UX/UI designer, and conversion rate optimization expert creating a highly persuasive, premium website proposal. Your primary goal is to convince the client of the immense business value, ROI, and competitive advantage of your recommended services. Make the proposal sound authoritative, compelling, and highly actionable.
 
 SELECTED CATEGORIES:
 ${selected.join("\n")}
@@ -507,16 +507,16 @@ ${selected.join("\n")}
 Analyze the entire website layout, design, content structure, responsiveness, user experience, performance, SEO, and visual presentation based on the provided data and the full-page desktop/mobile screenshots.
 
 Crucial Requirements:
-1. Start the proposal with a simple, direct assessment of the website. Mention that the website design looks outdated, may not meet modern user expectations, and could benefit from a visual refresh.
-2. Highlight key improvement areas such as SEO optimization, technical performance, mobile responsiveness, page speed, user experience, security, and conversion-focused enhancements.
-3. Keep the tone professional, friendly, and focused on the value these improvements can bring to the business.
-4. If the website is responsive and mobile-friendly, clearly mention this as a positive point (strength) in the report and proposal.
-5. Highlight both strengths and weaknesses instead of only listing issues.
-6. Analyze and write content ONLY for the selected categories. Do not mention, recommend, or create sections for unselected categories.
+1. SHORTER HEADINGS: Keep all headings and titles extremely concise, punchy, and benefit-driven (maximum 4-5 words). Do not use long, descriptive sentences for headings.
+2. BUSINESS FOCUS over TECHNICAL JARGON: Avoid overly technical language. Translate every finding into a clear business impact (e.g., instead of "blocking render scripts", say "slow loading times causing lost sales"). Focus on conversions, revenue, lead generation, and brand trust.
+3. EXECUTIVE SUMMARY: Start the proposal with a high-impact, direct assessment of the website's revenue and conversion potential. 
+4. HIGHLIGHT STRENGTHS: If the website is responsive or has good elements, clearly mention this as a positive point to build trust.
+5. PERSUASIVE TONE: Keep the tone professional, premium, and focused on the undeniable value these improvements bring to their bottom line.
+6. STRICT SCOPING: Analyze and write content ONLY for the selected categories. Do not mention, recommend, or create sections for unselected categories.
 
 Category boundaries:
 - redesign: design modernization, visual hierarchy, UX/UI, navigation, mobile layout, branding, trust, calls to action, conversion.
-- fix_issues: technical problems, broken functionality, security, browser/device issues, forms, links, stability.
+- fix_issues: technical stability, broken functionality, security, browser/device issues, forms, links.
 - loading_speed: loading performance, Core Web Vitals, images, scripts, CSS, caching, server response, mobile speed.
 - seo: rankings, on-page SEO, technical SEO, metadata, headings, content, internal links, indexing, search visibility.
 - ecommerce: product pages, cart abandonment, checkout flows, payment gateways, AOV optimization, upselling, conversion rates.
@@ -528,12 +528,12 @@ Category boundaries:
 Use only the supplied evidence and the visual screenshots. Do not invent technologies, traffic, rankings, revenue, or visual details. Keep language professional, persuasive, actionable, and client-friendly. The proposal and email must reference the attached full audit report and PNG proposal summary.
 
 Crucial Email Generation Instructions ('email_body'):
-- The email must be highly personalized to the specific website analyzed.
-- It MUST explicitly state 2-3 specific strengths or observations found during the audit (e.g., "While your site is responsive and clearly communicates your expertise...").
-- It MUST explicitly propose a strategic redesign or optimization to fix 1-2 major specific weaknesses (e.g., "...there is a significant opportunity to modernize the design and improve the patient booking journey").
-- It must mention the attached detailed proposal and audit report.
-- It must close with a call to action to discuss the findings.
-- Do NOT output generic templates. Make it read like a custom, hand-written email from a senior strategist.
+- The email must be highly personalized, concise, and conversion-focused.
+- Explicitly state 1-2 specific strengths found during the audit.
+- Explicitly propose a strategic solution to fix 1 major specific weakness affecting their business/revenue.
+- Mention the attached detailed proposal.
+- Close with a strong call to action to discuss the findings.
+- Do NOT output generic templates. Make it read like a custom, high-end agency email.
 
 Uploaded reference images (including full-page desktop and mobile screenshots) are attached after the text prompt in the same order as uploadedReferenceImages. Inspect them deeply when available, mention the supplied caption, describe clearly visible evidence, and connect relevant visual issues to recommendations. Do not infer hidden behavior from a screenshot.
 

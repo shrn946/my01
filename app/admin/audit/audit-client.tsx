@@ -119,53 +119,7 @@ export default function AuditClient({ lead }: { lead: any }) {
                   <ScoreCard label="Mobile Friendly" score={lead.mobileScore} icon={<Smartphone className="h-4 w-4" />} />
                 </div>
 
-                {lead.designAnalysis && (
-                  <div className="pt-6 border-t">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <Palette className="h-5 w-5 text-primary" /> Design Insights (Crawled)
-                    </h3>
-                    <div className="grid sm:grid-cols-2 gap-8">
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs font-bold text-muted-foreground uppercase mb-2">Color Palette</p>
-                          <div className="flex flex-wrap gap-2">
-                            {(lead.designAnalysis as any).colors?.background?.map((color: string, i: number) => (
-                              <div key={i} className="group relative">
-                                <div className="h-10 w-10 rounded-lg border shadow-sm" style={{ backgroundColor: color }} />
-                                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-black text-white text-[10px] px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap z-10">
-                                  {color}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-muted-foreground uppercase mb-2">Typography</p>
-                          <div className="flex flex-wrap gap-2">
-                            {(lead.designAnalysis as any).fonts?.map((font: string, i: number) => (
-                              <Badge key={i} variant="outline" style={{ fontFamily: font }}>{font}</Badge>
-                            ))}
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-2">
-                            H1 Size: {(lead.designAnalysis as any).typography?.h1FontSize} | Weight: {(lead.designAnalysis as any).typography?.h1FontWeight}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <p className="text-xs font-bold text-muted-foreground uppercase">Structural Audit</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <StatusBadge label="Hero Section" exists={(lead.designAnalysis as any).structure?.hasHero} />
-                          <StatusBadge label="Navigation" exists={(lead.designAnalysis as any).structure?.hasNavbar} />
-                          <StatusBadge label="Footer" exists={(lead.designAnalysis as any).structure?.hasFooter} />
-                          <StatusBadge label="Flex/Grid" exists={(lead.designAnalysis as any).structure?.hasFlex || (lead.designAnalysis as any).structure?.hasGrid} />
-                        </div>
-                        <div className="p-3 bg-muted/50 rounded-lg border">
-                          <p className="text-xs text-muted-foreground">Detected {(lead.designAnalysis as any).structure?.ctaCount} Call-to-Action elements</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+
               </div>
             )}
           </CardContent>

@@ -9,68 +9,6 @@ import { revalidatePath } from "next/cache";
 import { sendLeadEmail } from "@/lib/email-actions";
 import { detectBusinessCategory } from "@/lib/utils";
 
-async function crawlDesignData(url: string) {
-  let browser;
-  try {
-    browser = await launchBrowser();
-    const page = await browser.newPage();
-    await page.setViewportSize({ width: 1280, height: 800 });
-    
-    try {
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
-      await page.waitForTimeout(2000);
-    } catch (e) {
-      console.warn("Design crawl navigation timed out, attempting analysis anyway");
-    }
-
-    const analysis = await page.evaluate(() => {
-      const getStyles = (el: Element) => window.getComputedStyle(el);
-      const colors = new Set<string>();
-      const bgColors = new Set<string>();
-      const allElements = Array.from(document.querySelectorAll("*"));
-      allElements.slice(0, 500).forEach(el => {
-        const styles = getStyles(el);
-        if (styles.backgroundColor && styles.backgroundColor !== "rgba(0, 0, 0, 0)" && styles.backgroundColor !== "transparent") {
-          bgColors.add(styles.backgroundColor);
-        }
-      });
-      const fonts = new Set<string>();
-      allElements.slice(0, 300).forEach(el => {
-        const styles = getStyles(el);
-        if (styles.fontFamily) fonts.add(styles.fontFamily.split(",")[0].replace(/['"]/g, ""));
-      });
-      const hasHero = !!document.querySelector("header + section, section:first-of-type, .hero, #hero");
-      const hasNavbar = !!document.querySelector("nav, header, .nav, .navbar");
-      const hasFooter = !!document.querySelector("footer, .footer, #footer");
-      const ctaButtons = document.querySelectorAll("button, .btn, .button, a[class*='btn'], a[class*='button']").length;
-      const h1Styles = document.querySelector("h1") ? getStyles(document.querySelector("h1")!) : null;
-
-      // Technology detection
-      const html = document.documentElement.innerHTML;
-      let technology = "Unknown";
-      if (html.includes("wp-content") || html.includes("wp-includes") || document.querySelector('meta[name="generator"][content*="WordPress"]')) {
-        technology = "WordPress";
-      } else if (html.includes("shopify")) {
-        technology = "Shopify";
-      } else if (html.includes("wix")) {
-        technology = "Wix";
-      } else if (html.includes("squarespace")) {
-        technology = "Squarespace";
-      } else if (html.includes("next.js") || html.includes("next-assets")) {
-        technology = "Next.js";
-      }
-
-      return {
-        colors: { background: Array.from(bgColors).slice(0, 5) },
-        fonts: Array.from(fonts).slice(0, 5),
-        structure: { hasHero, hasNavbar, hasFooter, ctaCount: ctaButtons },
-        typography: { h1FontSize: h1Styles?.fontSize || "N/A", h1FontWeight: h1Styles?.fontWeight || "N/A" },
-        technology
-      };
-    });
-    return analysis;
-  } catch (e) { console.error("Design Crawl Error:", e); return null; } finally { if (browser) await browser.close(); }
-}
 
 export async function quickAnalyzeWebsite(url: string) {
   const prisma = getPrisma();
@@ -86,8 +24,6 @@ export async function quickAnalyzeWebsite(url: string) {
     let targetUrl = normalizeUrl(url);
     let parsedUrl = new URL(targetUrl);
     
-    // Run design crawl in parallel with basic extraction if possible, but keep it simple
-    const designAnalysis = await crawlDesignData(targetUrl);
 
     let baseOrigin = parsedUrl.origin;
     const isYelp = targetUrl.includes("yelp.com/biz/");
@@ -288,8 +224,7 @@ export async function quickAnalyzeWebsite(url: string) {
       topIssues: audit.issues.length > 0
         ? audit.issues.join("\n")
         : "No major HTML-level issues detected",
-      beforeAfterImage: null as string | null,
-      designAnalysis
+      beforeAfterImage: null as string | null
     };
 
     // Check for valid DATABASE_URL before creating
@@ -298,7 +233,7 @@ export async function quickAnalyzeWebsite(url: string) {
       throw new Error("DATABASE_URL is not configured. Please set a valid PostgreSQL connection string in your .env file to save leads.");
     }
 
-    // After designAnalysis is generated, classify the website using detectBusinessCategory
+    // Classify the website using detectBusinessCategory
     const autoCategory = detectBusinessCategory(
       extractedData.businessName,
       title,
@@ -329,7 +264,6 @@ export async function quickAnalyzeWebsite(url: string) {
         mobileScore: extractedData.mobileScore,
         desktopScore: extractedData.desktopScore,
         topIssues: extractedData.topIssues,
-        designAnalysis: designAnalysis as any,
         notes: `Contact Page: ${extractedData.contactPageUrl}\nSocials: ${extractedData.socialLinks}`
       }
     });
