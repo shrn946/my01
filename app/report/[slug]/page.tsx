@@ -194,8 +194,7 @@ export default async function ReportPage({
           {/* Subtle accent line at top */}
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
           <CardContent className="p-10 md:p-14">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600 mb-4">Executive Strategy</p>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900">{aiAudit.proposal_content.title}</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900">Executive Summary</h2>
             <p className="mt-6 text-lg text-slate-600 leading-relaxed font-light">{aiAudit.full_report_data.executive_summary}</p>
           </CardContent>
         </Card>
