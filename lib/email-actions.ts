@@ -187,7 +187,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
       if (settings?.resendApiKey || process.env.RESEND_API_KEY) {
         const { error } = await resend.emails.send({
           from: `${settings?.senderName || "Agency"} <${settings?.senderEmail || "onboarding@resend.dev"}>`,
-          to: [toEmail],
+          to: toEmail.split(",").map((e) => e.trim()).filter(Boolean),
           subject: subject,
           html: htmlBody,
           text: customBody.replace(/<[^>]*>?/gm, ''), // Plain text fallback
