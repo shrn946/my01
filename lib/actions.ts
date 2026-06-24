@@ -5,6 +5,7 @@ import { mkdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { hashPassword, requireRole } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { storeGeneratedFile } from "./generated-image-storage";
 import { slugify } from "@/lib/utils";
 
 function readString(formData: FormData, key: string) {
@@ -319,19 +320,16 @@ export async function uploadMedia(formData: FormData) {
     throw new Error("Only JPG, PNG, WebP, and GIF images are allowed.");
   }
 
-  const extension = path.extname(file.name).toLowerCase() || ".jpg";
-  const safeName = `${Date.now()}-${slugify(path.basename(file.name, extension))}${extension}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  const filePath = path.join(uploadDir, safeName);
+  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const safeName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${extension}`;
   const bytes = Buffer.from(await file.arrayBuffer());
 
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(filePath, bytes);
+  const url = await storeGeneratedFile(bytes, `uploads/${safeName}`, file.type);
 
   await prisma.mediaAsset.create({
     data: {
-      fileName: safeName,
-      url: `/uploads/${safeName}`,
+      fileName: file.name,
+      url,
       mimeType: file.type,
       size: file.size,
       alt: readString(formData, "alt") || null
