@@ -383,17 +383,25 @@ export default async function ReportPage({
         </section>
 
         {mediaFor("appendix").length > 0 && (
-          <section className="space-y-8">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="h-px bg-slate-200 flex-1"></span>
-              <h2 className="print-heading text-3xl font-black tracking-tight text-slate-900">Visual Evidence</h2>
-              <span className="h-px bg-slate-200 flex-1"></span>
+          <section className="print-section bg-red-50/80 border border-red-100 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden my-16">
+            <div className="absolute top-0 left-0 w-2 h-full bg-red-500"></div>
+            <div className="flex flex-col mb-10 relative z-10">
+              <h2 className="flex items-center gap-3 print-heading text-2xl md:text-3xl font-black tracking-tight text-red-950">
+                <AlertCircle className="h-8 w-8 text-red-600" />
+                Website Issues Found — Screenshots Attached
+              </h2>
+              <p className="mt-3 text-red-800 font-medium text-lg max-w-2xl">The following screenshots highlight specific technical, design, or content issues discovered during our analysis.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 relative z-10">
               {mediaFor("appendix").map((item) => (
-                <figure key={item.id} className="print-section overflow-hidden rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 bg-white">
-                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
-                  <figcaption className="p-6 text-sm font-medium text-slate-600 text-center bg-slate-50/50">{item.caption}</figcaption>
+                <figure key={item.id} className="print-section overflow-hidden rounded-[2rem] border border-red-100 shadow-xl shadow-red-900/5 bg-white">
+                  <div className="relative border-b border-slate-100">
+                    <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
+                  </div>
+                  <figcaption className="p-6">
+                    <p className="font-bold text-slate-900 mb-2">{item.caption}</p>
+                    {item.notes && <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">{item.notes}</p>}
+                  </figcaption>
                 </figure>
               ))}
             </div>
@@ -461,7 +469,10 @@ export default async function ReportPage({
                     <ReportImageHover image={lead.beforeAfterImage || lead.desktopImage || ""} label="before" />
                   </div>
                   <div className="space-y-5">
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Proposed Strategy</p>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Proposed Strategy</p>
+                      <p className="text-xs text-blue-300 font-medium">* It is just demo preview final website could be different design</p>
+                    </div>
                     <ReportImageHover image={(lead.reportContent as any)?.afterImage || ""} label="after" />
                   </div>
                 </div>
