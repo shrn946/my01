@@ -476,7 +476,7 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
         plan_name: input.selectedCategories.includes("maintenance") ? "Monthly Website Care Plan" : "",
         price_note: input.selectedCategories.includes("maintenance") ? "Pricing is confirmed after reviewing the website stack, update risk, and support requirements." : "",
         services: input.selectedCategories.includes("maintenance")
-          ? ["Core, plugin, and theme updates", "Security and malware monitoring", "Backups and restore checks", "Uptime monitoring", "Performance optimization", "Monthly technical support"]
+          ? ["System, plugin, and theme updates", "Security and malware monitoring", "Automated backups and restore checks", "Uptime monitoring", "Small fixes and text changes", "Monthly technical support"]
           : [],
       },
     },
@@ -523,7 +523,7 @@ Category boundaries:
 - lead_gen: landing pages, lead magnets, forms, CRM integrations, email capture, compelling CTAs, conversion funnels.
 - accessibility: ADA compliance, WCAG guidelines, screen readers, contrast ratios, keyboard navigation, inclusive design.
 - custom_dev: custom features, complex APIs, web apps, interactive dashboards, advanced integrations, specialized backend logic.
-- maintenance: WordPress core/plugin/theme updates, security, malware, backups, uptime, performance optimization, monthly checks, technical support, and a maintenance pricing section.
+- maintenance: System and plugin updates, security hardening, malware scanning, automated backups, uptime monitoring, small fixes, text changes, monthly checks, technical support, and a maintenance pricing section.
 
 Use only the supplied evidence and the visual screenshots. Do not invent technologies, traffic, rankings, revenue, or visual details. Keep language professional, persuasive, actionable, and client-friendly. The proposal and email must reference the attached full audit report and PNG proposal summary.
 
