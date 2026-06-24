@@ -956,7 +956,7 @@ export default function DashboardPage() {
                             formData.append("type", "after_image");
                             const res = await uploadLeadReportMedia(formData);
                             if (res.success && res.item) {
-                              setResult((prev: any) => ({...prev, proposalImage: res.item.url, reportContent: {...prev.reportContent, afterImage: res.item.url}}));
+                              setResult((prev: any) => ({...prev, reportContent: {...prev.reportContent, afterImage: res.item.url}}));
                             }
                             setIsUploadingCustomAfter(false);
                           }

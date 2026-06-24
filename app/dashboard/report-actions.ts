@@ -201,7 +201,7 @@ export async function uploadLeadReportMedia(formData: FormData) {
     const reportContent = getReportContent(lead?.reportContent as any);
     await prisma.lead.update({
       where: { id: leadId },
-      data: { proposalImage: url, reportContent: { ...reportContent, afterImage: url } as any, reportStatus: "Not Generated" },
+      data: { reportContent: { ...reportContent, afterImage: url } as any, reportStatus: "Not Generated" },
     });
     revalidatePath("/dashboard");
     return { success: true, item: { url, caption, section, type, id: "after", includeInEmail: false, fileName: file.name, createdAt: new Date().toISOString() } };
