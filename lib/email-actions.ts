@@ -113,10 +113,6 @@ function professionalEmailHtml({
                 <span style="color:#cbd5e1;font-weight:600;">Freelancer Profile:</span> 
                 <a href="https://www.freelancer.com/u/wordpressexp01" style="color:#60a5fa;text-decoration:none;">freelancer.com/u/wordpressexp01</a>
               </p>
-              <p style="margin:0;">
-                <span style="color:#cbd5e1;font-weight:600;">WhatsApp:</span> 
-                <a href="https://wa.me/" style="color:#4ade80;text-decoration:none;font-weight:600;">Contact us on WhatsApp</a>
-              </p>
             </div>
           </td></tr>
 
