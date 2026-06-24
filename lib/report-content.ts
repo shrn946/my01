@@ -7,6 +7,7 @@ export const reportMediaItemSchema = z.object({
   type: z.enum(["website_issue", "competitor", "branding", "before_after", "general"]),
   section: z.enum(["findings", "recommendations", "proposal", "email", "appendix"]),
   caption: z.string(),
+  notes: z.string().optional(),
   includeInEmail: z.boolean(),
   createdAt: z.string(),
 });

@@ -9,7 +9,8 @@ export const auditCategorySchema = z.enum([
   "ecommerce",
   "lead_gen",
   "accessibility",
-  "custom_dev"
+  "custom_dev",
+  "small_fixes"
 ]);
 
 export type AuditCategory = z.infer<typeof auditCategorySchema>;
@@ -28,4 +29,5 @@ export const AUDIT_CATEGORIES: Array<{
   { value: "accessibility", label: "ADA & Accessibility Compliance", description: "Protect against lawsuits and expand your audience by ensuring screen-reader compatibility, contrast ratios, and keyboard navigation." },
   { value: "custom_dev", label: "Custom Feature Development", description: "Build complex interactive tools, custom API integrations, dynamic dashboards, and specialized backend functionality." },
   { value: "maintenance", label: "Ongoing Maintenance & Security", description: "Ensure complete peace of mind with regular updates, hardened security, automated backups, guaranteed uptime monitoring, and small fixes or text changes." },
+  { value: "small_fixes", label: "Small Fixes & Website Changes", description: "Use this category for minor website problems and quick improvements, such as broken links, layout issues, responsiveness problems, text/image updates, and small functionality fixes." },
 ];

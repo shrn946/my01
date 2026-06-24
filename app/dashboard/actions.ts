@@ -771,3 +771,49 @@ Response constraints: Return ONLY the rewritten text. No introductions, no greet
   }
 }
 
+export async function autoCorrectText(text: string) {
+  const prisma = getPrisma();
+  try {
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+    const prompt = `You are an AI proofreader. Fix any grammar, spelling, and clarity issues in the following text, while preserving the exact original meaning and tone.
+Do not add any conversational filler, explanations, or quotes. Just return the corrected text.
+
+Text to correct:
+${text}`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Gemini API Error: ${response.status} - ${errText}`);
+    }
+    const json = await response.json();
+    const resultText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!resultText) throw new Error("Gemini returned an empty response");
+    return resultText.trim();
+  } catch (error: any) {
+    console.error("AUTOCORRECT_ERROR:", error);
+    throw new Error(error.message || "Failed to autocorrect text");
+  }
+}

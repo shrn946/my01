@@ -173,6 +173,7 @@ export async function uploadLeadReportMedia(formData: FormData) {
   const type = String(formData.get("type") || "general");
   const section = String(formData.get("section") || "appendix");
   const caption = String(formData.get("caption") || "").trim() || file.name;
+  const notes = String(formData.get("notes") || "").trim();
   const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const objectName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${extension}`;
   const url = await storeGeneratedFile(
@@ -215,6 +216,7 @@ export async function uploadLeadReportMedia(formData: FormData) {
     type,
     section,
     caption,
+    notes,
     includeInEmail: formData.get("includeInEmail") === "true",
     createdAt: new Date().toISOString(),
   });
@@ -235,6 +237,21 @@ export async function removeLeadReportMedia(leadId: string, mediaId: string) {
   await prisma.lead.update({ where: { id: leadId }, data: { reportStatus: "Not Generated" } });
   revalidatePath("/dashboard");
   return { success: true };
+}
+
+export async function updateLeadReportMediaNotes(leadId: string, mediaId: string, notes: string) {
+  const prisma = getPrisma();
+  const aiFields = await getLeadAiFields(prisma, leadId);
+  const media = getReportMedia(aiFields.reportMedia).map((item) => {
+    if (item.id === mediaId) {
+      return { ...item, notes };
+    }
+    return item;
+  });
+  await saveLeadReportMedia(prisma, leadId, media);
+  await prisma.lead.update({ where: { id: leadId }, data: { reportStatus: "Not Generated" } });
+  revalidatePath("/dashboard");
+  return { success: true, media };
 }
 
 export async function lockAfterImage(leadId: string) {

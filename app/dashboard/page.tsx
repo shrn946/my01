@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload, Copy, ChevronDown, ChevronUp
 } from "lucide-react";
-import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments } from "./actions";
+import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments, autoCorrectText } from "./actions";
 import { getFinderLeads } from "./lead-finder/actions";
 import { 
   setReportGenerating, actionCaptureScreenshot, actionRecommendations,
   actionProposalPng, actionPublicReport, actionPrepareEmail, saveReportEdits,
-  uploadLeadReportMedia, removeLeadReportMedia, lockAfterImage, generateSocialOutreachProposal
+  uploadLeadReportMedia, removeLeadReportMedia, lockAfterImage, generateSocialOutreachProposal, updateLeadReportMediaNotes
 } from "./report-actions";
 import { AUDIT_CATEGORIES, type AuditCategory } from "@/lib/audit-categories";
 import { updateLead } from "@/lib/lead-actions";
@@ -163,6 +163,10 @@ export default function DashboardPage() {
 
   const [hideEmailCard, setHideEmailCard] = useState(false);
   const [hideMediaCard, setHideMediaCard] = useState(false);
+  const [isCorrectingEmailSubject, setIsCorrectingEmailSubject] = useState(false);
+  const [isCorrectingEmailBody, setIsCorrectingEmailBody] = useState(false);
+  const [correctingMediaNotes, setCorrectingMediaNotes] = useState<string | null>(null);
+  const [recipientEmail, setRecipientEmail] = useState("");
 
   const handleSelectLead = async (leadId: string) => {
     setIsLoadingLead(true);
@@ -173,6 +177,7 @@ export default function DashboardPage() {
         localStorage.setItem("lastLeadId", lead.id);
         setUrl(lead.website || "");
         setEditEmail(lead.email || "");
+        setRecipientEmail(lead.email || "");
         setEditName(lead.businessName || "");
         setEditComments(lead.developerComments || "");
         setSelectedCategories((lead.aiAnalysis as any)?.selected_categories || []);
@@ -330,7 +335,8 @@ export default function DashboardPage() {
   };
 
   const handleSendEmail = async () => {
-    if (!result?.leadId || !result?.email) {
+    const finalEmail = recipientEmail || result?.email;
+    if (!result?.leadId || !finalEmail) {
       toast({ title: "No Email", description: "This lead needs an email address first.", variant: "destructive" });
       return;
     }
@@ -342,7 +348,7 @@ export default function DashboardPage() {
         result.leadId,
         emailSubject || result.aiAnalysis?.proposal_content?.email_subject || "Proposal",
         emailBody || result.aiAnalysis?.proposal_content?.email_body || "",
-        result.email
+        finalEmail
       );
       
       if (res.success) {
@@ -1163,17 +1169,17 @@ export default function DashboardPage() {
                         size="sm" 
                         className="font-bold shadow-sm"
                         onClick={handleSendEmail}
-                        disabled={isSendingEmail || !result.email}
+                        disabled={isSendingEmail || (!result.email && !recipientEmail)}
                       >
                         {isSendingEmail ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending</> : <><Send className="mr-2 h-4 w-4" /> Send Email</>}
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {!result.email && (
+                    {(!result.email && !recipientEmail) && (
                       <div className="mb-4 p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-sm flex items-center gap-2">
                         <AlertCircle className="h-4 w-4" />
-                        <strong>Missing Email:</strong> You need to add an email address in the Business Information section above before sending.
+                        <strong>Missing Email:</strong> You need to add a recipient email address below.
                       </div>
                     )}
                     
@@ -1181,7 +1187,40 @@ export default function DashboardPage() {
                       {isEditingEmailContent ? (
                         <div className="space-y-4">
                           <div className="space-y-1.5">
-                            <Label className="text-xs uppercase font-bold text-muted-foreground">Subject Line</Label>
+                            <Label className="text-xs uppercase font-bold text-muted-foreground">Recipient Email</Label>
+                            <Input 
+                              type="email"
+                              value={recipientEmail} 
+                              onChange={(e) => setRecipientEmail(e.target.value)} 
+                              className="font-medium"
+                              placeholder="Enter email address"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs uppercase font-bold text-muted-foreground">Subject Line</Label>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 text-xs text-primary"
+                                onClick={async () => {
+                                  setIsCorrectingEmailSubject(true);
+                                  try {
+                                    const corrected = await autoCorrectText(emailSubject);
+                                    setEmailSubject(corrected);
+                                  } catch (e) {
+                                    toast({ title: "Auto-Correct Failed", variant: "destructive" });
+                                  } finally {
+                                    setIsCorrectingEmailSubject(false);
+                                  }
+                                }}
+                                disabled={isCorrectingEmailSubject || !emailSubject}
+                              >
+                                {isCorrectingEmailSubject ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                                AI Auto-Correct
+                              </Button>
+                            </div>
                             <Input 
                               value={emailSubject} 
                               onChange={(e) => setEmailSubject(e.target.value)} 
@@ -1189,7 +1228,30 @@ export default function DashboardPage() {
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <Label className="text-xs uppercase font-bold text-muted-foreground">Message Body</Label>
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs uppercase font-bold text-muted-foreground">Message Body</Label>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 text-xs text-primary"
+                                onClick={async () => {
+                                  setIsCorrectingEmailBody(true);
+                                  try {
+                                    const corrected = await autoCorrectText(emailBody);
+                                    setEmailBody(corrected);
+                                  } catch (e) {
+                                    toast({ title: "Auto-Correct Failed", variant: "destructive" });
+                                  } finally {
+                                    setIsCorrectingEmailBody(false);
+                                  }
+                                }}
+                                disabled={isCorrectingEmailBody || !emailBody}
+                              >
+                                {isCorrectingEmailBody ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                                AI Auto-Correct
+                              </Button>
+                            </div>
                             <Textarea 
                               value={emailBody} 
                               onChange={(e) => setEmailBody(e.target.value)} 
@@ -1251,6 +1313,10 @@ export default function DashboardPage() {
                       <Label htmlFor="report-caption">Caption / What This Image Shows</Label>
                       <Input id="report-caption" name="caption" placeholder="Example: Mobile navigation overlaps the booking button" required />
                     </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="report-notes">Notes / Fixes Needed</Label>
+                      <Textarea id="report-notes" name="notes" placeholder="Explain the issue, required correction, or improvement..." className="min-h-[80px]" />
+                    </div>
                     <label className="flex items-center gap-2 text-sm font-medium">
                       <input type="checkbox" name="includeInEmail" value="true" className="h-4 w-4 accent-primary" />
                       Include this image in the email
@@ -1263,9 +1329,9 @@ export default function DashboardPage() {
                   {reportMedia.length > 0 && (
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {reportMedia.map((item) => (
-                        <div key={item.id} className="overflow-hidden rounded-2xl border bg-white">
+                        <div key={item.id} className="overflow-hidden rounded-2xl border bg-white flex flex-col">
                           <img src={item.url} alt={item.caption} className="aspect-video w-full object-contain bg-muted/20" loading="lazy" />
-                          <div className="p-4">
+                          <div className="p-4 flex flex-col flex-1 gap-3">
                             <div className="flex justify-between gap-3">
                               <div>
                                 <p className="text-sm font-bold">{item.caption}</p>
@@ -1274,6 +1340,47 @@ export default function DashboardPage() {
                               <Button type="button" size="icon" variant="ghost" onClick={() => handleRemoveReportMedia(item.id)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
+                            </div>
+                            <div className="space-y-1.5 flex-1 flex flex-col">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-[10px] uppercase font-bold text-muted-foreground">Notes / Fixes</Label>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-5 px-1.5 text-[10px] text-primary"
+                                  onClick={async () => {
+                                    setCorrectingMediaNotes(item.id);
+                                    try {
+                                      const corrected = await autoCorrectText(item.notes || "");
+                                      const res = await updateLeadReportMediaNotes(result.leadId, item.id, corrected);
+                                      if (res.success) {
+                                        setReportMedia(res.media);
+                                      }
+                                    } catch (e) {
+                                      toast({ title: "Auto-Correct Failed", variant: "destructive" });
+                                    } finally {
+                                      setCorrectingMediaNotes(null);
+                                    }
+                                  }}
+                                  disabled={correctingMediaNotes === item.id || !item.notes}
+                                >
+                                  {correctingMediaNotes === item.id ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                                  AI Auto-Correct
+                                </Button>
+                              </div>
+                              <Textarea 
+                                placeholder="Explain the issue or required fix..."
+                                value={item.notes || ""}
+                                onChange={(e) => {
+                                  const updated = reportMedia.map(m => m.id === item.id ? { ...m, notes: e.target.value } : m);
+                                  setReportMedia(updated);
+                                }}
+                                onBlur={async (e) => {
+                                  await updateLeadReportMediaNotes(result.leadId, item.id, e.target.value);
+                                }}
+                                className="flex-1 min-h-[80px] text-xs resize-y"
+                              />
                             </div>
                           </div>
                         </div>
