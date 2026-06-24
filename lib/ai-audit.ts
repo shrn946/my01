@@ -470,7 +470,7 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
       expected_outcomes: recommendations.map((item) => item.business_impact),
       call_to_action: "Book a short consultation to confirm priorities, scope, and implementation timing.",
       email_subject: `${labels.join(" + ")} opportunities for ${name}`,
-      email_body: `Hi ${name},\n\nI reviewed ${input.website} specifically for ${labels.join(", ")} and found several focused opportunities worth addressing.\n\nI have attached the full audit report and PNG proposal summary with the findings and recommended action plan.\n\nWould you be open to a short consultation to review the priorities?\n\nBest regards`,
+      email_body: `Hi ${name},\n\nI reviewed ${input.website} specifically for ${labels.join(", ")} and found several focused opportunities worth addressing.\n\nI have attached the full audit report and PNG proposal summary with the findings and recommended action plan.\n\nWould you be open to a short consultation to review the priorities? you can also reply back.\n\nBest regards`,
       maintenance_pricing: {
         included: input.selectedCategories.includes("maintenance"),
         plan_name: input.selectedCategories.includes("maintenance") ? "Monthly Website Care Plan" : "",
@@ -524,6 +524,7 @@ REQUIRED REPORT STRUCTURE:
 3. Recommended Scope: A short list of only the work needed to resolve the priority findings. Do not repeat findings word-for-word.
 4. Free Demo Offer: Only include this if "Complete Re-Design" is selected. Write: "I can create a free homepage redesign concept to show how the website could look with a clearer layout, stronger trust sections, and a more focused enquiry path. There is no obligation to continue with the full redesign."
 5. Next Step: One simple CTA: "Reply if you would like me to prepare the free homepage concept or discuss the priority improvements."
+6. Email Body (email_body): Write a short professional email summarizing the audit. Right before the sign-off, you MUST include this exact line: "Would you be open to a short consultation to review the priorities? you can also reply back."
 
 DYNAMIC CATEGORY HANDLING:
 - Small Fixes & Website Changes: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.

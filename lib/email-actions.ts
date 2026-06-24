@@ -106,8 +106,7 @@ function professionalEmailHtml({
           <!-- Footer -->
           <tr><td class="email-pad" style="padding:40px;background-color:#0f172a;text-align:center;">
             <h2 style="margin:0;font-size:22px;color:#ffffff;font-weight:700;">Ready to discuss the recommended improvements?</h2>
-            <p style="margin:16px 0 28px;color:#e2e8f0;font-size:16px;line-height:26px;">Would you be open to a short consultation to review the priorities? reply on this email for further discussion.</p>
-            <a class="email-button" href="https://www.coreweblabs.com/contact" style="display:inline-block;padding:16px 32px;border-radius:10px;background-color:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;box-shadow:0 4px 14px 0 rgba(59,130,246,0.39);">Book a Consultation</a>
+            <a class="email-button" href="https://www.coreweblabs.com/contact" style="display:inline-block;margin-top:24px;padding:16px 32px;border-radius:10px;background-color:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;box-shadow:0 4px 14px 0 rgba(59,130,246,0.39);">Book a Consultation</a>
             
             <div style="margin-top:40px;padding-top:32px;border-top:1px solid #1e293b;color:#94a3b8;font-size:15px;line-height:26px;">
               <p style="margin:0 0 12px;">
