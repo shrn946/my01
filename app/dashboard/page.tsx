@@ -1445,28 +1445,6 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
                   <div className="grid grid-cols-1 gap-2">
-                    {result.proposalImage ? (
-                      <Button variant="outline" className="justify-start text-xs h-10" asChild>
-                        <a href={result.proposalImage} target="_blank" rel="noreferrer">
-                          <ImageIcon className="mr-2 h-4 w-4" /> Focused Proposal Image
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button variant="outline" className="justify-start text-xs h-10" disabled>
-                        <ImageIcon className="mr-2 h-4 w-4" /> Proposal Image: Not generated
-                      </Button>
-                    )}
-                    {result.reportImage ? (
-                      <Button variant="outline" className="justify-start text-xs h-10" asChild>
-                        <a href={result.reportImage} target="_blank" rel="noreferrer">
-                          <ImageIcon className="mr-2 h-4 w-4" /> Audit PNG Summary
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button variant="outline" className="justify-start text-xs h-10" disabled>
-                        <ImageIcon className="mr-2 h-4 w-4" /> Audit PNG: Not generated
-                      </Button>
-                    )}
                   </div>
 
                   <Button 
