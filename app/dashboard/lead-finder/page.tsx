@@ -755,11 +755,6 @@ export default function LeadFinderPage() {
       try {
         const searchSettings = await getSearchSettings();
         if (searchSettings) {
-          // Build niches
-          if (searchSettings.categories && searchSettings.categories.length > 0) {
-            setPopularNiches(searchSettings.categories);
-          }
-          
           // Build cities from all locations in settings
           const loadedCities: { city: string; state: string; country: string }[] = [];
           const seenCities = new Set<string>();
