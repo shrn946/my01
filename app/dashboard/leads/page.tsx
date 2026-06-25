@@ -234,6 +234,9 @@ export default function LeadsPage() {
         .replace(/{businessName}/gi, selectedLead.businessName || "")
         .replace(/{website}/gi, selectedLead.website || "");
 
+      const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://www.coreweblabs.com";
+      const reportUrl = `${baseUrl}/report/${selectedLead.id}`;
+
       let body = template.body
         .replace(/{businessName}/gi, selectedLead.businessName || "")
         .replace(/{website}/gi, selectedLead.website || "")
@@ -243,7 +246,8 @@ export default function LeadsPage() {
         .replace(/{performanceScore}/gi, (selectedLead.performanceScore || selectedLead.pageSpeedPerformance || 0).toString())
         .replace(/{seoScore}/gi, (selectedLead.seoScore || selectedLead.pageSpeedSeo || 0).toString())
         .replace(/{accessibilityScore}/gi, (selectedLead.accessibilityScore || selectedLead.pageSpeedAccessibility || 0).toString())
-        .replace(/{bestPracticesScore}/gi, (selectedLead.bestPracticesScore || selectedLead.pageSpeedBestPractices || 0).toString());
+        .replace(/{bestPracticesScore}/gi, (selectedLead.bestPracticesScore || selectedLead.pageSpeedBestPractices || 0).toString())
+        .replace(/{reportUrl}/gi, reportUrl);
       
       setEmailSubject(subject);
       setEmailBody(body);

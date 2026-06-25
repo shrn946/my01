@@ -183,7 +183,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
           to: toEmail.split(",").map((e) => e.trim()).filter(Boolean),
           subject: subject,
           html: htmlBody,
-          text: customBody.replace(/<[^>]*>?/gm, ''), // Plain text fallback
+          text: customBody.replace(/<[^>]*>?/gm, '') + `\n\nView Full Audit Report: ${reportUrl}`, // Plain text fallback
           tags: [
             { name: "lead_id", value: leadId }
           ]
