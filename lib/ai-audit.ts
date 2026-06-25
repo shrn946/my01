@@ -524,7 +524,7 @@ REQUIRED REPORT STRUCTURE:
 3. Recommended Scope: A short list of only the work needed to resolve the priority findings. Do not repeat findings word-for-word.
 4. Free Demo Offer: Only include this if "Complete Re-Design" is selected. Write: "I can create a free homepage redesign concept to show how the website could look with a clearer layout, stronger trust sections, and a more focused enquiry path. There is no obligation to continue with the full redesign."
 5. Next Step: One simple CTA: "Reply if you would like me to prepare the free homepage concept or discuss the priority improvements."
-6. Email Body (email_body): Write a short professional email summarizing the audit. Do NOT mention any attached PNG proposal or PDF files; just mention the included audit report. Right before the sign-off, you MUST include this exact line: "Would you be open to a short consultation to review the priorities? you can also reply back."
+6. Email Body (email_body): Write a short professional email summarizing the audit. When mentioning the report, write exactly: "I have prepared a detailed web report with my findings and recommended action plan." (NEVER use the words 'PDF', 'PNG', 'attached', or 'proposal summary'). Right before the sign-off, you MUST include this exact line: "Would you be open to a short consultation to review the priorities? you can also reply back."
 
 DYNAMIC CATEGORY HANDLING:
 - Small Fixes & Website Changes: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
