@@ -398,8 +398,8 @@ export default function LeadFinderPage() {
   })();
 
   const filteredNiches = formData.niche.trim() === ""
-    ? popularNiches.slice(0, 8)
-    : popularNiches.filter(n => n.toLowerCase().includes(formData.niche.toLowerCase())).slice(0, 8);
+    ? popularNiches
+    : popularNiches.filter(n => n.toLowerCase().includes(formData.niche.toLowerCase()));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
