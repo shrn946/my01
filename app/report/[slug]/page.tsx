@@ -349,38 +349,7 @@ export default async function ReportPage({
           </Card>
         </section>
 
-        <section className="space-y-8">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="h-px bg-slate-200 flex-1"></span>
-            <h2 className="print-heading text-3xl font-black tracking-tight text-slate-900">Recommended Actions</h2>
-            <span className="h-px bg-slate-200 flex-1"></span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            {finalRecommendations.map((item, index) => (
-              <Card key={`${index}-${item}`} className="print-section border-none shadow-lg shadow-slate-200/50 rounded-3xl bg-white hover:shadow-xl transition-shadow duration-300">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="h-10 w-10 shrink-0 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-sm">
-                      {index + 1}
-                    </span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Action Item</span>
-                  </div>
-                  <p className="text-base text-slate-700 leading-relaxed">{item}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          {mediaFor("recommendations").length > 0 && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {mediaFor("recommendations").map((item) => (
-                <figure key={item.id} className="print-section overflow-hidden rounded-3xl border border-slate-200">
-                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
-                  <figcaption className="p-4 text-sm font-semibold">{item.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
-        </section>
+
 
         {mediaFor("appendix").length > 0 && (
           <section className="print-section bg-red-50/80 border border-red-100 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden my-16">
