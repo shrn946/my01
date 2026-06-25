@@ -519,7 +519,7 @@ REPORT RULES:
 10. If screenshots are available, connect each finding to the relevant screenshot or page section.
 
 REQUIRED REPORT STRUCTURE:
-1. Executive Summary: 2-3 short sentences explaining the most important website opportunity based on selected categories. Example: "The homepage provides basic business information, but the first screen does not clearly guide visitors toward the main action. Improving the hero area, trust sections, and contact path could make it easier for potential customers to understand the offer and get in touch."
+1. Executive Summary (proposal_content.executive_pitch): If "Complete Re-Design" is selected, this MUST be the short, professional redesign summary described in the Dynamic Category Handling section below. Otherwise, write 2-3 short sentences explaining the most important website opportunity based on the selected categories.
 2. Priority Findings (Output as developer_comments & recommendations arrays): Use this format mentally and adapt it to the JSON schema: Priority, Fix Type, Issue, Evidence, Why It Matters, Recommended Fix.
 3. Recommended Scope: A short list of only the work needed to resolve the priority findings. Do not repeat findings word-for-word.
 4. Free Demo Offer: Only include this if "Complete Re-Design" is selected. Write: "I can create a free homepage redesign concept to show how the website could look with a clearer layout, stronger trust sections, and a more focused enquiry path. There is no obligation to continue with the full redesign."
@@ -528,7 +528,7 @@ REQUIRED REPORT STRUCTURE:
 
 DYNAMIC CATEGORY HANDLING:
 - Small Fixes & Website Changes: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
-- Complete Re-Design: prioritize hero section, visual hierarchy, branding, navigation, trust, mobile design, service presentation, and conversion flow.
+- Complete Re-Design: Write a short, professional redesign summary based on the website audit. Clearly explain if the current website looks outdated or does not follow modern design and user-experience standards. Mention relevant improvement areas (visual design, mobile responsiveness, page structure, navigation, trust elements, calls to action, speed, accessibility, conversion flow). Use simple, client-friendly English with a helpful, professional tone (not overly negative). Focus on why a redesign will improve the visitor experience and generate more enquiries/leads. Example: "Your website design looks outdated and does not meet current user experience or design standards. A redesign is recommended to improve the visual appearance, mobile experience, page structure, trust elements, calls to action, and overall conversion flow. The updated design should follow modern website trends while keeping the brand professional, clear, and easy for visitors to use."
 - SEO: prioritize titles, headings, local SEO, service pages, internal links, metadata, and content gaps.
 - Technical Fixes: prioritize speed, mobile performance, broken forms, console errors, security, image optimization, and browser issues.
 
