@@ -211,56 +211,7 @@ export default function LeadDetailClient({ lead, templates, settings, portfolioE
                 <ScoreCard label="Best Practices" score={lead.bestPracticesScore ?? lead.pageSpeedBestPractices} icon={<CheckCircle2 className="h-4 w-4" />} />
               </div>
 
-              {/* Proposal PNG Generator Section */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div className="space-y-1">
-                    <CardTitle>Website Proposal PNG</CardTitle>
-                    <CardDescription>Generate a professional brochure-style PNG for cold outreach.</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    {lead.proposalImage ? (
-                      <>
-                        <Button variant="outline" size="sm" onClick={handleGeneratePng} disabled={generating}>
-                          {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                          Regenerate
-                        </Button>
-                        <Button variant="default" size="sm" asChild>
-                          <a href={lead.proposalImage} download={`proposal-${lead.businessName}.png`}>
-                            <Download className="h-4 w-4 mr-2" />
-                            Download PNG
-                          </a>
-                        </Button>
-                      </>
-                    ) : (
-                      <Button variant="default" size="sm" onClick={handleGeneratePng} disabled={generating}>
-                        {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileImage className="h-4 w-4 mr-2" />}
-                        Generate Proposal PNG
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {lead.proposalImage ? (
-                    <div className="mt-4 border rounded-xl overflow-hidden bg-muted/20 relative group">
-                      <img src={lead.proposalImage} alt="Proposal Preview" className="w-full h-auto shadow-lg" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                         <Button variant="secondary" asChild>
-                           <a href={lead.proposalImage} target="_blank" rel="noreferrer">View Full Image</a>
-                         </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-4 border-2 border-dashed rounded-xl p-12 text-center bg-muted/10">
-                      <FileImage className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                      <p className="text-muted-foreground font-medium">No proposal image generated yet.</p>
-                      <Button variant="link" onClick={handleGeneratePng} disabled={generating} className="mt-2">
-                        {generating ? "Generating..." : "Click here to generate one now"}
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+
 
               {/* Related Portfolio Examples Section */}
               <Card>
