@@ -78,16 +78,14 @@ function professionalEmailHtml({
             <div style="color:#334155;font-size:16px;line-height:26px;">${body.replace(/\n/g, "<br>")}</div>
           </td></tr>
 
-          <!-- Proposal Image / Preview -->
+          <!-- Report Image -->
           ${proposalImage ? `
-          <tr><td class="email-pad" style="padding:10px 40px 30px;background-color:#ffffff;text-align:center;">
-            <div style="background-color:#f8fafc;padding:24px;border-radius:16px;border:1px solid #e2e8f0;display:inline-block;width:100%;box-sizing:border-box;">
-              <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#475569;text-align:center;text-transform:uppercase;letter-spacing:0.5px;">Preview Summary</p>
-              <a href="${reportUrl}" style="display:block;text-decoration:none;">
+          <tr><td class="email-pad" style="padding:0 40px 20px;background-color:#ffffff;text-align:center;">
+            <a href="${proposalImage}" target="_blank" style="display:block;text-decoration:none;">
                 <img src="${proposalImage}" width="500" alt="Website proposal summary" style="display:block;width:100%;max-width:500px;height:auto;border-radius:8px;border:1px solid #cbd5e1;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);background-color:#ffffff;margin:0 auto;">
-              </a>
-            </div>
-          </td></tr>` : ""}
+            </a>
+          </td></tr>
+          ` : ""}
 
           <!-- Findings -->
           <tr><td class="email-pad" style="padding:30px 40px;background-color:#fafaf9;border-top:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;">
@@ -100,18 +98,18 @@ function professionalEmailHtml({
 
           <!-- Action Buttons -->
           <tr><td class="email-pad" style="padding:40px;background-color:#ffffff;text-align:center;">
-            <a class="email-button" href="${reportUrl}" style="display:inline-block;padding:14px 28px;border-radius:8px;background-color:#2563eb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;box-shadow:0 2px 4px rgba(37,99,235,0.2);">View Full Audit Report</a>
+            <a class="email-button" href="${reportUrl}" target="_blank" style="display:inline-block;padding:14px 28px;border-radius:8px;background-color:#2563eb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;box-shadow:0 2px 4px rgba(37,99,235,0.2);">View Full Audit Report</a>
           </td></tr>
 
           <!-- Footer -->
           <tr><td class="email-pad" style="padding:40px;background-color:#0f172a;text-align:center;">
             <h2 style="margin:0;font-size:22px;color:#ffffff;font-weight:700;">Ready to discuss the recommended improvements?</h2>
-            <a class="email-button" href="https://www.coreweblabs.com/contact" style="display:inline-block;margin-top:24px;padding:16px 32px;border-radius:10px;background-color:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;box-shadow:0 4px 14px 0 rgba(59,130,246,0.39);">Book a Consultation</a>
+            <a class="email-button" href="https://www.coreweblabs.com/contact" target="_blank" style="display:inline-block;margin-top:24px;padding:16px 32px;border-radius:10px;background-color:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;box-shadow:0 4px 14px 0 rgba(59,130,246,0.39);">Book a Consultation</a>
             
             <div style="margin-top:40px;padding-top:32px;border-top:1px solid #1e293b;color:#94a3b8;font-size:15px;line-height:26px;">
               <p style="margin:0 0 12px;">
                 <span style="color:#cbd5e1;font-weight:600;">Freelancer Profile:</span> 
-                <a href="https://www.freelancer.com/u/wordpressexp01" style="color:#60a5fa;text-decoration:none;">freelancer.com/u/wordpressexp01</a>
+                <a href="https://www.freelancer.com/u/wordpressexp01" target="_blank" style="color:#60a5fa;text-decoration:none;">freelancer.com/u/wordpressexp01</a>
               </p>
             </div>
           </td></tr>
