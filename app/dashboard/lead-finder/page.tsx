@@ -240,15 +240,45 @@ const DEFAULT_CITIES = [
 ];
 
 const DEFAULT_NICHES = [
-  "Dentists", "Lawyers", "Accountants", "Real Estate Agents", "Roofing Companies", 
-  "HVAC Companies", "Plumbers", "Electricians", "Home Remodelers", "Landscaping Companies", 
-  "Pest Control Companies", "Cleaning Services", "Moving Companies", "Chiropractors", 
-  "Physical Therapists", "Medical Clinics", "Veterinarians", "Dental Clinics", "Restaurants", 
-  "Coffee Shops", "Auto Repair Shops", "Car Dealerships", "Insurance Agencies", "Mortgage Brokers", 
-  "Financial Advisors", "Marketing Agencies", "Web Design Agencies", "IT Support Companies", 
-  "Managed Service Providers (MSPs)", "Construction Companies", "Solar Installers", 
-  "Property Management Companies", "Private Schools", "Tutoring Centers", "Gyms & Fitness Centers", 
-  "Beauty Salons", "Spas", "Wedding Photographers", "Law Firms", "Accounting Firms"
+  // High Priority / Best for Outreach
+  "Dentists", "Lawyers", "Roofing Companies", "HVAC Companies", "Plumbers", 
+  "Electricians", "Chiropractors", "Medical Clinics", "Kitchen Remodelers", 
+  "Landscaping Companies", "Pest Control Companies", "Insurance Agencies", 
+  "Real Estate Agents", "Accountants", "Auto Repair Shops",
+
+  // Health & Wellness
+  "Physiotherapists", "Dermatologists", "Psychologists", "Therapists", 
+  "Optometrists", "Veterinarians", "Pharmacies", "Beauty Salons", 
+  "Barbershops", "Spas", "Gyms", "Personal Trainers", "Yoga Studios",
+
+  // Home Services
+  "Painters", "Flooring Companies", "Window & Door Companies", 
+  "Bathroom Remodelers", "General Contractors", "Home Builders", 
+  "Tree Removal Services", "Cleaning Services", "Moving Companies", 
+  "Locksmiths", "Garage Door Repair", "Appliance Repair", "Handyman Services", 
+  "Solar Panel Installers", "Pool Services", "Pressure Washing Services",
+
+  // Professional Services
+  "Mortgage Brokers", "Financial Advisors", "Tax Consultants", 
+  "Business Consultants", "IT Support Companies", "Marketing Agencies", 
+  "Recruitment Agencies", "Translation Services", "Architecture Firms", 
+  "Interior Designers", "Engineering Firms", "Notaries",
+
+  // Property & Local Services
+  "Property Management Companies", "Home Inspectors", "Storage Facilities", 
+  "Hotels", "Guest Houses", "Event Venues", "Wedding Planners", 
+  "Photographers", "Caterers", "Funeral Homes", "Car Dealerships", 
+  "Driving Schools",
+
+  // Education & Family
+  "Daycares", "Preschools", "Private Schools", "Tutoring Centers", 
+  "Music Schools", "Language Schools", "Martial Arts Schools", 
+  "Dance Studios", "Childcare Services",
+
+  // Food & Retail
+  "Restaurants", "Cafes", "Bakeries", "Catering Companies", 
+  "Local Grocery Stores", "Furniture Stores", "Pet Groomers", 
+  "Pet Stores", "Flower Shops", "Jewellery Stores"
 ];
 
 // Social Media & WhatsApp SVG Icons
