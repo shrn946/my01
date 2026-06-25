@@ -184,6 +184,8 @@ model Lead {
   proposalImage          String?
   reportStatus           String     @default("Not Generated")
   proposalImageTech      String?
+  reportViewedAt         DateTime?
+  reportViewCount        Int        @default(0)
   designAnalysis         Json?
   developerComments      String?
   aiAnalysis             Json?

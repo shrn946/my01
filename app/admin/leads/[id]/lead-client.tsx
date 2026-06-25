@@ -196,6 +196,11 @@ export default function LeadDetailClient({ lead, templates, settings, portfolioE
         <div className="flex gap-2">
           <Badge variant={lead.status === "Contacted" ? "default" : "secondary"}>{lead.status}</Badge>
           {lead.leadScore && <Badge variant="outline">Lead Score: {lead.leadScore}</Badge>}
+          {(lead.reportViewCount || 0) > 0 && (
+            <Badge variant="destructive" className="animate-pulse shadow-lg bg-red-600">
+              🔥 Opened Report: {lead.reportViewCount}x
+            </Badge>
+          )}
         </div>
       </div>
 

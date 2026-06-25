@@ -9,6 +9,7 @@ import { getReportContent, getReportMedia } from "@/lib/report-content";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ReportImageHover } from "@/components/report-image-hover";
+import { ReportViewTracker } from "./view-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,7 @@ export default async function ReportPage({
   if (format === "png") {
     return (
       <div className="min-h-screen bg-slate-100 p-10 font-sans text-slate-950 flex flex-col items-center justify-center">
+        <ReportViewTracker leadId={lead.id} />
         <div id="report-shell" className="w-[1100px] overflow-hidden rounded-[3rem] bg-white shadow-2xl">
           <header className="bg-slate-950 p-12 text-white">
             <div className="flex items-start justify-between gap-8">
@@ -118,6 +120,7 @@ export default async function ReportPage({
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-slate-900 pb-20 font-sans selection:bg-indigo-100">
+      <ReportViewTracker leadId={lead.id} />
       <style>{`
         @media print {
           @page { size: A4; margin: 14mm 12mm; }
