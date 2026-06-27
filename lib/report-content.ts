@@ -15,11 +15,13 @@ export const reportMediaItemSchema = z.object({
 export const reportContentSchema = z.object({
   developerComments: z.string().default(""),
   recommendations: z.array(z.string()).default([]),
+  customProposal: z.string().optional(),
   history: z.array(z.object({
     id: z.string(),
     savedAt: z.string(),
     developerComments: z.string(),
     recommendations: z.array(z.string()),
+    customProposal: z.string().optional(),
   })).default([]),
   includeBeforeAfter: z.boolean().default(false),
 });
