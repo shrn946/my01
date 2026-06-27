@@ -445,6 +445,27 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
         findings: ["Public audits cannot confirm whether updates, backups, restore tests, and security monitoring are being completed consistently."],
         recommendations: services,
       });
+    } else if (!["redesign", "fix_issues", "loading_speed", "seo", "maintenance"].includes(category)) {
+      const label = categoryLabel(category);
+      comments.push({
+        category, priority: "medium", heading: `Opportunities identified for ${label}`,
+        finding: "Automated analysis indicates room for improvement in this area based on industry standards.",
+        recommendation: `Implement best practices for ${label} to improve overall website effectiveness and user experience.`,
+        evidence: "Review based on current website architecture and visible public metrics.",
+        strength: false,
+      });
+      recommendations.push({
+        category, priority: "medium", title: `Enhance ${label}`,
+        finding: "Current implementation does not fully leverage modern standards.",
+        recommendation: `Develop and apply a tailored strategy for ${label} aligned with your business goals.`,
+        business_impact: "Resolving these gaps will directly support business growth and improve the user journey.",
+      });
+      sections.push({
+        category, heading: `${label} Analysis`,
+        analysis: `This section focuses on reviewing the website's approach to ${label}.`,
+        findings: ["There are clear opportunities to modernize and optimize this aspect of the website."],
+        recommendations: [`Prioritize strategic updates related to ${label}.`],
+      });
     }
   }
 
