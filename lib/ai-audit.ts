@@ -41,13 +41,13 @@ const reportSectionSchema = z.object({
 });
 
 export const aiAuditSchema = z.object({
-  selected_categories: z.array(auditCategorySchema).min(1).max(5),
+  selected_categories: z.array(auditCategorySchema).min(1).max(10),
   audit_summary: z.object({
     overview: z.string(),
     strengths: z.array(z.string()).max(6),
     priority_issues: z.array(z.string()).max(8),
   }),
-  developer_comments: z.array(developerCommentSchema).min(1).max(12),
+  developer_comments: z.array(developerCommentSchema).min(1).max(15),
   recommendations: z.array(recommendationSchema).min(1).max(16),
   proposal_content: z.object({
     title: z.string(),
@@ -74,7 +74,7 @@ export const aiAuditSchema = z.object({
   }),
   full_report_data: z.object({
     executive_summary: z.string(),
-    sections: z.array(reportSectionSchema).min(1).max(5),
+    sections: z.array(reportSectionSchema).min(1).max(10),
     action_plan: z.array(z.string()).min(1).max(12),
   }),
 });

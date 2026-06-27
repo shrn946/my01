@@ -569,7 +569,7 @@ export default function DashboardPage() {
       return;
     }
 
-    setReportState({ active: true, step: 0, completed: false, totalSteps: 4 });
+    setReportState({ active: true, step: 0, completed: false, totalSteps: 2 });
     setResult((prev: any) => ({ ...prev, reportStatus: "Generating" }));
 
     try {
@@ -582,25 +582,7 @@ export default function DashboardPage() {
         throw new Error("Focused AI analysis failed");
       }
 
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      const proposalRes = await actionProposalPng(result.leadId);
-      if (!proposalRes.success) {
-        throw new Error("Proposal image generation failed");
-      }
-      setResult((prev: any) => ({ ...prev, proposalImage: proposalRes.path }));
-      
-      setReportState(s => ({ ...s, step: ++currentStep }));
-      const reportRes = await actionPublicReport(result.leadId);
-      if (!reportRes.success) {
-        throw new Error(reportRes.error || "PDF and PNG report generation failed");
-      }
-      setResult((prev: any) => ({
-        ...prev,
-        reportPdf: reportRes.reportPdf,
-        reportImage: reportRes.reportImage,
-        proposalPdf: reportRes.proposalPdf,
-      }));
-      
+
       setReportState(s => ({ ...s, step: ++currentStep }));
       await actionPrepareEmail(result.leadId);
       
@@ -636,15 +618,13 @@ export default function DashboardPage() {
         description: err instanceof Error ? err.message : "Failed to generate report",
         variant: "destructive"
       });
-      setReportState({ active: false, step: 0, completed: false, totalSteps: 4 });
+      setReportState({ active: false, step: 0, completed: false, totalSteps: 2 });
       setResult((prev: any) => ({ ...prev, reportStatus: "Not Generated" }));
     }
   };
 
   const activeSteps = [
     "Generating Selected Category Analysis",
-    "Creating Proposal Image",
-    "Building Focused PNG Report",
     "Preparing Email Template"
   ];
 
