@@ -93,7 +93,7 @@ export function HeroSlider({ slides }: { slides: any[] }) {
             <div key={slide.id ?? slide.title} className="relative min-w-0 flex-[0_0_100%]">
               <div className="absolute inset-0">
                 <Image 
-                  src={PLACEHOLDER_IMAGE} 
+                  src={slide.image || PLACEHOLDER_IMAGE} 
                   alt={slide.title} 
                   fill 
                   priority={index === 0}
