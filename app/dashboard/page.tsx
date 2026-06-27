@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments, autoCorrectText, updateCustomProposalContent } from "./actions";
 import { RichEditor } from "@/components/rich-editor";
+import { MediaUploader } from "@/components/media-uploader";
 import { getFinderLeads } from "./lead-finder/actions";
 import { 
   setReportGenerating, actionCaptureScreenshot, actionRecommendations,
@@ -967,9 +968,25 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* After Image */}
-                   <div className="p-6">
-                     <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">After (Proposed / Preview)</p>
+                   {/* After Image */}
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">After (Proposed / Preview)</p>
+                        <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-2 py-1 rounded border shadow-sm hover:bg-slate-100 transition-colors">
+                          <input 
+                            type="checkbox" 
+                            className="h-3 w-3 accent-indigo-600 rounded border-slate-300 cursor-pointer" 
+                            checked={!result.reportContent?.hideAfterImage}
+                            onChange={async (e) => {
+                              const isChecked = !e.target.checked;
+                              const updatedReportContent = { ...result.reportContent, hideAfterImage: isChecked };
+                              setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                              await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                            }}
+                          />
+                          <span className="text-xs font-semibold text-slate-700">Show Section</span>
+                        </label>
+                      </div>
                      <div className="flex gap-2 mb-3 flex-wrap items-center">
                        <Input 
                          placeholder="Enter URL to fetch After screenshot..." 
@@ -1353,47 +1370,16 @@ export default function DashboardPage() {
                     </div>
                   </CardHeader>
                 <CardContent className="space-y-6">
-                  <form id="report-media-upload-form" action={handleReportMediaUpload} className="grid md:grid-cols-2 gap-4 rounded-2xl border bg-slate-50 p-5">
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="report-file">Images (You can select multiple)</Label>
-                      <Input id="report-file" name="files" type="file" multiple accept="image/jpeg,image/png,image/webp" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="report-media-type">Image Type</Label>
-                      <select id="report-media-type" name="type" className="h-10 w-full rounded-md border bg-white px-3 text-sm">
-                        <option value="website_issue">Website Issue Screenshot</option>
-                        <option value="competitor">Competitor Screenshot</option>
-                        <option value="branding">Branding Reference</option>
-                        <option value="before_after">Before / After Example</option>
-                        <option value="general">General Reference</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="report-section">Place In Section</Label>
-                      <select id="report-section" name="section" className="h-10 w-full rounded-md border bg-white px-3 text-sm">
-                        <option value="findings">Selected Findings</option>
-                        <option value="recommendations">Recommendations</option>
-                        <option value="proposal">Proposal Section</option>
-                        <option value="email">Email</option>
-                        <option value="appendix">Uploaded Screenshots</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="report-caption">Caption / What This Image Shows</Label>
-                      <Input id="report-caption" name="caption" placeholder="Example: Mobile navigation overlaps the booking button" required />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="report-notes">Notes / Fixes Needed</Label>
-                      <Textarea id="report-notes" name="notes" placeholder="Explain the issue, required correction, or improvement..." className="min-h-[80px]" />
-                    </div>
-                    <label className="flex items-center gap-2 text-sm font-medium">
-                      <input type="checkbox" name="includeInEmail" value="true" className="h-4 w-4 accent-primary" />
-                      Include this image in the email
-                    </label>
-                    <Button type="submit" disabled={isUploadingMedia} className="md:justify-self-end">
-                      {isUploadingMedia ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading</> : <><Plus className="mr-2 h-4 w-4" /> Upload Image</>}
-                    </Button>
-                  </form>
+                  <MediaUploader 
+                    leadId={result.leadId} 
+                    onUploadSuccess={(items) => {
+                      setReportMedia((current) => {
+                        const next = [...current, ...items];
+                        setResult((resultState: any) => ({ ...resultState, reportMedia: next, reportStatus: "Not Generated" }));
+                        return next;
+                      });
+                    }} 
+                  />
 
                   {reportMedia.length > 0 && (
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">

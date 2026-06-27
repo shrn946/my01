@@ -26,4 +26,5 @@ export const AUDIT_CATEGORIES: Array<{
   { value: "lead_gen", label: "Conversion & Sales Optimization", description: "Increase revenue and generate leads by optimizing landing pages, checkout flows, compelling CTAs, and CRM integrations." },
   { value: "accessibility", label: "ADA & Accessibility Compliance", description: "Protect against lawsuits and expand your audience by ensuring screen-reader compatibility, contrast ratios, and keyboard navigation." },
   { value: "custom_dev", label: "Custom Feature Development", description: "Build complex interactive tools, custom API integrations, dynamic dashboards, and specialized backend functionality." },
+  { value: "small_fixes", label: "Small Fixes & Text Changes", description: "Text content updates and corrections, image replacements, broken links, minor functionality fixes, small layout improvements, and general cosmetic updates." },
 ];

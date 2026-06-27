@@ -481,7 +481,7 @@ export default async function ReportPage({
               </div>
             )}
 
-            {reportContent.includeBeforeAfter && (
+            {reportContent.includeBeforeAfter && !reportContent.hideAfterImage && (
               <div className="mt-16 pt-10 border-t border-white/10">
                 <h3 className="text-2xl font-bold mb-8 text-white flex items-center gap-3">
                   <Target className="h-6 w-6 text-blue-400" /> Transformation Preview
