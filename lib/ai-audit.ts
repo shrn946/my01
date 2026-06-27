@@ -558,7 +558,7 @@ Best regards,
 Hassan----"
 
 DYNAMIC CATEGORY HANDLING:
-- Small Fixes & Website Changes: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
+- Website Changes & Content Updates: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
 - Complete Re-Design: Write a short, professional redesign summary based on the website audit. Clearly explain if the current website looks outdated or does not follow modern design and user-experience standards. Mention relevant improvement areas (visual design, mobile responsiveness, page structure, navigation, trust elements, calls to action, speed, accessibility, conversion flow). Use simple, client-friendly English with a helpful, professional tone (not overly negative). Focus on why a redesign will improve the visitor experience and generate more enquiries/leads. Example: "Your website design looks outdated and does not meet current user experience or design standards. A redesign is recommended to improve the visual appearance, mobile experience, page structure, trust elements, calls to action, and overall conversion flow. The updated design should follow modern website trends while keeping the brand professional, clear, and easy for visitors to use."
 - SEO: prioritize titles, headings, local SEO, service pages, internal links, metadata, and content gaps.
 - Technical Fixes: prioritize speed, mobile performance, broken forms, console errors, security, image optimization, and browser issues.
