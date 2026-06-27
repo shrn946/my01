@@ -818,6 +818,11 @@ export default function LeadsPage() {
 
                         {/* Column: Actions */}
                         <div className="p-4 lg:py-0 lg:pr-5 lg:pl-2 lg:col-span-2 flex items-center justify-end gap-2 bg-muted/5 lg:bg-transparent border-t lg:border-t-0 border-dashed">
+                          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300" title="Analyze on Dashboard" asChild>
+                            <a href={`/dashboard?url=${encodeURIComponent(lead.website)}`} target="_blank" rel="noreferrer">
+                              <Wand2 className="h-4 w-4" />
+                            </a>
+                          </Button>
                           <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl shrink-0" title="View Report" asChild>
                             <a href={`/report/${lead.id}`} target="_blank" rel="noreferrer">
                               <Eye className="h-4 w-4" />
