@@ -28,7 +28,6 @@ function professionalEmailHtml({
   body,
   businessName,
   companyName,
-  proposalImage,
   reportUrl,
   findings,
   media,
@@ -37,7 +36,6 @@ function professionalEmailHtml({
   body: string;
   businessName: string;
   companyName: string;
-  proposalImage: string;
   reportUrl: string;
   findings: string[];
   media: Array<{ url: string; caption: string }>;
@@ -78,14 +76,7 @@ function professionalEmailHtml({
             <div style="color:#334155;font-size:16px;line-height:26px;">${body.replace(/\n/g, "<br>")}</div>
           </td></tr>
 
-          <!-- Report Image -->
-          ${proposalImage ? `
-          <tr><td class="email-pad" style="padding:0 40px 20px;background-color:#ffffff;text-align:center;">
-            <a href="${proposalImage}" target="_blank" style="display:block;text-decoration:none;">
-                <img src="${proposalImage}" width="500" alt="Website proposal summary" style="display:block;width:100%;max-width:500px;height:auto;border-radius:8px;border:1px solid #cbd5e1;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);background-color:#ffffff;margin:0 auto;">
-            </a>
-          </td></tr>
-          ` : ""}
+
 
           <!-- Findings -->
           <tr><td class="email-pad" style="padding:30px 40px;background-color:#fafaf9;border-top:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;">
@@ -153,21 +144,11 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     let errorMsg = null;
     
     const reportUrl = absoluteUrl(baseUrl, `/report/${leadId}`);
-    
-    // Ensure image shows by falling back to any available visual preview
-    const imageToUse = lead.proposalImage || lead.desktopImage;
-    
-    let inlineImageUrl = "";
-    
-    if (imageToUse) {
-      inlineImageUrl = absoluteUrl(baseUrl, imageToUse);
-    }
 
     const htmlBody = professionalEmailHtml({
       body: customBody,
       businessName: lead.businessName || "Your Business",
       companyName: settings?.companyName || settings?.senderName || "Website Consultant",
-      proposalImage: inlineImageUrl,
       reportUrl,
       findings: reportContent.recommendations.length
         ? reportContent.recommendations
