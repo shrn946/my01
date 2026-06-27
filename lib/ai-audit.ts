@@ -512,7 +512,7 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
       expected_outcomes: recommendations.map((item) => item.business_impact),
       call_to_action: "Book a short consultation to confirm priorities, scope, and implementation timing.",
       email_subject: `${labels.join(" + ")} opportunities for ${name}`,
-      email_body: `Hi ${name},\n\nI reviewed ${input.website} specifically for ${labels.join(" + ")} and found several focused opportunities worth addressing.\n\nI have prepared a detailed web report with my findings and recommended action plan.\n\nWould you be open to a short consultation to review the priorities? You are also welcome to reply directly to this email with any questions.\n\nBest regards,\nHassan----`,
+      email_body: `Hi,\n\nI took some time to review ${input.website} with a focus on ${labels.join(" + ")}, and I noticed a few specific areas where some focused updates could make a real difference.\n\nI've put together a quick web report outlining what I found and my recommended action plan for improving it.\n\nWould you be open to a brief chat to go over the priorities? You're also totally welcome to just reply directly to this email if you have any immediate questions.\n\nBest regards,\nHassan Naqvi`,
       maintenance_pricing: {
         included: input.selectedCategories.includes("maintenance"),
         plan_name: input.selectedCategories.includes("maintenance") ? "Monthly Website Care Plan" : "",
@@ -566,17 +566,17 @@ REQUIRED REPORT STRUCTURE:
 3. Recommended Scope: A short list of only the work needed to resolve the priority findings. Do not repeat findings word-for-word.
 4. Free Demo Offer: Only include this if "Complete Re-Design" is selected. Write: "I can create a free homepage redesign concept to show how the website could look with a clearer layout, stronger trust sections, and a more focused enquiry path. There is no obligation to continue with the full redesign."
 5. Next Step: One simple CTA: "Reply if you would like me to prepare the free homepage concept or discuss the priority improvements."
-6. Email Body (email_body): Write the email exactly using this template, replacing the bracketed information:
+6. Email Body (email_body): Write the email exactly using this template, replacing the bracketed information. If the business name looks like a phone number, URL, or is generally weird, just use "Hi," instead of "Hi [Business Name],":
 "Hi [Business Name],
 
-I reviewed [Website URL] specifically for [Selected Categories] and found several focused opportunities worth addressing.
+I took some time to review [Website URL] with a focus on [Selected Categories], and I noticed a few specific areas where some focused updates could make a real difference.
 
-I have prepared a detailed web report with my findings and recommended action plan.
+I've put together a quick web report outlining what I found and my recommended action plan for improving it.
 
-Would you be open to a short consultation to review the priorities? You are also welcome to reply directly to this email with any questions.
+Would you be open to a brief chat to go over the priorities? You're also totally welcome to just reply directly to this email if you have any immediate questions.
 
 Best regards,
-Hassan----"
+Hassan Naqvi"
 
 DYNAMIC CATEGORY HANDLING:
 - Website Changes & Content Updates: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.

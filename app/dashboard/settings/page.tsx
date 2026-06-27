@@ -767,15 +767,15 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Cold Outreach Categories */}
+          {/* Cold Outreach Categories & Locations */}
           <Card className="shadow-sm border-muted">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building className="h-5 w-5 text-primary" />
-                Cold Outreach Categories
+                Cold Outreach
               </CardTitle>
               <CardDescription>
-                Define cold outreach niches/business types for keyword dropdown suggestion autocompletes, separated by commas or newlines.
+                Define target niches and locations for search autocompletes.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -784,10 +784,29 @@ export default function SettingsPage() {
                 name="categories"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Editable Categories</FormLabel>
+                    <FormLabel>Target Categories (Niches)</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Dentists, Lawyers, Accountants..." className="min-h-[160px] rounded-xl resize-y" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Separated by commas or newlines.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="locationsPriority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Target Locations (Cities)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Houston, Dallas, Phoenix, London, Toronto..." className="min-h-[160px] rounded-xl resize-y" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Define target cities for search autocompletes and default filters, separated by commas or newlines.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
