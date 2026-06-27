@@ -133,12 +133,19 @@ export default async function ReportPage({
           img { max-height: 220mm; }
           .print-cover-image { background-position: top center !important; animation: none !important; }
         }
-        @keyframes cover-scroll {
-          0%, 10% { background-position: 50% 0%; }
-          90%, 100% { background-position: 50% 100%; }
+        .cover-image-scroll {
+          background-position: 50% 0%;
+          transition: background-position 6s linear;
         }
-        .animate-cover-scroll {
-          animation: cover-scroll 20s linear infinite alternate;
+        .group:hover .cover-image-scroll {
+          background-position: 50% 100%;
+        }
+        .scrollbar-thumb {
+          transform: translateY(0);
+          transition: transform 6s linear;
+        }
+        .group:hover .scrollbar-thumb {
+          transform: translateY(300%);
         }
       `}</style>
       <header className="print-cover bg-[#0a0a0a] text-white px-5 md:px-10 flex items-center relative overflow-hidden border-b border-white/5">
@@ -154,7 +161,7 @@ export default async function ReportPage({
                 </span>
               ))}
             </div>
-            <h1 className="text-4xl md:text-7xl font-black leading-tight md:leading-[1.1] tracking-tight break-words">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight md:leading-[1.1] tracking-tight break-words">
               Growth Strategy for {lead.businessName || "Your Business"}
             </h1>
             <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed font-light break-words">
@@ -205,7 +212,7 @@ export default async function ReportPage({
           
           {reportContent.includeBeforeAfter && (lead.beforeAfterImage || lead.desktopImage) && (
             <div className="w-full lg:w-[45%] lg:max-w-[480px] shrink-0">
-              <div className="w-full aspect-[4/5] rounded-[2rem] border border-white/10 shadow-2xl bg-slate-900 overflow-hidden flex flex-col relative ring-1 ring-white/5 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+              <div className="w-full aspect-[4/5] rounded-[2rem] border border-white/10 shadow-2xl bg-slate-900 overflow-hidden group flex flex-col relative ring-1 ring-white/5 transform rotate-2 hover:rotate-0 transition-all duration-500">
                 {/* Browser Header */}
                 <div className="h-10 bg-slate-800/90 border-b border-white/5 flex items-center px-5 shrink-0 backdrop-blur-md relative z-20">
                   <div className="flex gap-2">
@@ -218,12 +225,16 @@ export default async function ReportPage({
                 {/* Image Container */}
                 <div className="flex-1 relative overflow-hidden bg-slate-950">
                   <div
-                    className="absolute inset-0 w-full h-full bg-no-repeat bg-top animate-cover-scroll print-cover-image"
+                    className="absolute inset-0 w-full h-full bg-no-repeat bg-top cover-image-scroll print-cover-image"
                     style={{ 
                       backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`,
                       backgroundSize: "100% auto"
                     }}
                   />
+                  {/* Scroll Bar Track */}
+                  <div className="absolute right-2 top-3 bottom-3 w-1.5 rounded-full bg-slate-800/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 overflow-hidden z-20">
+                      <div className="w-full h-1/4 bg-blue-500 rounded-full scrollbar-thumb" />
+                  </div>
                 </div>
               </div>
             </div>
