@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload, Copy, ChevronDown, ChevronUp
 } from "lucide-react";
-import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments, autoCorrectText } from "./actions";
+import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments, autoCorrectText, updateCustomProposalContent } from "./actions";
+import { RichEditor } from "@/components/rich-editor";
 import { getFinderLeads } from "./lead-finder/actions";
 import { 
   setReportGenerating, actionCaptureScreenshot, actionRecommendations,
@@ -151,6 +152,9 @@ export default function DashboardPage() {
   const [editProposals, setEditProposals] = useState<string[]>([]);
   const [isEditingComments, setIsEditingComments] = useState(false);
   const [editComments, setEditComments] = useState("");
+  const [isEditingProposalContent, setIsEditingProposalContent] = useState(false);
+  const [editProposalContent, setEditProposalContent] = useState("");
+  const [isSavingProposalContent, setIsSavingProposalContent] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [reportMedia, setReportMedia] = useState<any[]>([]);
   const [stats, setStats] = useState({
@@ -197,12 +201,44 @@ export default function DashboardPage() {
         if ((lead.reportContent as any)?.developerComments) {
           setEditComments((lead.reportContent as any).developerComments);
         }
+        if ((lead.reportContent as any)?.customProposal) {
+          setEditProposalContent((lead.reportContent as any).customProposal);
+        } else if ((lead.aiAnalysis as any)?.proposal_content) {
+          const pc = (lead.aiAnalysis as any).proposal_content;
+          setEditProposalContent(`
+            <h3>${pc.title || ""}</h3>
+            <p>${pc.executive_pitch || ""}</p>
+            <ul>
+              ${(pc.scope || []).map((item: string) => `<li>${item}</li>`).join('')}
+            </ul>
+          `);
+        }
         toast({ title: "Lead Loaded", description: `${lead.businessName} loaded for analysis.` });
       }
     } catch (err) {
       toast({ title: "Error Loading Lead", description: "Could not fetch lead details.", variant: "destructive" });
     } finally {
       setIsLoadingLead(false);
+    }
+  };
+
+  const handleSaveProposalContent = async () => {
+    if (!result?.leadId) return;
+    setIsSavingProposalContent(true);
+    const success = await updateCustomProposalContent(result.leadId, editProposalContent);
+    setIsSavingProposalContent(false);
+    if (success) {
+      setResult((prev: any) => ({
+        ...prev,
+        reportContent: {
+          ...prev.reportContent,
+          customProposal: editProposalContent
+        }
+      }));
+      setIsEditingProposalContent(false);
+      toast({ title: "Success", description: "Proposal content updated successfully." });
+    } else {
+      toast({ title: "Error", description: "Failed to update proposal content.", variant: "destructive" });
     }
   };
 
@@ -1040,11 +1076,10 @@ export default function DashboardPage() {
                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Advanced Developer Editor</p>
                         </div>
                         <div className="relative">
-                          <Textarea 
+                          <RichEditor 
                             value={editComments} 
-                            onChange={e => setEditComments(e.target.value)}
-                            placeholder="Type your professional audit comments here... (e.g., 'Your website has a strong foundation, but the hero section lacks a clear call to action...')"
-                            className="min-h-[200px] border-0 focus-visible:ring-0 text-md leading-relaxed p-6"
+                            onChange={setEditComments}
+                            placeholder="Type your professional audit comments here..."
                           />
                           <Button 
                             size="icon" 
@@ -1065,9 +1100,10 @@ export default function DashboardPage() {
                     <div className="relative group">
                       {result.reportContent?.developerComments ? (
                         <div className="space-y-4">
-                          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed whitespace-pre-line">
-                            {result.reportContent.developerComments}
-                          </div>
+                          <div 
+                            className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
+                            dangerouslySetInnerHTML={{ __html: result.reportContent.developerComments }}
+                          />
                           <details className="rounded-xl border">
                             <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
                             <div className="border-t p-4 space-y-3">
@@ -1098,9 +1134,10 @@ export default function DashboardPage() {
                           ))}
                         </div>
                       ) : result.developerComments ? (
-                        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed whitespace-pre-line">
-                          {result.developerComments}
-                        </div>
+                        <div 
+                          className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
+                          dangerouslySetInnerHTML={{ __html: result.developerComments }}
+                        />
                       ) : (
                         <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400">
                            <FileText className="h-10 w-10 mb-2 opacity-20" />
@@ -1117,22 +1154,54 @@ export default function DashboardPage() {
               {result.aiAnalysis && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-xl">Focused Proposal Content</CardTitle>
-                    <CardDescription>Generated only for the selected service categories.</CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-xl">Focused Proposal Content</CardTitle>
+                        <CardDescription>Generated only for the selected service categories.</CardDescription>
+                      </div>
+                      {isEditingProposalContent ? (
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={handleSaveProposalContent} className="bg-indigo-600 hover:bg-indigo-700" disabled={isSavingProposalContent}>
+                            {isSavingProposalContent ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Save
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setIsEditingProposalContent(false)}>Cancel</Button>
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => setIsEditingProposalContent(true)} className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                          <Edit3 className="h-4 w-4 mr-2" /> Edit Proposal
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex flex-wrap gap-2">
-                      {result.aiAnalysis.selected_categories?.map((category: AuditCategory) => (
-                        <Badge key={category}>{AUDIT_CATEGORIES.find((item) => item.value === category)?.label}</Badge>
-                      ))}
-                    </div>
-                    <h3 className="font-black">{result.aiAnalysis.proposal_content?.title}</h3>
-                    <p className="text-sm text-muted-foreground">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
-                    <ul className="space-y-2">
-                      {result.aiAnalysis.proposal_content?.scope?.map((item: string) => (
-                        <li key={item} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
-                      ))}
-                    </ul>
+                    {isEditingProposalContent ? (
+                      <div className="relative">
+                        <RichEditor 
+                          value={editProposalContent} 
+                          onChange={setEditProposalContent}
+                        />
+                      </div>
+                    ) : result.reportContent?.customProposal ? (
+                      <div 
+                        className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
+                        dangerouslySetInnerHTML={{ __html: result.reportContent.customProposal }}
+                      />
+                    ) : (
+                      <>
+                        <div className="flex flex-wrap gap-2">
+                          {result.aiAnalysis.selected_categories?.map((category: AuditCategory) => (
+                            <Badge key={category}>{AUDIT_CATEGORIES.find((item) => item.value === category)?.label}</Badge>
+                          ))}
+                        </div>
+                        <h3 className="font-black">{result.aiAnalysis.proposal_content?.title}</h3>
+                        <p className="text-sm text-muted-foreground">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
+                        <ul className="space-y-2">
+                          {result.aiAnalysis.proposal_content?.scope?.map((item: string) => (
+                            <li key={item} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               )}

@@ -4,7 +4,7 @@ import * as cheerio from "cheerio";
 import { getPrisma } from "@/lib/prisma";
 import { auditWebsiteHtml } from "@/lib/site-audit";
 import { launchBrowser } from "@/lib/browser";
-import { getLeadAiFields } from "@/lib/lead-ai-storage";
+import { getLeadAiFields, saveLeadReportContent } from "@/lib/lead-ai-storage";
 import { revalidatePath } from "next/cache";
 import { sendLeadEmail } from "@/lib/email-actions";
 import { detectBusinessCategory } from "@/lib/utils";
@@ -717,6 +717,21 @@ export async function updateLeadDeveloperComments(leadId: string, comments: stri
     return true;
   } catch (error) {
     console.error("UPDATE_DEVELOPER_COMMENTS_ERROR:", error);
+    return false;
+  }
+}
+
+export async function updateCustomProposalContent(leadId: string, customHtml: string) {
+  const prisma = getPrisma();
+  try {
+    const leadAi = await getLeadAiFields(prisma, leadId);
+    const reportContent = (leadAi.reportContent as any) || {};
+    reportContent.customProposal = customHtml;
+    await saveLeadReportContent(prisma, leadId, reportContent);
+    revalidatePath("/dashboard/leads");
+    return true;
+  } catch (error) {
+    console.error("UPDATE_CUSTOM_PROPOSAL_ERROR:", error);
     return false;
   }
 }

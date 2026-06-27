@@ -108,8 +108,11 @@ export default async function ReportPage({
             </div>
             <section className="rounded-[2rem] bg-indigo-50 border border-indigo-100 p-8">
               <h2 className="text-2xl font-black flex items-center gap-2"><Terminal className="h-6 w-6 text-indigo-600" /> Developer Comments</h2>
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                {finalComments.split(/\n\n+/).filter(Boolean).slice(0, 6).map((item) => <p key={item} className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 whitespace-pre-line">{item}</p>)}
+              <div className="mt-5">
+                <div 
+                  className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-xl [&>h2]:text-lg [&>h3]:text-base"
+                  dangerouslySetInnerHTML={{ __html: finalComments }}
+                />
               </div>
             </section>
           </main>
@@ -128,67 +131,103 @@ export default async function ReportPage({
           .print-section { break-inside: avoid-page; }
           .print-heading { break-after: avoid-page; }
           img { max-height: 220mm; }
+          .print-cover-image { background-position: top center !important; animation: none !important; }
+        }
+        @keyframes cover-scroll {
+          0%, 10% { background-position: 50% 0%; }
+          90%, 100% { background-position: 50% 100%; }
+        }
+        .animate-cover-scroll {
+          animation: cover-scroll 20s linear infinite alternate;
         }
       `}</style>
       <header className="print-cover bg-[#0a0a0a] text-white px-5 md:px-10 flex items-center relative overflow-hidden border-b border-white/5">
         {/* Subtle premium background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none" />
         
-        <div className="max-w-5xl mx-auto py-12 md:py-24 relative z-10 w-full">
-          <div className="flex flex-wrap gap-2 mb-8">
-            {aiAudit.selected_categories.filter((c: string) => c !== "design").map((category) => (
-              <span key={category} className="rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
-                {categoryLabel(category)}
-              </span>
-            ))}
-          </div>
-          <h1 className="text-4xl md:text-7xl font-black leading-tight md:leading-[1.1] tracking-tight break-words">
-            Growth Strategy for {lead.businessName || "Your Business"}
-          </h1>
-          <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed font-light break-words">
-            A focused action plan and strategic roadmap to improve conversions, performance, and brand trust for <span className="text-white font-medium">{lead.website}</span>.
-          </p>
-          <div className="mt-10 md:mt-16 max-w-2xl w-full">
-            {/* Website Scores */}
-            <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
-                  <Zap className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black">Website Scores</p>
-                  <p className="text-xs text-slate-400 mt-1">Performance and SEO metrics</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
-                <div className="sm:col-span-3 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Overall</p>
-                    <p className="text-3xl font-black text-white mt-1">{lead.websiteScore || 0}</p>
+        <div className={`max-w-7xl mx-auto py-12 md:py-24 relative z-10 w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${(reportContent.includeBeforeAfter && (lead.beforeAfterImage || lead.desktopImage)) ? 'justify-between' : 'max-w-5xl'}`}>
+          <div className={`w-full ${(reportContent.includeBeforeAfter && (lead.beforeAfterImage || lead.desktopImage)) ? 'lg:w-[55%]' : ''}`}>
+            <div className="flex flex-wrap gap-2 mb-8">
+              {aiAudit.selected_categories.filter((c: string) => c !== "design").map((category) => (
+                <span key={category} className="rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
+                  {categoryLabel(category)}
+                </span>
+              ))}
+            </div>
+            <h1 className="text-4xl md:text-7xl font-black leading-tight md:leading-[1.1] tracking-tight break-words">
+              Growth Strategy for {lead.businessName || "Your Business"}
+            </h1>
+            <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed font-light break-words">
+              A focused action plan and strategic roadmap to improve conversions, performance, and brand trust for <span className="text-white font-medium">{lead.website}</span>.
+            </p>
+            <div className="mt-10 md:mt-16 max-w-2xl w-full">
+              {/* Website Scores */}
+              <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
+                    <Zap className="h-6 w-6" />
                   </div>
-                  <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      <span className="hidden sm:inline">Performance</span>
-                      <span className="sm:hidden">Perf.</span>
-                    </p>
-                    <p className="text-3xl font-black text-emerald-400 mt-1">{lead.performanceScore || 0}</p>
+                  <div>
+                    <p className="text-2xl font-black">Website Scores</p>
+                    <p className="text-xs text-slate-400 mt-1">Performance and SEO metrics</p>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">SEO</p>
-                  <p className="text-xl font-black text-white mt-1">{lead.seoScore || 0}</p>
-                </div>
-                <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Access.</p>
-                  <p className="text-xl font-black text-white mt-1">{lead.accessibilityScore || 0}</p>
-                </div>
-                <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Best Prac.</p>
-                  <p className="text-xl font-black text-white mt-1">{lead.bestPracticesScore || 0}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+                  <div className="sm:col-span-3 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Overall</p>
+                      <p className="text-3xl font-black text-white mt-1">{lead.websiteScore || 0}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/5 p-4 text-center border border-white/5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <span className="hidden sm:inline">Performance</span>
+                        <span className="sm:hidden">Perf.</span>
+                      </p>
+                      <p className="text-3xl font-black text-emerald-400 mt-1">{lead.performanceScore || 0}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">SEO</p>
+                    <p className="text-xl font-black text-white mt-1">{lead.seoScore || 0}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Access.</p>
+                    <p className="text-xl font-black text-white mt-1">{lead.accessibilityScore || 0}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/5 p-3 text-center border border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Best Prac.</p>
+                    <p className="text-xl font-black text-white mt-1">{lead.bestPracticesScore || 0}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          
+          {reportContent.includeBeforeAfter && (lead.beforeAfterImage || lead.desktopImage) && (
+            <div className="w-full lg:w-[45%] lg:max-w-[480px] shrink-0">
+              <div className="w-full aspect-[4/5] rounded-[2rem] border border-white/10 shadow-2xl bg-slate-900 overflow-hidden flex flex-col relative ring-1 ring-white/5 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                {/* Browser Header */}
+                <div className="h-10 bg-slate-800/90 border-b border-white/5 flex items-center px-5 shrink-0 backdrop-blur-md relative z-20">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                  </div>
+                </div>
+                
+                {/* Image Container */}
+                <div className="flex-1 relative overflow-hidden bg-slate-950">
+                  <div
+                    className="absolute inset-0 w-full h-full bg-no-repeat bg-top animate-cover-scroll print-cover-image"
+                    style={{ 
+                      backgroundImage: `url('${lead.beforeAfterImage || lead.desktopImage}')`,
+                      backgroundSize: "100% auto"
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -348,7 +387,10 @@ export default async function ReportPage({
           </div>
           <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2rem] bg-white overflow-hidden relative">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
-            <CardContent className="p-6 pl-8 md:p-10 md:pl-12 whitespace-pre-line text-slate-600 leading-relaxed font-light break-words">{finalComments}</CardContent>
+            <CardContent 
+              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
+              dangerouslySetInnerHTML={{ __html: finalComments }}
+            />
           </Card>
         </section>
 
@@ -386,22 +428,31 @@ export default async function ReportPage({
           
           <div className="relative z-10">
             <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-3 md:mb-4">Strategic Proposal</p>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight break-words">{aiAudit.proposal_content.title}</h2>
-            <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-300 leading-relaxed font-light max-w-3xl break-words">{aiAudit.proposal_content.executive_pitch}</p>
-            
-            <div className="mt-12 mb-6">
-              <h3 className="text-xl font-bold mb-6 text-white">Project Scope</h3>
-              <ul className="grid md:grid-cols-2 gap-x-8 gap-y-4">
-                {aiAudit.proposal_content.scope.map((item) => (
-                  <li key={item} className="flex gap-4 items-start">
-                    <div className="mt-0.5 p-1 rounded-full bg-emerald-500/20 text-emerald-400">
-                      <CheckCircle2 className="h-4 w-4 shrink-0" />
-                    </div>
-                    <span className="text-base text-slate-200">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {reportContent.customProposal ? (
+              <div 
+                className="text-slate-300 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white"
+                dangerouslySetInnerHTML={{ __html: reportContent.customProposal }} 
+              />
+            ) : (
+              <>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight break-words">{aiAudit.proposal_content.title}</h2>
+                <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-300 leading-relaxed font-light max-w-3xl break-words">{aiAudit.proposal_content.executive_pitch}</p>
+                
+                <div className="mt-12 mb-6">
+                  <h3 className="text-xl font-bold mb-6 text-white">Project Scope</h3>
+                  <ul className="grid md:grid-cols-2 gap-x-8 gap-y-4">
+                    {aiAudit.proposal_content.scope.map((item: string) => (
+                      <li key={item} className="flex gap-4 items-start">
+                        <div className="mt-0.5 p-1 rounded-full bg-emerald-500/20 text-emerald-400">
+                          <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        </div>
+                        <span className="text-base text-slate-200">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
 
             {mediaFor("proposal").length > 0 && (
               <div className="mt-10 mb-12 grid md:grid-cols-2 gap-6">

@@ -1,6 +1,7 @@
 import { getPrisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -14,8 +15,11 @@ export async function POST(req: Request) {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
-    // Only send email notification if it hasn't been viewed in the last hour
-    if (!lead.reportViewedAt || lead.reportViewedAt < oneHourAgo) {
+    const user = await getCurrentUser();
+    const isAdmin = user?.role === "ADMIN";
+
+    // Only send email notification if it hasn't been viewed in the last hour and the user is not an admin
+    if ((!lead.reportViewedAt || lead.reportViewedAt < oneHourAgo) && !isAdmin) {
       const settings = await prisma.settings.findUnique({ where: { id: "default" } });
       const resend = new Resend(settings?.resendApiKey || process.env.RESEND_API_KEY || "dummy_key");
 
