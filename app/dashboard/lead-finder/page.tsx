@@ -814,6 +814,10 @@ export default function LeadFinderPage() {
           if (loadedCities.length > 0) {
             setPopularCities(loadedCities);
           }
+
+          if (searchSettings.categories && searchSettings.categories.length > 0) {
+            setPopularNiches(searchSettings.categories);
+          }
         }
       } catch (err) {
         console.error("Failed to load custom search filters from settings:", err);
