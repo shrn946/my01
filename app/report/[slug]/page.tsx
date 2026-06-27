@@ -396,10 +396,10 @@ export default async function ReportPage({
             </div>
             <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 break-words">Technical Observations</h2>
           </div>
-          <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2rem] bg-white overflow-hidden relative">
+          <Card className="border-none shadow-2xl shadow-indigo-900/5 overflow-hidden relative rounded-[2rem]">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
             <CardContent 
-              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
+              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
               dangerouslySetInnerHTML={{ __html: finalComments }}
             />
           </Card>
@@ -411,7 +411,7 @@ export default async function ReportPage({
           <section className="print-section bg-red-50/80 border border-red-100 rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden my-10 md:my-16">
             <div className="absolute top-0 left-0 w-2 h-full bg-red-500"></div>
             <div className="flex flex-col mb-8 md:mb-10 relative z-10">
-              <h2 className="flex items-start md:items-center gap-3 print-heading text-xl md:text-3xl font-black tracking-tight text-red-950 break-words">
+              <h2 className="flex items-start md:items-center gap-3 print-heading text-xl md:text-3xl font-black tracking-tight text-red-950">
                 <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600 shrink-0 mt-1 md:mt-0" />
                 Website Issues Found — Screenshots Attached
               </h2>
@@ -419,7 +419,7 @@ export default async function ReportPage({
             </div>
             <div className="grid md:grid-cols-2 gap-8 relative z-10">
               {mediaFor("appendix").map((item) => (
-                <figure key={item.id} className="print-section overflow-hidden rounded-[2rem] border border-red-100 shadow-xl shadow-red-900/5 bg-white">
+                <figure key={item.id} className="print-section overflow-hidden rounded-xl border border-red-100 shadow-xl shadow-red-900/5 bg-white">
                   <div className="relative border-b border-slate-100">
                     <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
                   </div>
@@ -441,13 +441,13 @@ export default async function ReportPage({
             <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-3 md:mb-4">Strategic Proposal</p>
             {reportContent.customProposal ? (
               <div 
-                className="text-slate-300 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white"
+                className="text-slate-300 leading-relaxed font-light [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white"
                 dangerouslySetInnerHTML={{ __html: reportContent.customProposal }} 
               />
             ) : (
               <>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight break-words">{aiAudit.proposal_content.title}</h2>
-                <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-300 leading-relaxed font-light max-w-3xl break-words">{aiAudit.proposal_content.executive_pitch}</p>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">{aiAudit.proposal_content.title}</h2>
+                <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-300 leading-relaxed font-light max-w-3xl">{aiAudit.proposal_content.executive_pitch}</p>
                 
                 <div className="mt-12 mb-6">
                   <h3 className="text-xl font-bold mb-6 text-white">Project Scope</h3>
