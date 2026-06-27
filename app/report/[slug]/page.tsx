@@ -130,11 +130,11 @@ export default async function ReportPage({
           img { max-height: 220mm; }
         }
       `}</style>
-      <header className="print-cover bg-[#0a0a0a] text-white px-10 flex items-center relative overflow-hidden border-b border-white/5">
+      <header className="print-cover bg-[#0a0a0a] text-white px-5 md:px-10 flex items-center relative overflow-hidden border-b border-white/5">
         {/* Subtle premium background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none" />
         
-        <div className="max-w-5xl mx-auto py-24 relative z-10 w-full">
+        <div className="max-w-5xl mx-auto py-12 md:py-24 relative z-10 w-full">
           <div className="flex flex-wrap gap-2 mb-8">
             {aiAudit.selected_categories.filter((c: string) => c !== "design").map((category) => (
               <span key={category} className="rounded-full bg-white/5 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
@@ -142,13 +142,13 @@ export default async function ReportPage({
               </span>
             ))}
           </div>
-          <h1 className="text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
+          <h1 className="text-4xl md:text-7xl font-black leading-tight md:leading-[1.1] tracking-tight break-words">
             Growth Strategy for {lead.businessName || "Your Business"}
           </h1>
-          <p className="mt-6 text-xl text-slate-400 max-w-3xl leading-relaxed font-light">
+          <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed font-light break-words">
             A focused action plan and strategic roadmap to improve conversions, performance, and brand trust for <span className="text-white font-medium">{lead.website}</span>.
           </p>
-          <div className="mt-16 max-w-2xl">
+          <div className="mt-10 md:mt-16 max-w-2xl w-full">
             {/* Website Scores */}
             <div className="rounded-[2rem] bg-white/10 border border-white/10 p-7 shadow-2xl backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-6">
@@ -192,20 +192,20 @@ export default async function ReportPage({
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-16 space-y-20">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-12 md:space-y-20 w-full overflow-hidden">
         <Card className="print-section shadow-2xl shadow-indigo-900/5 border-none rounded-[2.5rem] bg-white overflow-hidden relative">
           {/* Subtle accent line at top */}
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-          <CardContent className="p-10 md:p-14">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900">Executive Summary</h2>
-            <p className="mt-6 text-lg text-slate-600 leading-relaxed font-light">{aiAudit.full_report_data.executive_summary}</p>
+          <CardContent className="p-6 md:p-14">
+            <h2 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 break-words">Executive Summary</h2>
+            <p className="mt-4 md:mt-6 text-base md:text-lg text-slate-600 leading-relaxed font-light break-words">{aiAudit.full_report_data.executive_summary}</p>
           </CardContent>
         </Card>
 
-        <section className="space-y-10">
-          <div className="flex items-center gap-4 mb-4">
+        <section className="space-y-8 md:space-y-10">
+          <div className="flex items-center gap-3 md:gap-4 mb-4">
             <span className="h-px bg-slate-200 flex-1"></span>
-            <h2 className="print-heading text-3xl font-black tracking-tight text-slate-900">Strategic Analysis</h2>
+            <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 text-center break-words">Strategic Analysis</h2>
             <span className="h-px bg-slate-200 flex-1"></span>
           </div>
           {aiAudit.full_report_data.sections.map((section) => {
@@ -303,9 +303,9 @@ export default async function ReportPage({
 
             return (
             <Card key={section.category} className="print-section border-none shadow-xl shadow-slate-200/50 rounded-[2rem] overflow-hidden bg-white">
-              <CardContent className="p-10 md:p-12">
+              <CardContent className="p-6 md:p-12">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
-                  <h3 className="text-2xl font-black tracking-tight text-slate-900">{section.heading}</h3>
+                  <h3 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 break-words">{section.heading}</h3>
                   <span className="rounded-full bg-indigo-50/80 text-indigo-700 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.15em]">{categoryLabel(section.category)}</span>
                 </div>
                 <p className="text-lg text-slate-600 leading-relaxed font-light">{section.analysis}</p>
@@ -341,28 +341,28 @@ export default async function ReportPage({
 
         <section className="print-section space-y-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600">
-              <Terminal className="h-6 w-6" />
+            <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600 shrink-0">
+              <Terminal className="h-5 w-5 md:h-6 md:w-6" />
             </div>
-            <h2 className="print-heading text-3xl font-black tracking-tight text-slate-900">Technical Observations</h2>
+            <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 break-words">Technical Observations</h2>
           </div>
           <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2rem] bg-white overflow-hidden relative">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
-            <CardContent className="p-10 pl-12 whitespace-pre-line text-slate-600 leading-relaxed font-light">{finalComments}</CardContent>
+            <CardContent className="p-6 pl-8 md:p-10 md:pl-12 whitespace-pre-line text-slate-600 leading-relaxed font-light break-words">{finalComments}</CardContent>
           </Card>
         </section>
 
 
 
         {mediaFor("appendix").length > 0 && (
-          <section className="print-section bg-red-50/80 border border-red-100 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden my-16">
+          <section className="print-section bg-red-50/80 border border-red-100 rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden my-10 md:my-16">
             <div className="absolute top-0 left-0 w-2 h-full bg-red-500"></div>
-            <div className="flex flex-col mb-10 relative z-10">
-              <h2 className="flex items-center gap-3 print-heading text-2xl md:text-3xl font-black tracking-tight text-red-950">
-                <AlertCircle className="h-8 w-8 text-red-600" />
+            <div className="flex flex-col mb-8 md:mb-10 relative z-10">
+              <h2 className="flex items-start md:items-center gap-3 print-heading text-xl md:text-3xl font-black tracking-tight text-red-950 break-words">
+                <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600 shrink-0 mt-1 md:mt-0" />
                 Website Issues Found — Screenshots Attached
               </h2>
-              <p className="mt-3 text-red-800 font-medium text-lg max-w-2xl">The following screenshots highlight specific technical, design, or content issues discovered during our analysis.</p>
+              <p className="mt-3 text-red-800 font-medium text-base md:text-lg max-w-2xl">The following screenshots highlight specific technical, design, or content issues discovered during our analysis.</p>
             </div>
             <div className="grid md:grid-cols-2 gap-8 relative z-10">
               {mediaFor("appendix").map((item) => (
@@ -380,14 +380,14 @@ export default async function ReportPage({
           </section>
         )}
 
-        <section className="print-section rounded-[2.5rem] border-none shadow-2xl shadow-indigo-900/10 bg-gradient-to-br from-[#0f172a] to-[#1e1b4b] p-10 md:p-14 text-white relative overflow-hidden">
+        <section className="print-section rounded-[2.5rem] border-none shadow-2xl shadow-indigo-900/10 bg-gradient-to-br from-[#0f172a] to-[#1e1b4b] p-6 md:p-14 text-white relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-blue-500/20 rounded-full blur-[80px] pointer-events-none" />
           
           <div className="relative z-10">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-4">Strategic Proposal</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">{aiAudit.proposal_content.title}</h2>
-            <p className="mt-6 text-xl text-slate-300 leading-relaxed font-light max-w-3xl">{aiAudit.proposal_content.executive_pitch}</p>
+            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-3 md:mb-4">Strategic Proposal</p>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight break-words">{aiAudit.proposal_content.title}</h2>
+            <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-300 leading-relaxed font-light max-w-3xl break-words">{aiAudit.proposal_content.executive_pitch}</p>
             
             <div className="mt-12 mb-6">
               <h3 className="text-xl font-bold mb-6 text-white">Project Scope</h3>
@@ -415,7 +415,7 @@ export default async function ReportPage({
             )}
             
             {aiAudit.proposal_content.maintenance_pricing.included && (
-              <div className="mt-12 p-8 rounded-3xl bg-white/5 border border-white/10">
+              <div className="mt-10 md:mt-12 p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 mb-3">Ongoing Support</p>
                 <h3 className="text-2xl font-bold text-white">{aiAudit.proposal_content.maintenance_pricing.plan_name}</h3>
                 <p className="mt-3 text-slate-300 mb-6 font-light">{aiAudit.proposal_content.maintenance_pricing.price_note}</p>
@@ -451,11 +451,11 @@ export default async function ReportPage({
               </div>
             )}
 
-            <div className="mt-16 pt-10 border-t border-white/10 flex flex-col md:flex-row gap-8 items-center justify-between">
-              <div className="max-w-xl">
-                <p className="font-black text-2xl md:text-3xl tracking-tight text-white">{aiAudit.proposal_content.call_to_action}</p>
-                <p className="mt-3 text-base text-slate-400 flex items-center gap-2 font-light">
-                  <ShieldCheck className="h-5 w-5 text-blue-400" /> Guaranteed focused implementation strategy.
+            <div className="mt-12 md:mt-16 pt-8 md:pt-10 border-t border-white/10 flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
+              <div className="max-w-xl text-center md:text-left">
+                <p className="font-black text-2xl md:text-3xl tracking-tight text-white break-words">{aiAudit.proposal_content.call_to_action}</p>
+                <p className="mt-3 text-base text-slate-400 flex items-center justify-center md:justify-start gap-2 font-light">
+                  <ShieldCheck className="h-5 w-5 text-blue-400 shrink-0" /> Guaranteed focused implementation strategy.
                 </p>
               </div>
               <Button className="bg-white text-slate-950 hover:bg-slate-200 h-14 px-8 text-lg font-bold rounded-full w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300" asChild>
