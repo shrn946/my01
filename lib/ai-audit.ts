@@ -36,25 +36,25 @@ const reportSectionSchema = z.object({
   category: auditCategorySchema,
   heading: z.string(),
   analysis: z.string(),
-  findings: z.array(z.string()).min(1).max(6),
-  recommendations: z.array(z.string()).min(1).max(6),
+  findings: z.array(z.string()).min(1).max(20),
+  recommendations: z.array(z.string()).min(1).max(20),
 });
 
 export const aiAuditSchema = z.object({
-  selected_categories: z.array(auditCategorySchema).min(1).max(10),
+  selected_categories: z.array(auditCategorySchema).min(1).max(20),
   audit_summary: z.object({
     overview: z.string(),
-    strengths: z.array(z.string()).max(6),
-    priority_issues: z.array(z.string()).max(8),
+    strengths: z.array(z.string()).max(20),
+    priority_issues: z.array(z.string()).max(20),
   }),
-  developer_comments: z.array(developerCommentSchema).min(1).max(15),
-  recommendations: z.array(recommendationSchema).min(1).max(16),
+  developer_comments: z.array(developerCommentSchema).min(1).max(40),
+  recommendations: z.array(recommendationSchema).min(1).max(40),
   proposal_content: z.object({
     title: z.string(),
     subject: z.string(),
     executive_pitch: z.string(),
-    scope: z.array(z.string()).min(1).max(12),
-    expected_outcomes: z.array(z.string()).min(1).max(8),
+    scope: z.array(z.string()).min(1).max(30),
+    expected_outcomes: z.array(z.string()).min(1).max(30),
     call_to_action: z.string(),
     email_subject: z.string(),
     email_body: z.string(),
@@ -62,20 +62,20 @@ export const aiAuditSchema = z.object({
       included: z.boolean(),
       plan_name: z.string(),
       price_note: z.string(),
-      services: z.array(z.string()).max(12),
+      services: z.array(z.string()).max(20),
     }),
   }),
   png_report_data: z.object({
     headline: z.string(),
     score_label: z.string(),
-    findings: z.array(z.string()).min(1).max(8),
-    recommendations: z.array(z.string()).min(1).max(8),
-    developer_comments: z.array(z.string()).min(1).max(6),
+    findings: z.array(z.string()).min(1).max(20),
+    recommendations: z.array(z.string()).min(1).max(20),
+    developer_comments: z.array(z.string()).min(1).max(20),
   }),
   full_report_data: z.object({
     executive_summary: z.string(),
-    sections: z.array(reportSectionSchema).min(1).max(10),
-    action_plan: z.array(z.string()).min(1).max(12),
+    sections: z.array(reportSectionSchema).min(1).max(20),
+    action_plan: z.array(z.string()).min(1).max(30),
   }),
 });
 
@@ -677,7 +677,11 @@ export async function generateAiAudit(input: AuditInput): Promise<{ audit: AiAud
 
 export function getAiAudit(value: unknown): AiAudit | null {
   const parsed = aiAuditSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success) {
+    console.error("AI Audit validation failed:", parsed.error);
+    return null;
+  }
+  return parsed.data;
 }
 
 export function formatDeveloperComments(audit: AiAudit) {
