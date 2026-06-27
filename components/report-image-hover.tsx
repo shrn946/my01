@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+
 
 export function ReportImageHover({ image, label }: { image: string, label: string }) {
   return (
@@ -15,33 +15,21 @@ export function ReportImageHover({ image, label }: { image: string, label: strin
       </div>
       
       {/* Image Container */}
-      <motion.div 
+      <div 
         className="flex-1 relative overflow-hidden bg-slate-950"
-        whileHover="hover"
       >
         {image ? (
           <>
-            <motion.div
-              className="absolute inset-0 w-full h-full bg-no-repeat bg-top"
+            <div
+              className="absolute inset-0 w-full h-full bg-no-repeat bg-top cover-image-scroll print-cover-image"
               style={{ 
                 backgroundImage: `url('${image}')`,
                 backgroundSize: "100% auto"
               }}
-              variants={{
-                hover: { backgroundPosition: "50% 100%" }
-              }}
-              initial={{ backgroundPosition: "50% 0%" }}
-              transition={{ duration: 6, ease: "linear" }}
             />
             {/* Scroll Bar Track */}
             <div className="absolute right-1 top-2 bottom-2 w-1.5 rounded-full bg-slate-800/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 overflow-hidden z-20">
-                <motion.div
-                    className="w-full bg-blue-500 rounded-full"
-                    variants={{
-                        hover: { height: "25%", y: ["0%", "300%"] }
-                    }}
-                    transition={{ duration: 6, ease: "linear" }}
-                />
+                <div className="w-full h-1/4 bg-blue-500 rounded-full scrollbar-thumb" />
             </div>
           </>
         ) : (
@@ -49,7 +37,7 @@ export function ReportImageHover({ image, label }: { image: string, label: strin
             No {label} image
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }
