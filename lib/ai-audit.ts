@@ -445,7 +445,28 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
         findings: ["Public audits cannot confirm whether updates, backups, restore tests, and security monitoring are being completed consistently."],
         recommendations: services,
       });
-    } else if (!["redesign", "fix_issues", "loading_speed", "seo", "maintenance"].includes(category)) {
+    }
+    if (category === "design_improvements") {
+      comments.push({
+        category, priority: "high", heading: "Layout and visual aesthetics can be modernized",
+        finding: "While the underlying content is solid, the presentation lacks modern UI refinements.",
+        recommendation: "Apply improved spacing, consistent typography, subtle animations, and updated UI components to elevate the visual appeal without a full rebuild.",
+        evidence: `Mobile score is ${input.scores.mobile}/100. Modernizing the UI can improve user engagement metrics.`,
+        strength: false,
+      });
+      recommendations.push({
+        category, priority: "high", title: "Implement Website Design Improvements",
+        finding: "The current design feels slightly outdated and could benefit from visual polish.",
+        recommendation: "Introduce refined spacing, better contrast, modern typography, and interactive UI elements while preserving existing content.",
+        business_impact: "A polished, modern look builds trust faster and decreases bounce rates, leading to higher conversion.",
+      });
+      sections.push({
+        category, heading: "Design Enhancement Opportunities",
+        analysis: "This review focuses on visual styling, layout spacing, modern UI trends, and user experience without changing core functionality.",
+        findings: ["The interface lacks the premium feel of modern web applications.", "Spacing and typography could be optimized for better readability."],
+        recommendations: ["Upgrade UI components (buttons, cards, forms).", "Improve whitespace and typographic hierarchy.", "Enhance mobile responsiveness and navigation."],
+      });
+    } else if (!["redesign", "fix_issues", "loading_speed", "seo", "maintenance", "design_improvements"].includes(category)) {
       const label = categoryLabel(category);
       comments.push({
         category, priority: "medium", heading: `Opportunities identified for ${label}`,
@@ -559,6 +580,7 @@ Hassan----"
 
 DYNAMIC CATEGORY HANDLING:
 - Website Changes & Content Updates: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
+- Website Design Improvements: prioritize layout refinements, visual styling updates, improved spacing and typography, modern UI enhancements, mobile responsiveness, navigation improvements, and overall user experience upgrades while preserving the current content and structure.
 - Complete Re-Design: Write a short, professional redesign summary based on the website audit. Clearly explain if the current website looks outdated or does not follow modern design and user-experience standards. Mention relevant improvement areas (visual design, mobile responsiveness, page structure, navigation, trust elements, calls to action, speed, accessibility, conversion flow). Use simple, client-friendly English with a helpful, professional tone (not overly negative). Focus on why a redesign will improve the visitor experience and generate more enquiries/leads. Example: "Your website design looks outdated and does not meet current user experience or design standards. A redesign is recommended to improve the visual appearance, mobile experience, page structure, trust elements, calls to action, and overall conversion flow. The updated design should follow modern website trends while keeping the brand professional, clear, and easy for visitors to use."
 - SEO: prioritize titles, headings, local SEO, service pages, internal links, metadata, and content gaps.
 - Technical Fixes: prioritize speed, mobile performance, broken forms, console errors, security, image optimization, and browser issues.
