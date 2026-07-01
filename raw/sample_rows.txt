@@ -1,0 +1,68 @@
+=== ROW 2 ===
+  [Video Title]: Contact Form 7 CAPTCHA That Doesn't Look Terrible
+  [Video URL]: https://www.youtube.com/watch?v=AHb_QfhZrVc
+  [Current Description]: Tired of ugly CAPTCHAs and endless Contact Form 7 spam?
+
+In this tutorial, I'll show you how to install and configure Animated CAPTCHA for Contact Form 7, a modern and user-friendly anti-spam solution for WordPress. Unlike traditional CAPTCHAs, this one looks clean, features animated characters, supports AJAX refresh, and helps protect your forms from bots without hurting the user experience.
+
+In 
+  [New SEO Title]: Contact Form 7 CAPTCHA Tutorial: Stop Spam with Animated Fields
+  [New SEO Description]: Contact Form 7 CAPTCHA: Learn how to stop Contact Form 7 spam effectively by using an Animated CAPTCHA that improves user experience.
+
+In this WordPress tutorial, I guide you through the process of replacing outdated, hard-to-read anti-spam methods with a modern, animated alternative that keeps your forms clean and functional. This video covers everything you need to know about setting up and conf
+  [Upload Date]: 2026-06-18
+  [Duration]: 3:48
+  [Views]: 29
+  [SEO Score]: 96
+
+=== ROW 10 ===
+  [Video Title]: Best Elementor Widget: Interactive Glow Cards with 3D Tilt Effects
+  [Video URL]: https://www.youtube.com/watch?v=sN8G84ryS_M
+  [Current Description]: Want to add stunning interactive glow cards to your Elementor website?
+
+In this tutorial, I'll show you how to create beautiful cards featuring:
+
+? Interactive Edge Glow Effects
+? Cursor-Following Lighting Effects
+? Optional 3D Tilt Animation
+? Independent Glare Effects
+? Custom Gradient Backgrounds
+? Color Overlays
+? Responsive Design Controls
+? Full Elementor Customization
+
+The best part? No cod
+  [New SEO Title]: Best Elementor Widget: Interactive Glow Cards with 3D Tilt Effects
+  [New SEO Description]: Want to add stunning interactive glow cards to your Elementor website?
+
+In this tutorial, I'll show you how to create beautiful cards featuring:
+
+? Interactive Edge Glow Effects
+? Cursor-Following Lighting Effects
+? Optional 3D Tilt Animation
+? Independent Glare Effects
+? Custom Gradient Backgrounds
+? Color Overlays
+? Responsive Design Controls
+? Full Elementor Customization
+
+The best part? No cod
+  [Upload Date]: 2026-06-06
+  [Duration]: 5:01
+  [Views]: 93
+  [SEO Score]: 99
+
+=== ROW 25 ===
+  [Video Title]: How to Add a Date Time Picker to Contact Form 7 (2026 Tutorial)
+  [Video URL]: https://www.youtube.com/watch?v=Hq_lgz_hPs0
+  [Current Description]: Contact Form 7 Date Time Picker: Adding a date time picker to Contact Form 7 is a great way to improve user input and streamline your scheduling.
+
+This Contact Form 7 tutorial shows you how to integrate a modern, lightweight picker into your WordPress forms to ensure accurate data collection for bookings or appointments. In this video, you will learn how to set up the plugin, configure specific ti
+  [New SEO Title]: How to Add a Date Time Picker to Contact Form 7 (2026 Tutorial)
+  [New SEO Description]: Contact Form 7 Date Time Picker: Adding a date time picker to Contact Form 7 is a great way to improve user input and streamline your scheduling.
+
+This Contact Form 7 tutorial shows you how to integrate a modern, lightweight picker into your WordPress forms to ensure accurate data collection for bookings or appointments. In this video, you will learn how to set up the plugin, configure specific ti
+  [Upload Date]: 2026-05-24
+  [Duration]: 5:34
+  [Views]: 69
+  [SEO Score]: 93

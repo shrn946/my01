@@ -39,11 +39,10 @@ $protectedPaths = @(
 )
 
 foreach ($protectedPath in $protectedPaths) {
-  git restore --staged -- $protectedPath 2>$null
-}
-
-if ($LASTEXITCODE -ne 0) {
-  $global:LASTEXITCODE = 0
+  $isStaged = git diff --cached --name-only | Where-Object { $_ -eq $protectedPath }
+  if ($isStaged) {
+    git restore --staged -- $protectedPath 2>$null
+  }
 }
 
 $blockedFiles = git diff --cached --name-only | Where-Object {
