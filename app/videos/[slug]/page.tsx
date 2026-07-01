@@ -40,15 +40,32 @@ export default async function VideoDetailsPage({ params }: { params: Promise<{ s
 
             <FadeIn>
               <div className="overflow-hidden rounded-[3rem] bg-white shadow-soft border border-black/5">
-                {/* Video Embed */}
+                {/* Video Embed or Placeholder Image */}
                 <div className="relative aspect-video w-full bg-slate-900">
-                  <iframe 
-                    src={`https://www.youtube.com/embed/${video.id}?autoplay=0&rel=0`}
-                    title={video.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 h-full w-full border-0"
-                  />
+                  {video.id.includes("-") || video.id.length !== 11 ? (
+                    <div className="relative w-full h-full">
+                      <img 
+                        src="/video-placeholder.jpg" 
+                        alt={video.title} 
+                        className="h-full w-full object-cover opacity-70"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/35 text-white p-6 text-center">
+                        <div className="rounded-full bg-white/95 p-5 text-[#FF0000] shadow-2xl mb-4 transition-transform hover:scale-110">
+                          <PlayCircle size={48} className="fill-current" />
+                        </div>
+                        <p className="text-lg font-bold tracking-tight">Video tutorial coming soon!</p>
+                        <p className="text-xs text-slate-300 mt-1">Real video embed will be active once URL is updated.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${video.id}?autoplay=0&rel=0`}
+                      title={video.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 h-full w-full border-0"
+                    />
+                  )}
                 </div>
 
                 <div className="p-8 lg:p-12">
