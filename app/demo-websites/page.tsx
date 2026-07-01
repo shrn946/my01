@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Grid3X3, Search } from "lucide-react";
+import * as cheerio from "cheerio";
 import { InnerHero } from "@/components/inner-hero";
 import { SectionHeading } from "@/components/section-heading";
 import { DemoGrid } from "@/components/demo-grid";
+import { getPrisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -11,7 +13,10 @@ export const metadata: Metadata = {
   description: "Browse our live demo websites for dental clinics, optometry, and ophthalmology practices."
 };
 
-const DEMO_WEBSITES = [
+// Revalidate cache every 10 minutes to maintain fast loading while keeping content updated
+export const revalidate = 600;
+
+const DEFAULT_DEMO_WEBSITES = [
   {
     title: "Primecare – Dentist & Dental Clinic",
     slug: "primecare",
@@ -104,16 +109,168 @@ const DEMO_WEBSITES = [
   }
 ];
 
+async function fetchDemoDetails(url: string) {
+  try {
+    let category = "Dental Clinic";
+    let image = "/pro.png";
+    let tools = ["Clinic", "Services"];
+
+    const urlLower = url.toLowerCase().trim();
+    
+    // Categorization based on URL keywords
+    if (urlLower.includes("/eye-") || urlLower.includes("eye") || urlLower.includes("vision") || urlLower.includes("optometry")) {
+      category = "Eye Care & Ophthalmology";
+      tools = ["Ophthalmology", "Specialist", "Clean"];
+    } else if (urlLower.includes("dent") || urlLower.includes("teeth") || urlLower.includes("tooth") || urlLower.includes("ortho")) {
+      category = "Dental Clinic";
+      tools = ["Dentist", "Booking", "Clinic"];
+    }
+
+    // Local image mappings for pre-captured high-quality screenshots
+    if (urlLower.endsWith("clinics-lime.vercel.app") || urlLower.endsWith("clinics-lime.vercel.app/")) {
+      image = "/demo-screenshots/primecare.png";
+      tools = ["Dentist", "Booking", "Clinic"];
+    } else if (urlLower.includes("/demo-2")) {
+      image = "/demo-screenshots/clinic-demo-2.png";
+      tools = ["Dental", "Services", "Modern"];
+    } else if (urlLower.includes("/demo-3")) {
+      image = "/demo-screenshots/clinic-demo-3.png";
+      tools = ["Clinic", "Dentist", "Clean"];
+    } else if (urlLower.includes("/demo-4")) {
+      image = "/demo-screenshots/clinic-demo-4.png";
+      tools = ["Healthcare", "Booking", "Responsive"];
+    } else if (urlLower.includes("/demo-5")) {
+      image = "/demo-screenshots/clinic-demo-5.png";
+      tools = ["Appointment", "Dentist", "Elementor"];
+    } else if (urlLower.includes("/demo-6")) {
+      image = "/demo-screenshots/clinic-demo-6.png";
+      tools = ["Clinic", "Services", "WordPress"];
+    } else if (urlLower.includes("/dental-7")) {
+      image = "/demo-screenshots/clinic-dental-7.png";
+      tools = ["Dentistry", "Specialists", "Modern"];
+    } else if (urlLower.includes("/eye-1")) {
+      image = "/demo-screenshots/eye-clinic-demo-1.png";
+      category = "Eye Care & Ophthalmology";
+      tools = ["Ophthalmology", "Eye Clinic", "Services"];
+    } else if (urlLower.includes("/eye-2")) {
+      image = "/demo-screenshots/eye-clinic-demo-2.png";
+      category = "Eye Care & Ophthalmology";
+      tools = ["Optometry", "Doctor", "Booking"];
+    } else if (urlLower.includes("/eye-3")) {
+      image = "/demo-screenshots/eye-clinic-demo-3.png";
+      category = "Eye Care & Ophthalmology";
+      tools = ["Ophthalmology", "Specialist", "Clean"];
+    } else {
+      // Fallback to thum.io screenshot service for newly added external URLs
+      image = `https://image.thum.io/get/width/1280/crop/800/${url}`;
+    }
+
+    // Fetch the page content with a 4-second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      }
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+
+    const html = await response.text();
+    const $ = cheerio.load(html);
+
+    // Extract title
+    let title = $("title").text().trim() || 
+                $('meta[property="og:title"]').attr("content")?.trim() || 
+                $("h1").first().text().trim() || 
+                "Clinic Demo";
+
+    // Clean up title if it contains suffixes
+    if (title.includes(" - ")) {
+      title = title.split(" - ")[0].trim();
+    } else if (title.includes(" | ")) {
+      title = title.split(" | ")[0].trim();
+    }
+
+    // Extract description
+    const description = $('meta[name="description"]').attr("content")?.trim() || 
+                        $('meta[property="og:description"]').attr("content")?.trim() || 
+                        `Live demo website for ${title}.`;
+
+    return {
+      title,
+      slug: slugify(title) || Math.random().toString(36).substring(7),
+      category,
+      description,
+      tools,
+      image,
+      liveUrl: url
+    };
+  } catch (error) {
+    console.error(`Error fetching details for ${url}:`, error);
+    
+    // Resilient fallback configuration if url is unreachable/offline
+    const cleanUrl = url.trim().replace(/\/$/, "");
+    const parts = cleanUrl.split("/");
+    const lastPart = parts[parts.length - 1];
+    
+    let title = lastPart;
+    if (!title || title.includes("clinics-lime")) {
+      title = "Clinic Demo";
+    } else {
+      title = title.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    }
+    
+    let category = "Dental Clinic";
+    if (url.includes("eye") || url.includes("vision") || url.includes("eye-")) {
+      category = "Eye Care & Ophthalmology";
+    }
+
+    return {
+      title,
+      slug: slugify(title) || Math.random().toString(36).substring(7),
+      category,
+      description: `Live demo website for ${title}.`,
+      tools: ["Clinic", "Services"],
+      image: `https://image.thum.io/get/width/1280/crop/800/${url}`,
+      liveUrl: url
+    };
+  }
+}
+
 export default async function DemoWebsitesPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const { category } = await searchParams;
   const categories = [
     "Dental Clinic",
     "Eye Care & Ophthalmology"
   ];
+
+  let demoWebsitesList = DEFAULT_DEMO_WEBSITES;
+
+  // Try to load urls dynamically from settings table in the database
+  try {
+    const prisma = getPrisma();
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const urlsText = settings?.demoWebsiteUrls || "";
+    const urls = urlsText.split("\n").map(u => u.trim()).filter(Boolean);
+    
+    if (urls.length > 0) {
+      // Fetch details for all configured URLs in parallel
+      demoWebsitesList = await Promise.all(urls.map(url => fetchDemoDetails(url)));
+    }
+  } catch (error) {
+    console.error("Failed to load demo websites dynamically, falling back to defaults:", error);
+  }
   
   const filteredDemos = category
-    ? DEMO_WEBSITES.filter((demo) => slugify(demo.category) === category)
-    : DEMO_WEBSITES;
+    ? demoWebsitesList.filter((demo) => slugify(demo.category) === category)
+    : demoWebsitesList;
 
   return (
     <>
