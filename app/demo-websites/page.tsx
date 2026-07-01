@@ -106,6 +106,15 @@ const DEFAULT_DEMO_WEBSITES = [
     tools: ["Ophthalmology", "Specialist", "Clean"],
     image: "/demo-screenshots/eye-clinic-demo-3.png",
     liveUrl: "https://clinics-lime.vercel.app/eye-3"
+  },
+  {
+    title: "Eye Clinic Demo 4",
+    slug: "eye-clinic-demo-4",
+    category: "Eye Care & Ophthalmology",
+    description: "Experience state-of-the-art vision correction, professional eye exams, and personalized optical treatments.",
+    tools: ["Ophthalmology", "Specialist", "Clean"],
+    image: "https://image.thum.io/get/width/1280/crop/800/https://clinics-lime.vercel.app/eye-4/",
+    liveUrl: "https://clinics-lime.vercel.app/eye-4/"
   }
 ];
 
@@ -158,6 +167,10 @@ async function fetchDemoDetails(url: string) {
       tools = ["Optometry", "Doctor", "Booking"];
     } else if (urlLower.includes("/eye-3")) {
       image = "/demo-screenshots/eye-clinic-demo-3.png";
+      category = "Eye Care & Ophthalmology";
+      tools = ["Ophthalmology", "Specialist", "Clean"];
+    } else if (urlLower.includes("/eye-4")) {
+      image = `https://image.thum.io/get/width/1280/crop/800/${url}`;
       category = "Eye Care & Ophthalmology";
       tools = ["Ophthalmology", "Specialist", "Clean"];
     } else {
@@ -253,13 +266,33 @@ export default async function DemoWebsitesPage({ searchParams }: { searchParams:
 
   let demoWebsitesList = DEFAULT_DEMO_WEBSITES;
 
-  // Try to load urls dynamically from settings table in the database
   try {
+    // 1. Try to load urls dynamically from settings table in the database
     const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
     const urlsText = settings?.demoWebsiteUrls || "";
-    const urls = urlsText.split("\n").map(u => u.trim()).filter(Boolean);
+    let urls = urlsText.split("\n").map(u => u.trim()).filter(Boolean);
     
+    // 2. If no urls are configured in database settings, try to load from the clinics Vercel site's auto-generated list
+    if (urls.length === 0) {
+      try {
+        const res = await fetch("https://clinics-lime.vercel.app/demos-list.json", {
+          next: { revalidate: 600 } // Cache for 10 minutes
+        });
+        if (res.ok) {
+          const list = await res.json() as string[];
+          if (Array.isArray(list) && list.length > 0) {
+            urls = list.map(p => {
+              const pathStr = p.trim();
+              return pathStr ? `https://clinics-lime.vercel.app/${pathStr}` : `https://clinics-lime.vercel.app/`;
+            });
+          }
+        }
+      } catch (fetchErr) {
+        console.error("Failed to fetch dynamic demos-list.json from clinics site:", fetchErr);
+      }
+    }
+
     if (urls.length > 0) {
       // Fetch details for all configured URLs in parallel
       demoWebsitesList = await Promise.all(urls.map(url => fetchDemoDetails(url)));
