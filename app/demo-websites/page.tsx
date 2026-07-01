@@ -113,7 +113,7 @@ const DEFAULT_DEMO_WEBSITES = [
     category: "Eye Care & Ophthalmology",
     description: "Experience state-of-the-art vision correction, professional eye exams, and personalized optical treatments.",
     tools: ["Ophthalmology", "Specialist", "Clean"],
-    image: "https://image.thum.io/get/width/1280/crop/800/https://clinics-lime.vercel.app/eye-4/",
+    image: "/demo-screenshots/eye-clinic-demo-4.png",
     liveUrl: "https://clinics-lime.vercel.app/eye-4/"
   }
 ];
@@ -170,7 +170,7 @@ async function fetchDemoDetails(url: string) {
       category = "Eye Care & Ophthalmology";
       tools = ["Ophthalmology", "Specialist", "Clean"];
     } else if (urlLower.includes("/eye-4")) {
-      image = `https://image.thum.io/get/width/1280/crop/800/${url}`;
+      image = "/demo-screenshots/eye-clinic-demo-4.png";
       category = "Eye Care & Ophthalmology";
       tools = ["Ophthalmology", "Specialist", "Clean"];
     } else {
