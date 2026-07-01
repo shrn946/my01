@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 import { getInnerHeroSettings } from "@/lib/data";
@@ -23,14 +24,19 @@ export async function InnerHero({
   return (
     <section
       className="inner-hero relative isolate flex items-center justify-center overflow-hidden text-center"
-      style={{
-        minHeight: `${settings.heroHeight}px`,
-        backgroundImage: `url("${backgroundImage}")`,
-        backgroundPosition: settings.backgroundPosition,
-        backgroundAttachment: settings.backgroundAttachment as "scroll" | "fixed",
-        backgroundSize: "cover"
-      }}
+      style={{ minHeight: `${settings.heroHeight}px` }}
     >
+      {/* Optimized background image — served as AVIF/WebP, preloaded as LCP element */}
+      <Image
+        src={backgroundImage}
+        alt=""
+        fill
+        priority
+        fetchPriority="high"
+        sizes="100vw"
+        className="-z-20 object-cover"
+        style={{ objectPosition: settings.backgroundPosition }}
+      />
       <div className="absolute inset-0 -z-10" style={{ backgroundColor: settings.overlayColor, opacity }} />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
       

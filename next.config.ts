@@ -32,7 +32,14 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "xnkghknmgshmvxhrwtxw.supabase.co" },
       { protocol: "https", hostname: "img.youtube.com" }
-    ]
+    ],
+    // Serve modern formats (AVIF first, then WebP) for significant size savings
+    formats: ["image/avif", "image/webp"],
+    // Breakpoints matching the layout's responsive grid
+    deviceSizes: [640, 768, 1024, 1280, 1536],
+    imageSizes: [256, 384, 512, 640],
+    // Cache optimized images for 7 days on the CDN (default is 60 s)
+    minimumCacheTTL: 604800,
   }
 };
 

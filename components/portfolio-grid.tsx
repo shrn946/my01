@@ -19,7 +19,7 @@ export function PortfolioGrid({ projects }: { projects: any[] }) {
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {visibleProjects.map((project, index) => (
           <FadeIn key={project.slug} delay={(index % 18) * 0.05}>
-            <ProjectCard project={project} />
+            <ProjectCard project={project} index={index} />
           </FadeIn>
         ))}
       </div>

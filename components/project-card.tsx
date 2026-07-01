@@ -9,7 +9,7 @@ import { PLACEHOLDER_IMAGE } from "@/lib/utils";
 // Using the local placeholder image
 const TALL_PLACEHOLDER = "/pro.png";
 
-export function ProjectCard({ project }: { project: any }) {
+export function ProjectCard({ project, index = 0 }: { project: any; index?: number }) {
   return (
     <motion.article 
       initial={{ opacity: 0, y: 20 }}
@@ -21,20 +21,23 @@ export function ProjectCard({ project }: { project: any }) {
         className="relative aspect-[4/3] overflow-hidden bg-slate-100 rounded-3xl shadow-inner"
         whileHover="hover"
       >
-          <div className="relative w-full h-full overflow-hidden">
-            <motion.div
-              className="absolute inset-0 w-full h-full bg-no-repeat bg-top"
-              style={{ 
-                backgroundImage: `url(${project.image || TALL_PLACEHOLDER})`,
-                backgroundSize: "100% auto"
-              }}
-              variants={{
-                hover: { backgroundPosition: "50% 100%" }
-              }}
-              initial={{ backgroundPosition: "50% 0%" }}
-              transition={{ duration: 6, ease: "linear" }}
+          {/* Scrolling screenshot effect via translateY on the Next.js Image wrapper */}
+          <motion.div
+            className="absolute inset-0 w-full"
+            style={{ height: "160%" }}
+            variants={{ hover: { y: "-37.5%" } }}
+            initial={{ y: "0%" }}
+            transition={{ duration: 6, ease: "linear" }}
+          >
+            <Image
+              src={project.image || TALL_PLACEHOLDER}
+              alt={project.title}
+              fill
+              loading={index < 6 ? "eager" : "lazy"}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover object-top"
             />
-          </div>
+          </motion.div>
 
           <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5 pointer-events-none" />
 
@@ -52,7 +55,7 @@ export function ProjectCard({ project }: { project: any }) {
           <motion.div
               className="w-full bg-primary rounded-full"
               variants={{
-                  hover: { height: "25%", y: ["0%", "300%"] }
+                  hover: { height: "25%", y: [0, 300] }
               }}
               transition={{ duration: 6, ease: "linear" }}
           />

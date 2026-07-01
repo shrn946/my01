@@ -64,7 +64,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
               <FadeIn delay={0.1}>
                 <div className="relative aspect-[16/9] overflow-hidden rounded-[2.5rem] shadow-premium">
-                  <Image src={project.image} alt={project.title} fill className="object-cover" priority />
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    priority
+                    fetchPriority="high"
+                    sizes="(max-width: 1024px) 100vw, calc(100vw - 400px)"
+                    className="object-cover"
+                  />
                 </div>
               </FadeIn>
 
@@ -96,7 +104,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                       <Image 
                         src={image} 
                         alt={`${project.title} screenshot ${index + 1}`} 
-                        fill 
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, calc(50vw - 200px)"
                         className="object-cover transition-transform duration-700 group-hover:scale-105" 
                       />
                     </div>
