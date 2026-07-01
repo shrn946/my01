@@ -8,7 +8,7 @@ export function VideoThumbnail({ videoId, alt }: { videoId: string; alt: string 
   const isPlaceholder = videoId.includes("-") || videoId.length !== 11;
   const [imgSrc, setImgSrc] = useState(
     isPlaceholder
-      ? "/pro.png"
+      ? "/video-placeholder.jpg"
       : `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
   );
 
@@ -23,7 +23,7 @@ export function VideoThumbnail({ videoId, alt }: { videoId: string; alt: string 
         if (imgSrc.includes("maxresdefault")) {
           setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
         } else {
-          setImgSrc("/pro.png");
+          setImgSrc("/video-placeholder.jpg");
         }
       }}
     />
