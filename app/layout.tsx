@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { HeaderFooterWrapper } from "@/components/header-footer-wrapper";
 import { ScrollProgressBar } from "@/components/scroll-progress-bar";
@@ -41,6 +42,19 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en" className={jakarta.variable} suppressHydrationWarning>
       <body className="font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground overflow-x-hidden w-full">
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-YT873T0EZ9"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-YT873T0EZ9');
+          `}
+        </Script>
         <ScrollProgressBar />
         <HeaderFooterWrapper menuItems={menuItems}>
           <PageTransition>
