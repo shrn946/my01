@@ -11,6 +11,17 @@ export function ContactForm() {
 
   return (
     <form action={action} className="rounded-[2.5rem] border border-black/5 bg-white p-6 sm:p-8 shadow-premium lg:p-12">
+      {/* Honeypot field - completely invisible to humans, but bots will fill it in */}
+      <div className="absolute opacity-0 pointer-events-none -z-50 h-0 w-0 overflow-hidden" aria-hidden="true">
+        <input 
+          type="text" 
+          name="confirm_email" 
+          tabIndex={-1} 
+          autoComplete="off" 
+          placeholder="Do not fill this out" 
+        />
+      </div>
+
       <div className="grid gap-6 sm:grid-cols-2">
         <Field label="Full Name" name="name" placeholder="John Doe" required />
         <Field label="Email Address" name="email" type="email" placeholder="john@example.com" required />

@@ -49,6 +49,12 @@ async function uniqueSlug(model: "project" | "blogPost", baseSlug: string, curre
 }
 
 export async function createContactMessage(_: unknown, formData: FormData) {
+  // Honeypot check: If the hidden field is filled, reject silently (mimicking success)
+  const honeypot = readString(formData, "confirm_email");
+  if (honeypot) {
+    return { ok: true, message: "Thanks. Your message has been saved." };
+  }
+
   const name = readString(formData, "name");
   const email = readString(formData, "email");
   const projectType = readString(formData, "projectType");
