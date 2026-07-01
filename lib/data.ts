@@ -394,6 +394,7 @@ export async function getMenuSettings() {
     { id: "about", label: "About", href: "/about", visible: true },
     { id: "services", label: "Services", href: "/services", visible: true },
     { id: "portfolio", label: "Portfolio", href: "/portfolio", visible: true },
+    { id: "demo-websites", label: "Demo Websites", href: "/demo-websites", visible: true },
     { 
       id: "blog-dropdown",
       label: "Blog", 

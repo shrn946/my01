@@ -16,6 +16,7 @@ const footerLinks = [
     title: "Navigation",
     links: [
       { label: "My Portfolio", href: "/portfolio" },
+      { label: "Demo Websites", href: "/demo-websites" },
       { label: "About Me", href: "/about" },
       { label: "Read Blog", href: "/blog" },
       { label: "Contact", href: "/contact" },
