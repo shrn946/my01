@@ -79,7 +79,7 @@ export default async function VideosPage({ searchParams }: { searchParams: Promi
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-16 flex items-center justify-between border-t border-black/5 pt-8">
+            <div className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-black/5 pt-8">
               <p className="text-sm font-bold text-slate-500">
                 Showing <span className="text-ink">{startIndex + 1}</span> to <span className="text-ink">{Math.min(startIndex + ITEMS_PER_PAGE, totalItems)}</span> of <span className="text-ink">{totalItems}</span> videos
               </p>
@@ -94,9 +94,32 @@ export default async function VideosPage({ searchParams }: { searchParams: Promi
                 </Link>
                 
                 <div className="flex items-center gap-1">
+                  {/* Render compact page numbers: first, current-1, current, current+1, last */}
                   {Array.from({ length: totalPages }).map((_, i) => {
                     const pageNum = i + 1;
                     const isActive = pageNum === currentPage;
+                    
+                    // Compact display conditions:
+                    // Always show page 1, the last page, and page numbers adjacent to the current page
+                    const shouldShow = 
+                      pageNum === 1 || 
+                      pageNum === totalPages || 
+                      Math.abs(pageNum - currentPage) <= 1;
+
+                    // Render ellipsis if there is a gap
+                    const showLeftEllipsis = pageNum === 2 && currentPage > 3;
+                    const showRightEllipsis = pageNum === totalPages - 1 && currentPage < totalPages - 2;
+
+                    if (!shouldShow) {
+                      if (showLeftEllipsis) {
+                        return <span key="left-el" className="px-2 text-slate-400 text-sm font-bold">...</span>;
+                      }
+                      if (showRightEllipsis) {
+                        return <span key="right-el" className="px-2 text-slate-400 text-sm font-bold">...</span>;
+                      }
+                      return null;
+                    }
+
                     return (
                       <Link
                         key={pageNum}

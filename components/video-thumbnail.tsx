@@ -1,16 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function VideoThumbnail({ videoId, alt }: { videoId: string; alt: string }) {
-  // Use a local placeholder fallback if the ID is a placeholder/slug or if the image fails to load
-  const isPlaceholder = videoId.includes("-") || videoId.length !== 11;
-  const [imgSrc, setImgSrc] = useState(
-    isPlaceholder
-      ? "/video-placeholder.jpg"
-      : `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-  );
+  const isPlaceholder = !videoId || videoId.includes("-") || videoId.length !== 11;
+  const [imgSrc, setImgSrc] = useState("/video-placeholder.jpg");
+
+  // Keep state in sync with videoId prop changes during client-side rendering/pagination
+  useEffect(() => {
+    if (isPlaceholder) {
+      setImgSrc("/video-placeholder.jpg");
+    } else {
+      setImgSrc(`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+    }
+  }, [videoId, isPlaceholder]);
 
   return (
     <Image 
