@@ -4,17 +4,12 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export function VideoThumbnail({ videoId, alt }: { videoId: string; alt: string }) {
-  const isPlaceholder = !videoId || videoId.includes("-") || videoId.length !== 11;
-  const [imgSrc, setImgSrc] = useState("/video-placeholder.jpg");
+  const [imgSrc, setImgSrc] = useState(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
 
   // Keep state in sync with videoId prop changes during client-side rendering/pagination
   useEffect(() => {
-    if (isPlaceholder) {
-      setImgSrc("/video-placeholder.jpg");
-    } else {
-      setImgSrc(`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
-    }
-  }, [videoId, isPlaceholder]);
+    setImgSrc(`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+  }, [videoId]);
 
   return (
     <Image 
@@ -26,8 +21,6 @@ export function VideoThumbnail({ videoId, alt }: { videoId: string; alt: string 
       onError={() => {
         if (imgSrc.includes("maxresdefault")) {
           setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
-        } else {
-          setImgSrc("/video-placeholder.jpg");
         }
       }}
     />
