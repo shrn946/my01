@@ -4,17 +4,8 @@ import { prisma } from "@/lib/prisma";
 const DEFAULT_MENU = [
   { id: "home", label: "Home", href: "/", visible: true },
   { id: "about", label: "About", href: "/about", visible: true },
-  { id: "services", label: "Services", "href": "/services", visible: true },
-  { 
-    id: "portfolio-dropdown",
-    label: "Portfolio", 
-    href: "/portfolio",
-    visible: true,
-    children: [
-      { id: "my-portfolio", label: "My Portfolio", href: "/portfolio", visible: true },
-      { id: "demo-websites", label: "Demo Websites", href: "https://www.coreweblabs.com/demo-websites", visible: true }
-    ]
-  },
+  { id: "services", label: "Services", href: "/services", visible: true },
+  { id: "portfolio", label: "Portfolio", href: "/portfolio", visible: true },
   { 
     id: "blog-dropdown",
     label: "Blog", 
