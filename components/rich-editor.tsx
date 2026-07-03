@@ -16,19 +16,23 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
   const modules = useMemo(
     () => ({
       toolbar: [
-        [{ header: [1, 2, 3, false] }],
+        [{ font: [] }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
         ["bold", "italic", "underline", "strike"],
         [{ color: [] }, { background: [] }],
-        [{ size: ["small", false, "large", "huge"] }],
-        [{ list: "ordered" }, { list: "bullet" }],
-        ["link", "clean"],
+        [{ script: "sub" }, { script: "super" }],
+        [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
+        [{ align: [] }],
+        ["blockquote", "code-block"],
+        ["link", "image"],
+        ["clean"],
       ],
     }),
     []
   );
 
   return (
-    <div className="bg-white [&_.ql-container]:min-h-[200px] [&_.ql-container]:text-base [&_.ql-editor]:min-h-[200px] [&_.ql-toolbar]:rounded-t-xl [&_.ql-container]:rounded-b-xl [&_.ql-toolbar]:border-indigo-100 [&_.ql-container]:border-indigo-100">
+    <div className="bg-white [&_.ql-container]:min-h-[400px] [&_.ql-container]:text-base [&_.ql-editor]:min-h-[400px] [&_.ql-editor]:break-words [&_.ql-editor]:whitespace-pre-wrap [&_.ql-toolbar]:rounded-t-xl [&_.ql-container]:rounded-b-xl [&_.ql-toolbar]:border-indigo-100 [&_.ql-container]:border-indigo-100 max-w-full overflow-hidden">
       <ReactQuill
         theme="snow"
         value={value}
