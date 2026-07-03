@@ -110,8 +110,8 @@ export default async function ReportPage({
               <h2 className="text-2xl font-black flex items-center gap-2"><Terminal className="h-6 w-6 text-indigo-600" /> Developer Comments</h2>
               <div className="mt-5">
                 <div 
-                  className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-xl [&>h2]:text-lg [&>h3]:text-base"
-                  dangerouslySetInnerHTML={{ __html: finalComments }}
+                  className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-xl [&>h2]:text-lg [&>h3]:text-base overflow-hidden w-full"
+                  dangerouslySetInnerHTML={{ __html: finalComments.replace(/&nbsp;/g, ' ') }}
                 />
               </div>
             </section>
@@ -399,8 +399,8 @@ export default async function ReportPage({
           <Card className="border-none shadow-2xl shadow-indigo-900/5 overflow-hidden relative rounded-[2rem]">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
             <CardContent 
-              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
-              dangerouslySetInnerHTML={{ __html: finalComments }}
+              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
+              dangerouslySetInnerHTML={{ __html: finalComments.replace(/&nbsp;/g, ' ') }}
             />
           </Card>
         </section>
@@ -441,8 +441,8 @@ export default async function ReportPage({
             <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-3 md:mb-4">Strategic Proposal</p>
             {reportContent.customProposal ? (
               <div 
-                className="text-slate-300 leading-relaxed font-light [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white"
-                dangerouslySetInnerHTML={{ __html: reportContent.customProposal }} 
+                className="text-slate-300 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white overflow-hidden w-full"
+                dangerouslySetInnerHTML={{ __html: reportContent.customProposal.replace(/&nbsp;/g, ' ') }} 
               />
             ) : (
               <>

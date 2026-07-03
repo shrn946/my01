@@ -1099,7 +1099,7 @@ export default function DashboardPage() {
                         <div className="space-y-4 w-full overflow-hidden">
                           <div 
                             className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden"
-                            dangerouslySetInnerHTML={{ __html: result.reportContent.developerComments }}
+                            dangerouslySetInnerHTML={{ __html: result.reportContent.developerComments.replace(/&nbsp;/g, ' ') }}
                           />
                           <details className="rounded-xl border">
                             <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
@@ -1133,7 +1133,7 @@ export default function DashboardPage() {
                       ) : result.developerComments ? (
                         <div 
                           className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
-                          dangerouslySetInnerHTML={{ __html: result.developerComments }}
+                          dangerouslySetInnerHTML={{ __html: result.developerComments.replace(/&nbsp;/g, ' ') }}
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400">
@@ -1180,8 +1180,8 @@ export default function DashboardPage() {
                       </div>
                     ) : result.reportContent?.customProposal ? (
                       <div 
-                        className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold"
-                        dangerouslySetInnerHTML={{ __html: result.reportContent.customProposal }}
+                        className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
+                        dangerouslySetInnerHTML={{ __html: result.reportContent.customProposal.replace(/&nbsp;/g, ' ') }}
                       />
                     ) : (
                       <>
