@@ -1099,7 +1099,7 @@ export default function DashboardPage() {
                       {result.reportContent?.developerComments ? (
                         <div className="space-y-4 w-full overflow-hidden">
                           <div 
-                            className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden"
+                            className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden"
                             dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.developerComments) }}
                           />
                           <details className="rounded-xl border">
@@ -1133,7 +1133,7 @@ export default function DashboardPage() {
                         </div>
                       ) : result.developerComments ? (
                         <div 
-                          className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
+                          className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
                           dangerouslySetInnerHTML={{ __html: cleanHtml(result.developerComments) }}
                         />
                       ) : (
@@ -1181,7 +1181,7 @@ export default function DashboardPage() {
                       </div>
                     ) : result.reportContent?.customProposal ? (
                       <div 
-                        className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
+                        className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed break-words [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
                         dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.customProposal) }}
                       />
                     ) : (

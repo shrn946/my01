@@ -111,7 +111,7 @@ export default async function ReportPage({
               <h2 className="text-2xl font-black flex items-center gap-2"><Terminal className="h-6 w-6 text-indigo-600" /> Developer Comments</h2>
               <div className="mt-5">
                 <div 
-                  className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-xl [&>h2]:text-lg [&>h3]:text-base overflow-hidden w-full"
+                  className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 break-words [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base [&_p]:mb-4 last:[&_p]:mb-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
                   dangerouslySetInnerHTML={{ __html: cleanHtml(finalComments) }}
                 />
               </div>
@@ -400,7 +400,7 @@ export default async function ReportPage({
           <Card className="border-none shadow-2xl shadow-indigo-900/5 overflow-hidden relative rounded-[2rem]">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
             <CardContent 
-              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
+              className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
               dangerouslySetInnerHTML={{ __html: cleanHtml(finalComments) }}
             />
           </Card>
@@ -442,7 +442,7 @@ export default async function ReportPage({
             <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-3 md:mb-4">Strategic Proposal</p>
             {reportContent.customProposal ? (
               <div 
-                className="text-slate-300 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white overflow-hidden w-full"
+                className="text-slate-300 leading-relaxed font-light break-words [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-3xl md:[&_h1]:text-5xl [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:leading-tight [&_h1]:text-white [&_h1]:mb-6 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-white [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-white [&_p]:mb-4 last:[&_p]:mb-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-400 [&_a]:underline overflow-hidden w-full"
                 dangerouslySetInnerHTML={{ __html: cleanHtml(reportContent.customProposal) }} 
               />
             ) : (
