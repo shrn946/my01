@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ReportImageHover } from "@/components/report-image-hover";
 import { ReportViewTracker } from "./view-tracker";
+import { cleanHtml } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -111,7 +112,7 @@ export default async function ReportPage({
               <div className="mt-5">
                 <div 
                   className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-xl [&>h2]:text-lg [&>h3]:text-base overflow-hidden w-full"
-                  dangerouslySetInnerHTML={{ __html: finalComments.replace(/&nbsp;/g, ' ') }}
+                  dangerouslySetInnerHTML={{ __html: cleanHtml(finalComments) }}
                 />
               </div>
             </section>
@@ -400,7 +401,7 @@ export default async function ReportPage({
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
             <CardContent 
               className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
-              dangerouslySetInnerHTML={{ __html: finalComments.replace(/&nbsp;/g, ' ') }}
+              dangerouslySetInnerHTML={{ __html: cleanHtml(finalComments) }}
             />
           </Card>
         </section>
@@ -442,7 +443,7 @@ export default async function ReportPage({
             {reportContent.customProposal ? (
               <div 
                 className="text-slate-300 leading-relaxed font-light break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-3xl md:[&>h1]:text-5xl [&>h1]:font-black [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:text-white [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white overflow-hidden w-full"
-                dangerouslySetInnerHTML={{ __html: reportContent.customProposal.replace(/&nbsp;/g, ' ') }} 
+                dangerouslySetInnerHTML={{ __html: cleanHtml(reportContent.customProposal) }} 
               />
             ) : (
               <>

@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneList } from "@/components/phone-list";
+import { cleanHtml } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [url, setUrl] = useState("");
@@ -1099,7 +1100,7 @@ export default function DashboardPage() {
                         <div className="space-y-4 w-full overflow-hidden">
                           <div 
                             className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden"
-                            dangerouslySetInnerHTML={{ __html: result.reportContent.developerComments.replace(/&nbsp;/g, ' ') }}
+                            dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.developerComments) }}
                           />
                           <details className="rounded-xl border">
                             <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
@@ -1133,7 +1134,7 @@ export default function DashboardPage() {
                       ) : result.developerComments ? (
                         <div 
                           className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
-                          dangerouslySetInnerHTML={{ __html: result.developerComments.replace(/&nbsp;/g, ' ') }}
+                          dangerouslySetInnerHTML={{ __html: cleanHtml(result.developerComments) }}
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400">
@@ -1181,7 +1182,7 @@ export default function DashboardPage() {
                     ) : result.reportContent?.customProposal ? (
                       <div 
                         className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed break-words [&>ol]:list-decimal [&>ul]:list-disc [&>ol]:ml-5 [&>ul]:ml-5 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold overflow-hidden w-full"
-                        dangerouslySetInnerHTML={{ __html: result.reportContent.customProposal.replace(/&nbsp;/g, ' ') }}
+                        dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.customProposal) }}
                       />
                     ) : (
                       <>

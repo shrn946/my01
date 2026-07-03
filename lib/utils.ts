@@ -168,3 +168,16 @@ export function formatPhoneNumbers(rawPhone: string | null | undefined, countryC
 export function cleanPhoneForHref(formattedPhone: string): string {
   return formattedPhone.replace(/[^\d+]/g, '');
 }
+
+export function cleanHtml(html: string | null | undefined): string {
+  if (!html) return "";
+  let cleaned = html.replace(/&nbsp;/g, ' ');
+  cleaned = cleaned.replace(/href="https?:\/\/(?:www\.)?google\.com\/(?:url|search)\?q=([^"&]+)[^"]*"/g, (match, p1) => {
+    try {
+      return `href="${decodeURIComponent(p1)}"`;
+    } catch {
+      return match;
+    }
+  });
+  return cleaned;
+}
