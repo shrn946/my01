@@ -746,14 +746,30 @@ export async function enhanceDeveloperComments(rawComments: string) {
     const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
-    const prompt = `You are a professional senior web developer auditing a client website.
-Rewrite the following raw, informal developer notes into a highly professional, persuasive, and technically accurate "Expert Audit Findings" paragraph or bullet points suitable for a client proposal.
-Keep it concise, authoritative, and focused on business impact (e.g. lost conversions, SEO penalties).
+    const prompt = `You are a professional senior web developer auditing a client website based on the provided raw notes.
+I want you to analyze the website's design (via the notes) and generate professional developer comments based on its UI, UX, layout, and conversion opportunities. The feedback should be written in simple, easy-to-understand English, as if a web developer is giving constructive advice to a client.
 
-Raw Notes:
+The comments should:
+* Focus only on what is visible on the website (as mentioned in the notes).
+* Identify design, layout, usability, and conversion issues.
+* Explain why each issue matters.
+* Suggest practical improvements in a positive, professional tone.
+* Avoid technical jargon so non-technical clients can easily understand it.
+* Never make assumptions about the website's backend or functionality unless they are clearly visible.
+* Keep the feedback concise, personalized, and actionable.
+
+The output MUST follow this exact format (return it as clean HTML tags like <p>, <ul>, <li>, <strong>, without any markdown wrappers or code blocks):
+* A short introduction mentioning that the website was reviewed.
+* A paragraph describing the main issues affecting user experience or conversions.
+* A list of recommended improvements (using <ul> and <li>).
+* End with a friendly call to action inviting the client to discuss a redesign.
+
+The writing should sound natural and personalized—not like AI-generated content or a generic website audit. It should read like feedback from an experienced web developer who wants to help improve the website and increase conversions.
+
+Raw Notes to base the audit on:
 ${rawComments}
 
-Response constraints: Return ONLY the rewritten text. No introductions, no greetings, no Markdown wrappers if it's just plain text.`;
+Response constraints: Return ONLY the raw HTML string. Do NOT wrap it in \`\`\`html or any markdown.`;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
