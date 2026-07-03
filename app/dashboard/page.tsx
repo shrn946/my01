@@ -1443,11 +1443,19 @@ export default function DashboardPage() {
                           <input
                             type="checkbox"
                             checked={checked}
-                            onChange={() => setSelectedCategories((current) =>
-                              checked
-                                ? current.filter((item) => item !== category.value)
-                                : [...current, category.value]
-                            )}
+                            onChange={async () => {
+                              setSelectedCategories((current) =>
+                                checked
+                                  ? current.filter((item) => item !== category.value)
+                                  : [...current, category.value]
+                              );
+                              
+                              if (category.value === "redesign" && !checked) {
+                                const updatedReportContent = { ...result.reportContent, includeBeforeAfter: true };
+                                setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                                await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                              }
+                            }}
                             className="mt-1 h-4 w-4 accent-primary"
                           />
                           <div>

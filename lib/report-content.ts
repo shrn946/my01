@@ -25,6 +25,8 @@ export const reportContentSchema = z.object({
   })).default([]),
   includeBeforeAfter: z.boolean().default(false),
   hideAfterImage: z.boolean().default(false),
+  afterImage: z.string().optional(),
+  isAfterImageLocked: z.boolean().optional(),
 });
 
 export type ReportMediaItem = z.infer<typeof reportMediaItemSchema>;

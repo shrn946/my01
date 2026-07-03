@@ -130,6 +130,7 @@ export async function saveReportEdits(
   const aiFields = await getLeadAiFields(prisma, leadId);
   const current = getReportContent(aiFields.reportContent);
   const next = {
+    ...current,
     developerComments,
     recommendations: recommendations.filter(Boolean),
     history: [
