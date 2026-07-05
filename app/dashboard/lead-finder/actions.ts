@@ -149,6 +149,22 @@ export async function updateSearchSettings(data: {
   }
 }
 
+export async function updateSearchProviderModeAction(mode: string) {
+  const prisma = getPrisma();
+  try {
+    await prisma.settings.update({
+      where: { id: "default" },
+      data: { searchProviderMode: mode }
+    });
+    revalidatePath("/dashboard/lead-finder");
+    revalidatePath("/dashboard/settings");
+    return { success: true };
+  } catch (error: any) {
+    console.error("UPDATE_SEARCH_MODE_ERROR:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 // 3. Helper to check if Google Custom Search can be used
 export async function canUseGoogleSearch(): Promise<boolean> {
   const prisma = getPrisma();

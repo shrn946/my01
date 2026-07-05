@@ -14,7 +14,8 @@ import {
   getFinderLeads,
   getSearchSettings,
   importLeadsAction,
-  searchSimilarLeadsByUrl
+  searchSimilarLeadsByUrl,
+  updateSearchProviderModeAction
 } from "./actions";
 import * as XLSX from "xlsx";
 import { 
@@ -432,6 +433,7 @@ export default function LeadFinderClient({
   const [filterCountry, setFilterCountry] = useState("All");
   const [sortBy, setSortBy] = useState<"newest" | "speed" | "country" | "category" | "email">("newest");
   const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
   const [stats, setStats] = useState(initialStats || {
     googleUsed: 0,
     googleRemaining: 40,
@@ -441,6 +443,25 @@ export default function LeadFinderClient({
     serpLimit: 40,
     searchProviderMode: "Auto"
   });
+
+  const [isUpdatingMode, setIsUpdatingMode] = useState(false);
+
+  const handleModeChange = async (newMode: string) => {
+    setIsUpdatingMode(true);
+    try {
+      const res = await updateSearchProviderModeAction(newMode);
+      if (res.success) {
+        setStats((prev: any) => ({ ...prev, searchProviderMode: newMode }));
+        toast({ title: "Search Provider Mode Updated", description: `Mode changed to ${newMode}` });
+      } else {
+        toast({ title: "Failed to update mode", description: res.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
+    } finally {
+      setIsUpdatingMode(false);
+    }
+  };
 
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showNicheDropdown, setShowNicheDropdown] = useState(false);
@@ -784,8 +805,6 @@ export default function LeadFinderClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-
-  const { toast } = useToast();
 
   const fetchStats = async () => {
     const limitStats = await getSearchLimitStats();
@@ -1261,9 +1280,27 @@ export default function LeadFinderClient({
 
         {/* Limit Counters */}
         <div className="flex flex-wrap gap-4 items-center">
-          <Badge variant="outline" className="px-3 py-1 text-xs border-primary/20 bg-primary/5 text-primary font-bold flex items-center gap-1">
-            <Settings2 className="h-3 w-3" /> Mode: {stats.searchProviderMode}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Settings2 className="h-4 w-4 text-primary" />
+            <span className="text-sm font-bold text-foreground">API Mode:</span>
+            <Select 
+              value={stats.searchProviderMode} 
+              onValueChange={handleModeChange}
+              disabled={isUpdatingMode}
+            >
+              <SelectTrigger className="w-[160px] h-8 text-xs font-bold rounded-lg border-primary/20 bg-primary/5 text-primary">
+                <SelectValue placeholder="Select Mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Google Only">Google Only</SelectItem>
+                <SelectItem value="SerpAPI Only">SerpAPI Only</SelectItem>
+                <SelectItem value="TomTom Only">TomTom Only</SelectItem>
+                <SelectItem value="Yelp Only">Yelp Only</SelectItem>
+                <SelectItem value="Apollo Only">Apollo Only</SelectItem>
+                <SelectItem value="Auto">Auto (Fallback)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="flex gap-2 flex-wrap">
             <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">

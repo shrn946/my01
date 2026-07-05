@@ -94,7 +94,7 @@ const settingsSchema = z.object({
   apolloApiKey: z.string().optional(),
   apolloSearchLimit: z.number().int().min(1, "Limit must be at least 1"),
 
-  searchProviderMode: z.enum(["Google Only", "SerpAPI Only", "Auto"]),
+  searchProviderMode: z.enum(["Google Only", "SerpAPI Only", "TomTom Only", "Yelp Only", "Apollo Only", "Auto"]),
 
   // Target Locations & Categories
   locationsUsa: z.string().optional(),
@@ -542,6 +542,9 @@ export default function SettingsPage() {
                         <SelectContent>
                           <SelectItem value="Google Only">Google Only</SelectItem>
                           <SelectItem value="SerpAPI Only">SerpAPI Only</SelectItem>
+                          <SelectItem value="TomTom Only">TomTom Only</SelectItem>
+                          <SelectItem value="Yelp Only">Yelp Only</SelectItem>
+                          <SelectItem value="Apollo Only">Apollo Only</SelectItem>
                           <SelectItem value="Auto">Auto (Fallback Enabled)</SelectItem>
                         </SelectContent>
                       </Select>
