@@ -23,11 +23,6 @@ const footerLinks = [
   },
 ];
 
-const socialLinks = [
-  { icon: Send, href: "#", label: "Twitter" },
-  { icon: Globe, href: "#", label: "GitHub" },
-  { icon: Briefcase, href: "#", label: "LinkedIn" },
-];
 
 export function SiteFooter() {
   return (
@@ -56,20 +51,6 @@ export function SiteFooter() {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
               </div>
               <span className="text-sm font-bold text-ink uppercase tracking-wider">Available for new projects</span>
-            </div>
-
-            <div className="mt-10 flex gap-4">
-              {socialLinks.map((social) => (
-                <Magnetic key={social.label}>
-                  <a
-                    href={social.href}
-                    className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 border border-black/5 text-slate-600 shadow-sm transition-all hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl hover:shadow-primary/20"
-                    aria-label={social.label}
-                  >
-                    <social.icon size={20} />
-                  </a>
-                </Magnetic>
-              ))}
             </div>
           </div>
           
