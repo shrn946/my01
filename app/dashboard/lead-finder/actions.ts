@@ -204,8 +204,62 @@ export async function canUseSerpApiSearch(): Promise<boolean> {
   }
 }
 
+export async function canUseTomTomSearch(): Promise<boolean> {
+  const prisma = getPrisma();
+  const todayStr = getTodayString();
+  try {
+    const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
+    if (!settings || !settings.tomTomEnabled) return false;
+
+    const apiKey = settings.tomTomApiKey;
+    if (!apiKey) return false;
+
+    const usage: any = await prisma.searchUsage.findUnique({ where: { date: todayStr } });
+    const count = usage?.tomTomCount || 0;
+    return count < settings.tomTomSearchLimit;
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function canUseYelpSearch(): Promise<boolean> {
+  const prisma = getPrisma();
+  const todayStr = getTodayString();
+  try {
+    const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
+    if (!settings || !settings.yelpEnabled) return false;
+
+    const apiKey = settings.yelpApiKey;
+    if (!apiKey) return false;
+
+    const usage: any = await prisma.searchUsage.findUnique({ where: { date: todayStr } });
+    const count = usage?.yelpCount || 0;
+    return count < settings.yelpSearchLimit;
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function canUseApolloSearch(): Promise<boolean> {
+  const prisma = getPrisma();
+  const todayStr = getTodayString();
+  try {
+    const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
+    if (!settings || !settings.apolloEnabled) return false;
+
+    const apiKey = settings.apolloApiKey;
+    if (!apiKey) return false;
+
+    const usage: any = await prisma.searchUsage.findUnique({ where: { date: todayStr } });
+    const count = usage?.apolloCount || 0;
+    return count < settings.apolloSearchLimit;
+  } catch (error) {
+    return false;
+  }
+}
+
 // 5. Helper to increment search usage securely
-export async function incrementSearchUsage(provider: "google" | "serpapi") {
+export async function incrementSearchUsage(provider: "google" | "serpapi" | "tomtom" | "yelp" | "apollo") {
   const prisma = getPrisma();
   const todayStr = getTodayString();
   try {
@@ -213,13 +267,31 @@ export async function incrementSearchUsage(provider: "google" | "serpapi") {
       await prisma.searchUsage.upsert({
         where: { date: todayStr },
         update: { googleCount: { increment: 1 } },
-        create: { date: todayStr, googleCount: 1, serpCount: 0 }
+        create: { date: todayStr, googleCount: 1, serpCount: 0, tomTomCount: 0, yelpCount: 0, apolloCount: 0 }
       });
     } else if (provider === "serpapi") {
       await prisma.searchUsage.upsert({
         where: { date: todayStr },
         update: { serpCount: { increment: 1 } },
-        create: { date: todayStr, googleCount: 0, serpCount: 1 }
+        create: { date: todayStr, googleCount: 0, serpCount: 1, tomTomCount: 0, yelpCount: 0, apolloCount: 0 }
+      });
+    } else if (provider === "tomtom") {
+      await prisma.searchUsage.upsert({
+        where: { date: todayStr },
+        update: { tomTomCount: { increment: 1 } },
+        create: { date: todayStr, googleCount: 0, serpCount: 0, tomTomCount: 1, yelpCount: 0, apolloCount: 0 }
+      });
+    } else if (provider === "yelp") {
+      await prisma.searchUsage.upsert({
+        where: { date: todayStr },
+        update: { yelpCount: { increment: 1 } },
+        create: { date: todayStr, googleCount: 0, serpCount: 0, tomTomCount: 0, yelpCount: 1, apolloCount: 0 }
+      });
+    } else if (provider === "apollo") {
+      await prisma.searchUsage.upsert({
+        where: { date: todayStr },
+        update: { apolloCount: { increment: 1 } },
+        create: { date: todayStr, googleCount: 0, serpCount: 0, tomTomCount: 0, yelpCount: 0, apolloCount: 1 }
       });
     }
     return true;
@@ -230,7 +302,7 @@ export async function incrementSearchUsage(provider: "google" | "serpapi") {
 }
 
 // 6. Helper to resolve the correct provider mode
-export async function getSearchProvider(): Promise<"google" | "serpapi" | "none"> {
+export async function getSearchProvider(): Promise<"google" | "serpapi" | "tomtom" | "yelp" | "apollo" | "none"> {
   const prisma = getPrisma();
   try {
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
@@ -238,17 +310,22 @@ export async function getSearchProvider(): Promise<"google" | "serpapi" | "none"
 
     const googleAllowed = await canUseGoogleSearch();
     const serpAllowed = await canUseSerpApiSearch();
+    const tomTomAllowed = await canUseTomTomSearch();
+    const yelpAllowed = await canUseYelpSearch();
+    const apolloAllowed = await canUseApolloSearch();
 
-    if (mode === "Google Only") {
-      return googleAllowed ? "google" : "none";
-    }
-    if (mode === "SerpAPI Only") {
-      return serpAllowed ? "serpapi" : "none";
-    }
+    if (mode === "Google Only") return googleAllowed ? "google" : "none";
+    if (mode === "SerpAPI Only") return serpAllowed ? "serpapi" : "none";
+    if (mode === "TomTom Only") return tomTomAllowed ? "tomtom" : "none";
+    if (mode === "Yelp Only") return yelpAllowed ? "yelp" : "none";
+    if (mode === "Apollo Only") return apolloAllowed ? "apollo" : "none";
 
-    // Auto Mode Logic (Google -> SerpAPI Fallback)
+    // Auto Mode Logic
     if (googleAllowed) return "google";
     if (serpAllowed) return "serpapi";
+    if (tomTomAllowed) return "tomtom";
+    if (yelpAllowed) return "yelp";
+    if (apolloAllowed) return "apollo";
 
     return "none";
   } catch (error) {
@@ -269,7 +346,8 @@ async function queryGoogleCustomSearch(query: string, start: number = 1) {
     );
   }
 
-  const url = `https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(cx)}&q=${encodeURIComponent(query)}&start=${start}`;
+  const safeStart = Math.max(1, Math.floor(Number(start) || 1));
+  const url = `https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(cx)}&q=${encodeURIComponent(query)}&start=${safeStart}`;
 
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
@@ -292,7 +370,9 @@ async function querySerpApiSearch(query: string, limit: number = 10, start: numb
     throw new Error("SerpAPI API key is missing. Please configure it in Settings.");
   }
 
-  const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${encodeURIComponent(apiKey)}&num=${limit}&start=${start}`;
+  const safeLimit = Math.max(1, Math.floor(Number(limit) || 10));
+  const safeStart = Math.max(0, Math.floor(Number(start) || 0));
+  const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${encodeURIComponent(apiKey)}&num=${safeLimit}&start=${safeStart}`;
 
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
@@ -307,6 +387,78 @@ async function querySerpApiSearch(query: string, limit: number = 10, start: numb
     title: item.title,
     link: item.link,
     snippet: item.snippet
+  }));
+}
+
+async function queryTomTomSearch(query: string, limit: number = 10) {
+  const prisma = getPrisma();
+  const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
+  const apiKey = settings?.tomTomApiKey;
+
+  if (!apiKey) throw new Error("TomTom API key is missing.");
+
+  const url = `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${encodeURIComponent(apiKey)}&limit=${limit}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`TomTom returned status ${res.status}`);
+
+  const data = await res.json();
+  const results = data.results || [];
+  return results.map((item: any) => ({
+    title: item.poi?.name || "Unknown Business",
+    link: item.poi?.url || item.poi?.phone || "",
+    snippet: item.address?.freeformAddress || ""
+  }));
+}
+
+async function queryYelpSearch(query: string, location: string, limit: number = 10) {
+  const prisma = getPrisma();
+  const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
+  const apiKey = settings?.yelpApiKey;
+
+  if (!apiKey) throw new Error("Yelp API key is missing.");
+
+  const url = `https://api.yelp.com/v3/businesses/search?term=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&limit=${limit}`;
+  const res = await fetch(url, { 
+    headers: { Authorization: `Bearer ${apiKey}` },
+    cache: "no-store" 
+  });
+  if (!res.ok) throw new Error(`Yelp returned status ${res.status}`);
+
+  const data = await res.json();
+  const businesses = data.businesses || [];
+  return businesses.map((item: any) => ({
+    title: item.name || "Unknown Business",
+    link: item.url || "",
+    snippet: item.location?.display_address?.join(", ") || ""
+  }));
+}
+
+async function queryApolloSearch(query: string, limit: number = 10) {
+  const prisma = getPrisma();
+  const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
+  const apiKey = settings?.apolloApiKey;
+
+  if (!apiKey) throw new Error("Apollo API key is missing.");
+
+  const url = `https://api.apollo.io/api/v1/mixed_people/search`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      api_key: apiKey,
+      q_keywords: query,
+      per_page: limit
+    }),
+    cache: "no-store"
+  });
+  if (!res.ok) throw new Error(`Apollo returned status ${res.status}`);
+
+  const data = await res.json();
+  const people = data.people || [];
+  return people.map((item: any) => ({
+    title: item.organization?.name || item.name || "Unknown Business",
+    link: item.organization?.website_url || "",
+    snippet: item.title || ""
   }));
 }
 
@@ -655,14 +807,44 @@ export async function searchAndAnalyzeLeads(
     const searchQuery = customQuery || `${niche} in ${searchLocation} ${negativeKeywords}`;
 
     let searchItems: any[] = [];
-    let activeProvider: "google" | "serpapi" = "google";
+    let activeProvider: string = "google";
 
-    const usage = await prisma.searchUsage.findUnique({ where: { date: todayStr } });
-    const settings = await prisma.settings.findUnique({ where: { id: "default" } });
+    const usage: any = await prisma.searchUsage.findUnique({ where: { date: todayStr } });
+    const settings: any = await prisma.settings.findUnique({ where: { id: "default" } });
 
     const randomPage = Math.floor(Math.random() * 5); // 0 to 4 (page 1 to 5)
 
-    if (provider === "google") {
+    if (provider === "tomtom") {
+      try {
+        console.log("Searching TomTom...");
+        searchItems = await queryTomTomSearch(searchQuery, maxResults);
+        await incrementSearchUsage("tomtom");
+        activeProvider = "tomtom";
+      } catch (err: any) {
+        console.error("TomTom request failed:", err);
+        throw err;
+      }
+    } else if (provider === "yelp") {
+      try {
+        console.log("Searching Yelp...");
+        searchItems = await queryYelpSearch(niche, searchLocation, maxResults);
+        await incrementSearchUsage("yelp");
+        activeProvider = "yelp";
+      } catch (err: any) {
+        console.error("Yelp request failed:", err);
+        throw err;
+      }
+    } else if (provider === "apollo") {
+      try {
+        console.log("Searching Apollo...");
+        searchItems = await queryApolloSearch(searchQuery, maxResults);
+        await incrementSearchUsage("apollo");
+        activeProvider = "apollo";
+      } catch (err: any) {
+        console.error("Apollo request failed:", err);
+        throw err;
+      }
+    } else if (provider === "google") {
       try {
         console.log("Searching Google Custom Search API...");
         
