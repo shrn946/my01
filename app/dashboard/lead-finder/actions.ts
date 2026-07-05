@@ -152,9 +152,17 @@ export async function updateSearchSettings(data: {
 export async function updateSearchProviderModeAction(mode: string) {
   const prisma = getPrisma();
   try {
+    const dataToUpdate: any = { searchProviderMode: mode };
+    
+    if (mode === "Google Only") dataToUpdate.googleSearchEnabled = true;
+    if (mode === "SerpAPI Only") dataToUpdate.serpApiSearchEnabled = true;
+    if (mode === "TomTom Only") dataToUpdate.tomTomEnabled = true;
+    if (mode === "Yelp Only") dataToUpdate.yelpEnabled = true;
+    if (mode === "Apollo Only") dataToUpdate.apolloEnabled = true;
+
     await prisma.settings.update({
       where: { id: "default" },
-      data: { searchProviderMode: mode }
+      data: dataToUpdate
     });
     revalidatePath("/dashboard/lead-finder");
     revalidatePath("/dashboard/settings");
@@ -794,7 +802,7 @@ export async function searchAndAnalyzeLeads(
   if (provider === "none") {
     return {
       success: false,
-      error: "Search limit reached for all enabled search engines. Please adjust settings or try again tomorrow."
+      error: "Search provider is not configured properly or limits reached. Ensure the API key is set and the provider is enabled in Settings."
     };
   }
 
