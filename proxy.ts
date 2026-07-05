@@ -1,7 +1,7 @@
 import { jwtVerify } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedRoutes = ["/admin", "/client"];
+const protectedRoutes = ["/admin", "/client", "/dashboard"];
 const cookieName = "portfolio_session";
 
 function secret() {
@@ -20,7 +20,7 @@ export async function proxy(request: NextRequest) {
 
   try {
     const { payload } = await jwtVerify(token, secret());
-    if (pathname.startsWith("/admin") && payload.role !== "ADMIN") {
+    if ((pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) && payload.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/client", request.url));
     }
     return NextResponse.next();
@@ -30,5 +30,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/client/:path*"]
+  matcher: ["/admin/:path*", "/client/:path*", "/dashboard/:path*"]
 };
