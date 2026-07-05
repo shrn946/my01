@@ -261,6 +261,18 @@ model Settings {
 
   searchProviderMode   String  @default("Auto")
 
+  tomTomEnabled        Boolean @default(false)
+  tomTomApiKey         String?
+  tomTomSearchLimit    Int     @default(2500)
+
+  yelpEnabled          Boolean @default(false)
+  yelpApiKey           String?
+  yelpSearchLimit      Int     @default(500)
+
+  apolloEnabled        Boolean @default(false)
+  apolloApiKey         String?
+  apolloSearchLimit    Int     @default(100)
+
   // Target Locations (by country)
   locationsUsa          String[] @default(["Houston", "Dallas", "Phoenix", "Atlanta", "Charlotte", "Tampa", "Denver", "Austin", "San Antonio", "Orlando", "Miami", "Jacksonville", "Raleigh", "Nashville", "Las Vegas", "Salt Lake City", "Columbus", "Indianapolis", "Kansas City"])
   locationsUk           String[] @default(["London", "Manchester", "Birmingham", "Leeds", "Liverpool", "Bristol", "Nottingham", "Sheffield", "Leicester", "Newcastle"])
@@ -279,6 +291,9 @@ model SearchUsage {
   date        String   @unique
   googleCount Int      @default(0)
   serpCount   Int      @default(0)
+  tomTomCount Int      @default(0)
+  yelpCount   Int      @default(0)
+  apolloCount Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

@@ -1265,7 +1265,7 @@ export default function LeadFinderClient({
             <Settings2 className="h-3 w-3" /> Mode: {stats.searchProviderMode}
           </Badge>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
               <span className="text-[9px] uppercase font-black text-muted-foreground">Google Used</span>
               <span className="text-md font-extrabold text-foreground">{stats.googleUsed} / {stats.googleLimit}</span>
@@ -1273,6 +1273,18 @@ export default function LeadFinderClient({
             <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
               <span className="text-[9px] uppercase font-black text-muted-foreground">SerpAPI Used</span>
               <span className="text-md font-extrabold text-foreground">{stats.serpUsed} / {stats.serpLimit}</span>
+            </Card>
+            <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
+              <span className="text-[9px] uppercase font-black text-muted-foreground">TomTom Used</span>
+              <span className="text-md font-extrabold text-foreground">{(stats as any).tomTomUsed} / {(stats as any).tomTomLimit}</span>
+            </Card>
+            <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
+              <span className="text-[9px] uppercase font-black text-muted-foreground">Yelp Used</span>
+              <span className="text-md font-extrabold text-foreground">{(stats as any).yelpUsed} / {(stats as any).yelpLimit}</span>
+            </Card>
+            <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
+              <span className="text-[9px] uppercase font-black text-muted-foreground">Apollo Used</span>
+              <span className="text-md font-extrabold text-foreground">{(stats as any).apolloUsed} / {(stats as any).apolloLimit}</span>
             </Card>
           </div>
         </div>

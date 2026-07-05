@@ -37,6 +37,18 @@ export async function getSearchSettings() {
       serpApiSearchLimit: settings.serpApiSearchLimit,
       searchProviderMode: settings.searchProviderMode,
       
+      tomTomEnabled: settings.tomTomEnabled,
+      tomTomApiKey: settings.tomTomApiKey ? API_KEY_MASK : "",
+      tomTomSearchLimit: settings.tomTomSearchLimit,
+      
+      yelpEnabled: settings.yelpEnabled,
+      yelpApiKey: settings.yelpApiKey ? API_KEY_MASK : "",
+      yelpSearchLimit: settings.yelpSearchLimit,
+      
+      apolloEnabled: settings.apolloEnabled,
+      apolloApiKey: settings.apolloApiKey ? API_KEY_MASK : "",
+      apolloSearchLimit: settings.apolloSearchLimit,
+
       // Target Locations & Categories
       locationsUsa: settings.locationsUsa || [],
       locationsUk: settings.locationsUk || [],
@@ -63,6 +75,15 @@ export async function updateSearchSettings(data: {
   serpApiKey: string;
   serpApiSearchLimit: number;
   searchProviderMode: string;
+  tomTomEnabled: boolean;
+  tomTomApiKey: string;
+  tomTomSearchLimit: number;
+  yelpEnabled: boolean;
+  yelpApiKey: string;
+  yelpSearchLimit: number;
+  apolloEnabled: boolean;
+  apolloApiKey: string;
+  apolloSearchLimit: number;
   locationsUsa?: string[];
   locationsUk?: string[];
   locationsCanada?: string[];
@@ -83,6 +104,9 @@ export async function updateSearchSettings(data: {
     const googleApiKey = data.googleApiKey === API_KEY_MASK ? current.googleApiKey : data.googleApiKey || null;
     const googleSearchCx = data.googleSearchCx === API_KEY_MASK ? current.googleSearchCx : data.googleSearchCx || null;
     const serpApiKey = data.serpApiKey === API_KEY_MASK ? current.serpApiKey : data.serpApiKey || null;
+    const tomTomApiKey = data.tomTomApiKey === API_KEY_MASK ? current.tomTomApiKey : data.tomTomApiKey || null;
+    const yelpApiKey = data.yelpApiKey === API_KEY_MASK ? current.yelpApiKey : data.yelpApiKey || null;
+    const apolloApiKey = data.apolloApiKey === API_KEY_MASK ? current.apolloApiKey : data.apolloApiKey || null;
 
     await prisma.settings.update({
       where: { id: "default" },
@@ -95,6 +119,15 @@ export async function updateSearchSettings(data: {
         serpApiKey,
         serpApiSearchLimit: data.serpApiSearchLimit,
         searchProviderMode: data.searchProviderMode,
+        tomTomEnabled: data.tomTomEnabled,
+        tomTomApiKey,
+        tomTomSearchLimit: data.tomTomSearchLimit,
+        yelpEnabled: data.yelpEnabled,
+        yelpApiKey,
+        yelpSearchLimit: data.yelpSearchLimit,
+        apolloEnabled: data.apolloEnabled,
+        apolloApiKey,
+        apolloSearchLimit: data.apolloSearchLimit,
         locationsUsa: data.locationsUsa,
         locationsUk: data.locationsUk,
         locationsCanada: data.locationsCanada,
@@ -996,7 +1029,14 @@ export async function getSearchLimitStats() {
   const todayStr = getTodayString();
 
   try {
-    const settings = await prisma.settings.findUnique({ where: { id: "default" } }) || { googleSearchLimit: 40, serpApiSearchLimit: 40, searchProviderMode: "Auto" };
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } }) || { 
+      googleSearchLimit: 40, 
+      serpApiSearchLimit: 40, 
+      tomTomSearchLimit: 2500,
+      yelpSearchLimit: 500,
+      apolloSearchLimit: 100,
+      searchProviderMode: "Auto" 
+    };
     const usage = await prisma.searchUsage.findUnique({
       where: { date: todayStr }
     });
@@ -1009,6 +1049,18 @@ export async function getSearchLimitStats() {
     const serpLimit = settings.serpApiSearchLimit ?? 40;
     const serpRemaining = Math.max(0, serpLimit - serpUsed);
 
+    const tomTomUsed = usage?.tomTomCount || 0;
+    const tomTomLimit = (settings as any).tomTomSearchLimit ?? 2500;
+    const tomTomRemaining = Math.max(0, tomTomLimit - tomTomUsed);
+
+    const yelpUsed = usage?.yelpCount || 0;
+    const yelpLimit = (settings as any).yelpSearchLimit ?? 500;
+    const yelpRemaining = Math.max(0, yelpLimit - yelpUsed);
+
+    const apolloUsed = usage?.apolloCount || 0;
+    const apolloLimit = (settings as any).apolloSearchLimit ?? 100;
+    const apolloRemaining = Math.max(0, apolloLimit - apolloUsed);
+
     return {
       googleUsed,
       googleRemaining,
@@ -1016,6 +1068,15 @@ export async function getSearchLimitStats() {
       serpUsed,
       serpRemaining,
       serpLimit,
+      tomTomUsed,
+      tomTomRemaining,
+      tomTomLimit,
+      yelpUsed,
+      yelpRemaining,
+      yelpLimit,
+      apolloUsed,
+      apolloRemaining,
+      apolloLimit,
       searchProviderMode: settings.searchProviderMode || "Auto"
     };
   } catch (error) {
@@ -1026,6 +1087,15 @@ export async function getSearchLimitStats() {
       serpUsed: 0,
       serpRemaining: 40,
       serpLimit: 40,
+      tomTomUsed: 0,
+      tomTomRemaining: 2500,
+      tomTomLimit: 2500,
+      yelpUsed: 0,
+      yelpRemaining: 500,
+      yelpLimit: 500,
+      apolloUsed: 0,
+      apolloRemaining: 100,
+      apolloLimit: 100,
       searchProviderMode: "Auto"
     };
   }

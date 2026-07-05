@@ -82,6 +82,18 @@ const settingsSchema = z.object({
   serpApiKey: z.string().optional(),
   serpApiSearchLimit: z.number().int().min(1, "Limit must be at least 1"),
 
+  tomTomEnabled: z.boolean(),
+  tomTomApiKey: z.string().optional(),
+  tomTomSearchLimit: z.number().int().min(1, "Limit must be at least 1"),
+
+  yelpEnabled: z.boolean(),
+  yelpApiKey: z.string().optional(),
+  yelpSearchLimit: z.number().int().min(1, "Limit must be at least 1"),
+
+  apolloEnabled: z.boolean(),
+  apolloApiKey: z.string().optional(),
+  apolloSearchLimit: z.number().int().min(1, "Limit must be at least 1"),
+
   searchProviderMode: z.enum(["Google Only", "SerpAPI Only", "Auto"]),
 
   // Target Locations & Categories
@@ -118,6 +130,15 @@ export default function SettingsPage() {
       serpApiSearchEnabled: true,
       serpApiKey: "",
       serpApiSearchLimit: 40,
+      tomTomEnabled: false,
+      tomTomApiKey: "",
+      tomTomSearchLimit: 2500,
+      yelpEnabled: false,
+      yelpApiKey: "",
+      yelpSearchLimit: 500,
+      apolloEnabled: false,
+      apolloApiKey: "",
+      apolloSearchLimit: 100,
       searchProviderMode: "Auto",
       locationsUsa: "",
       locationsUk: "",
@@ -156,6 +177,15 @@ export default function SettingsPage() {
           serpApiSearchEnabled: searchData?.serpApiSearchEnabled ?? true,
           serpApiKey: searchData?.serpApiKey || "",
           serpApiSearchLimit: searchData?.serpApiSearchLimit ?? 40,
+          tomTomEnabled: searchData?.tomTomEnabled ?? false,
+          tomTomApiKey: searchData?.tomTomApiKey || "",
+          tomTomSearchLimit: searchData?.tomTomSearchLimit ?? 2500,
+          yelpEnabled: searchData?.yelpEnabled ?? false,
+          yelpApiKey: searchData?.yelpApiKey || "",
+          yelpSearchLimit: searchData?.yelpSearchLimit ?? 500,
+          apolloEnabled: searchData?.apolloEnabled ?? false,
+          apolloApiKey: searchData?.apolloApiKey || "",
+          apolloSearchLimit: searchData?.apolloSearchLimit ?? 100,
           searchProviderMode: (searchData?.searchProviderMode as any) || "Auto",
           locationsUsa: (searchData?.locationsUsa || []).join(", "),
           locationsUk: (searchData?.locationsUk || []).join(", "),
@@ -194,6 +224,15 @@ export default function SettingsPage() {
       serpApiSearchEnabled: values.serpApiSearchEnabled,
       serpApiKey: values.serpApiKey || "",
       serpApiSearchLimit: values.serpApiSearchLimit,
+      tomTomEnabled: values.tomTomEnabled,
+      tomTomApiKey: values.tomTomApiKey || "",
+      tomTomSearchLimit: values.tomTomSearchLimit,
+      yelpEnabled: values.yelpEnabled,
+      yelpApiKey: values.yelpApiKey || "",
+      yelpSearchLimit: values.yelpSearchLimit,
+      apolloEnabled: values.apolloEnabled,
+      apolloApiKey: values.apolloApiKey || "",
+      apolloSearchLimit: values.apolloSearchLimit,
       searchProviderMode: values.searchProviderMode,
       locationsUsa: (values.locationsUsa || "").split(/[,\n]/).map(c => c.trim()).filter(Boolean),
       locationsUk: (values.locationsUk || "").split(/[,\n]/).map(c => c.trim()).filter(Boolean),
@@ -649,6 +688,189 @@ export default function SettingsPage() {
                         />
                       </FormControl>
                       <FormDescription>Max query requests allowed per day for SerpAPI.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* TomTom API Group */}
+              <div className="space-y-4 border rounded-2xl p-5 bg-card shadow-sm">
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <h4 className="font-extrabold text-sm text-foreground">TomTom Search API</h4>
+                  <FormField
+                    control={form.control}
+                    name="tomTomEnabled"
+                    render={({ field }) => (
+                      <Select 
+                        value={field.value ? "true" : "false"} 
+                        onValueChange={(val) => field.onChange(val === "true")}
+                      >
+                        <SelectTrigger className="w-32 h-8 rounded-lg text-xs bg-muted/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Enabled</SelectItem>
+                          <SelectItem value="false">Disabled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="tomTomApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>TomTom API Key</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input type="password" placeholder="Enter TomTom API key" className="pl-10 rounded-xl" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tomTomSearchLimit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>TomTom Daily Search Limit</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          className="rounded-xl w-32" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))} 
+                        />
+                      </FormControl>
+                      <FormDescription>Max query requests allowed per day for TomTom API.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Yelp API Group */}
+              <div className="space-y-4 border rounded-2xl p-5 bg-card shadow-sm">
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <h4 className="font-extrabold text-sm text-foreground">Yelp Fusion API</h4>
+                  <FormField
+                    control={form.control}
+                    name="yelpEnabled"
+                    render={({ field }) => (
+                      <Select 
+                        value={field.value ? "true" : "false"} 
+                        onValueChange={(val) => field.onChange(val === "true")}
+                      >
+                        <SelectTrigger className="w-32 h-8 rounded-lg text-xs bg-muted/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Enabled</SelectItem>
+                          <SelectItem value="false">Disabled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="yelpApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Yelp API Key</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input type="password" placeholder="Enter Yelp API key" className="pl-10 rounded-xl" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="yelpSearchLimit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Yelp Daily Search Limit</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          className="rounded-xl w-32" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))} 
+                        />
+                      </FormControl>
+                      <FormDescription>Max query requests allowed per day for Yelp Fusion API.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Apollo API Group */}
+              <div className="space-y-4 border rounded-2xl p-5 bg-card shadow-sm">
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <h4 className="font-extrabold text-sm text-foreground">Apollo API</h4>
+                  <FormField
+                    control={form.control}
+                    name="apolloEnabled"
+                    render={({ field }) => (
+                      <Select 
+                        value={field.value ? "true" : "false"} 
+                        onValueChange={(val) => field.onChange(val === "true")}
+                      >
+                        <SelectTrigger className="w-32 h-8 rounded-lg text-xs bg-muted/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Enabled</SelectItem>
+                          <SelectItem value="false">Disabled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="apolloApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Apollo API Key</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input type="password" placeholder="Enter Apollo API key" className="pl-10 rounded-xl" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="apolloSearchLimit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Apollo Daily Search Limit</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          className="rounded-xl w-32" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))} 
+                        />
+                      </FormControl>
+                      <FormDescription>Max query requests allowed per day for Apollo API.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
