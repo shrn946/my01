@@ -37,17 +37,9 @@ export async function getSearchSettings() {
       serpApiSearchLimit: settings.serpApiSearchLimit,
       searchProviderMode: settings.searchProviderMode,
       
-      tomTomEnabled: settings.tomTomEnabled,
-      tomTomApiKey: settings.tomTomApiKey ? API_KEY_MASK : "",
-      tomTomSearchLimit: settings.tomTomSearchLimit,
-      
       yelpEnabled: settings.yelpEnabled,
       yelpApiKey: settings.yelpApiKey ? API_KEY_MASK : "",
       yelpSearchLimit: settings.yelpSearchLimit,
-      
-      apolloEnabled: settings.apolloEnabled,
-      apolloApiKey: settings.apolloApiKey ? API_KEY_MASK : "",
-      apolloSearchLimit: settings.apolloSearchLimit,
 
       // Target Locations & Categories
       locationsUsa: settings.locationsUsa || [],
@@ -75,15 +67,9 @@ export async function updateSearchSettings(data: {
   serpApiKey: string;
   serpApiSearchLimit: number;
   searchProviderMode: string;
-  tomTomEnabled: boolean;
-  tomTomApiKey: string;
-  tomTomSearchLimit: number;
   yelpEnabled: boolean;
   yelpApiKey: string;
   yelpSearchLimit: number;
-  apolloEnabled: boolean;
-  apolloApiKey: string;
-  apolloSearchLimit: number;
   locationsUsa?: string[];
   locationsUk?: string[];
   locationsCanada?: string[];
@@ -104,9 +90,7 @@ export async function updateSearchSettings(data: {
     const googleApiKey = data.googleApiKey === API_KEY_MASK ? current.googleApiKey : data.googleApiKey || null;
     const googleSearchCx = data.googleSearchCx === API_KEY_MASK ? current.googleSearchCx : data.googleSearchCx || null;
     const serpApiKey = data.serpApiKey === API_KEY_MASK ? current.serpApiKey : data.serpApiKey || null;
-    const tomTomApiKey = data.tomTomApiKey === API_KEY_MASK ? current.tomTomApiKey : data.tomTomApiKey || null;
     const yelpApiKey = data.yelpApiKey === API_KEY_MASK ? current.yelpApiKey : data.yelpApiKey || null;
-    const apolloApiKey = data.apolloApiKey === API_KEY_MASK ? current.apolloApiKey : data.apolloApiKey || null;
 
     await prisma.settings.update({
       where: { id: "default" },
@@ -119,15 +103,9 @@ export async function updateSearchSettings(data: {
         serpApiKey,
         serpApiSearchLimit: data.serpApiSearchLimit,
         searchProviderMode: data.searchProviderMode,
-        tomTomEnabled: data.tomTomEnabled,
-        tomTomApiKey,
-        tomTomSearchLimit: data.tomTomSearchLimit,
         yelpEnabled: data.yelpEnabled,
         yelpApiKey,
         yelpSearchLimit: data.yelpSearchLimit,
-        apolloEnabled: data.apolloEnabled,
-        apolloApiKey,
-        apolloSearchLimit: data.apolloSearchLimit,
         locationsUsa: data.locationsUsa,
         locationsUk: data.locationsUk,
         locationsCanada: data.locationsCanada,
@@ -310,7 +288,7 @@ export async function incrementSearchUsage(provider: "google" | "serpapi" | "tom
 }
 
 // 6. Helper to resolve the correct provider mode
-export async function getSearchProvider(): Promise<"google" | "serpapi" | "tomtom" | "yelp" | "apollo" | "none"> {
+export async function getSearchProvider(): Promise<"google" | "serpapi" | "yelp" | "none"> {
   const prisma = getPrisma();
   try {
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
@@ -318,22 +296,16 @@ export async function getSearchProvider(): Promise<"google" | "serpapi" | "tomto
 
     const googleAllowed = await canUseGoogleSearch();
     const serpAllowed = await canUseSerpApiSearch();
-    const tomTomAllowed = await canUseTomTomSearch();
     const yelpAllowed = await canUseYelpSearch();
-    const apolloAllowed = await canUseApolloSearch();
 
     if (mode === "Google Only") return googleAllowed ? "google" : "none";
     if (mode === "SerpAPI Only") return serpAllowed ? "serpapi" : "none";
-    if (mode === "TomTom Only") return tomTomAllowed ? "tomtom" : "none";
     if (mode === "Yelp Only") return yelpAllowed ? "yelp" : "none";
-    if (mode === "Apollo Only") return apolloAllowed ? "apollo" : "none";
 
     // Auto Mode Logic
     if (googleAllowed) return "google";
     if (serpAllowed) return "serpapi";
-    if (tomTomAllowed) return "tomtom";
     if (yelpAllowed) return "yelp";
-    if (apolloAllowed) return "apollo";
 
     return "none";
   } catch (error) {
@@ -822,34 +794,14 @@ export async function searchAndAnalyzeLeads(
 
     const randomPage = Math.floor(Math.random() * 5); // 0 to 4 (page 1 to 5)
 
-    if (provider === "tomtom") {
+    if (provider === "yelp") {
       try {
-        console.log("Searching TomTom...");
-        searchItems = await queryTomTomSearch(searchQuery, maxResults);
-        await incrementSearchUsage("tomtom");
-        activeProvider = "tomtom";
-      } catch (err: any) {
-        console.error("TomTom request failed:", err);
-        throw err;
-      }
-    } else if (provider === "yelp") {
-      try {
-        console.log("Searching Yelp...");
+        const searchLocation = [formData.city, formData.state, formData.country].filter(Boolean).join(", ") || "United States";
         searchItems = await queryYelpSearch(niche, searchLocation, maxResults);
         await incrementSearchUsage("yelp");
         activeProvider = "yelp";
       } catch (err: any) {
         console.error("Yelp request failed:", err);
-        throw err;
-      }
-    } else if (provider === "apollo") {
-      try {
-        console.log("Searching Apollo...");
-        searchItems = await queryApolloSearch(searchQuery, maxResults);
-        await incrementSearchUsage("apollo");
-        activeProvider = "apollo";
-      } catch (err: any) {
-        console.error("Apollo request failed:", err);
         throw err;
       }
     } else if (provider === "google") {

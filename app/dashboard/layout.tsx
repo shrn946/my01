@@ -3,7 +3,11 @@ import { LayoutDashboard, Users, Settings, Search, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+import { requireRole } from "@/lib/auth";
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  await requireRole("ADMIN");
+
   return (
     <div className="flex min-h-screen bg-muted/40">
       {/* Sidebar */}

@@ -1294,9 +1294,7 @@ export default function LeadFinderClient({
               <SelectContent>
                 <SelectItem value="Google Only">Google Only</SelectItem>
                 <SelectItem value="SerpAPI Only">SerpAPI Only</SelectItem>
-                <SelectItem value="TomTom Only">TomTom Only</SelectItem>
                 <SelectItem value="Yelp Only">Yelp Only</SelectItem>
-                <SelectItem value="Apollo Only">Apollo Only</SelectItem>
                 <SelectItem value="Auto">Auto (Fallback)</SelectItem>
               </SelectContent>
             </Select>
@@ -1312,16 +1310,8 @@ export default function LeadFinderClient({
               <span className="text-md font-extrabold text-foreground">{stats.serpUsed} / {stats.serpLimit}</span>
             </Card>
             <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
-              <span className="text-[9px] uppercase font-black text-muted-foreground">TomTom Used</span>
-              <span className="text-md font-extrabold text-foreground">{(stats as any).tomTomUsed} / {(stats as any).tomTomLimit}</span>
-            </Card>
-            <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
               <span className="text-[9px] uppercase font-black text-muted-foreground">Yelp Used</span>
               <span className="text-md font-extrabold text-foreground">{(stats as any).yelpUsed} / {(stats as any).yelpLimit}</span>
-            </Card>
-            <Card className="px-3 py-1.5 flex flex-col justify-center border-muted bg-card shadow-sm text-center min-w-[120px]">
-              <span className="text-[9px] uppercase font-black text-muted-foreground">Apollo Used</span>
-              <span className="text-md font-extrabold text-foreground">{(stats as any).apolloUsed} / {(stats as any).apolloLimit}</span>
             </Card>
           </div>
         </div>
