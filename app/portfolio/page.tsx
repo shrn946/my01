@@ -28,7 +28,7 @@ const DEMO_WEBSITES = [
     tools: ["Dental", "Booking", "Clinic", "Responsive"],
     image: "/demo-screenshots/primecare.png",
     gallery: ["/demo-screenshots/primecare.png"],
-    liveUrl: "https://clinics-lime.vercel.app/",
+    liveUrl: "https://clinic.coreweblabs.com/",
     featured: true
   },
   {
@@ -43,7 +43,7 @@ const DEMO_WEBSITES = [
     tools: ["Dental", "Services", "Modern"],
     image: "/demo-screenshots/clinic-demo-2.png",
     gallery: ["/demo-screenshots/clinic-demo-2.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-2",
+    liveUrl: "https://clinic.coreweblabs.com/demo-2",
     featured: false
   },
   {
@@ -58,7 +58,7 @@ const DEMO_WEBSITES = [
     tools: ["Clinic", "Dentist", "Clean"],
     image: "/demo-screenshots/clinic-demo-3.png",
     gallery: ["/demo-screenshots/clinic-demo-3.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-3",
+    liveUrl: "https://clinic.coreweblabs.com/demo-3",
     featured: false
   },
   {
@@ -73,7 +73,7 @@ const DEMO_WEBSITES = [
     tools: ["Healthcare", "Booking", "Responsive"],
     image: "/demo-screenshots/clinic-demo-4.png",
     gallery: ["/demo-screenshots/clinic-demo-4.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-4",
+    liveUrl: "https://clinic.coreweblabs.com/demo-4",
     featured: false
   },
   {
@@ -88,7 +88,7 @@ const DEMO_WEBSITES = [
     tools: ["Appointment", "Dentist", "Elementor"],
     image: "/demo-screenshots/clinic-demo-5.png",
     gallery: ["/demo-screenshots/clinic-demo-5.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-5",
+    liveUrl: "https://clinic.coreweblabs.com/demo-5",
     featured: false
   },
   {
@@ -103,7 +103,7 @@ const DEMO_WEBSITES = [
     tools: ["Clinic", "Services", "WordPress"],
     image: "/demo-screenshots/clinic-demo-6.png",
     gallery: ["/demo-screenshots/clinic-demo-6.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-6",
+    liveUrl: "https://clinic.coreweblabs.com/demo-6",
     featured: false
   },
   {
@@ -118,7 +118,7 @@ const DEMO_WEBSITES = [
     tools: ["Dentistry", "Specialists", "Modern"],
     image: "/demo-screenshots/clinic-dental-7.png",
     gallery: ["/demo-screenshots/clinic-dental-7.png"],
-    liveUrl: "https://clinics-lime.vercel.app/dental-7",
+    liveUrl: "https://clinic.coreweblabs.com/dental-7",
     featured: false
   },
   {
@@ -133,7 +133,7 @@ const DEMO_WEBSITES = [
     tools: ["Ophthalmology", "Eye Clinic", "Services"],
     image: "/demo-screenshots/eye-clinic-demo-1.png",
     gallery: ["/demo-screenshots/eye-clinic-demo-1.png"],
-    liveUrl: "https://clinics-lime.vercel.app/eye-1",
+    liveUrl: "https://clinic.coreweblabs.com/eye-1",
     featured: false
   },
   {
@@ -148,7 +148,7 @@ const DEMO_WEBSITES = [
     tools: ["Optometry", "Doctor", "Booking"],
     image: "/demo-screenshots/eye-clinic-demo-2.png",
     gallery: ["/demo-screenshots/eye-clinic-demo-2.png"],
-    liveUrl: "https://clinics-lime.vercel.app/eye-2",
+    liveUrl: "https://clinic.coreweblabs.com/eye-2",
     featured: false
   },
   {
@@ -163,7 +163,7 @@ const DEMO_WEBSITES = [
     tools: ["Ophthalmology", "Specialist", "Clean"],
     image: "/demo-screenshots/eye-clinic-demo-3.png",
     gallery: ["/demo-screenshots/eye-clinic-demo-3.png"],
-    liveUrl: "https://clinics-lime.vercel.app/eye-3",
+    liveUrl: "https://clinic.coreweblabs.com/eye-3",
     featured: false
   },
   {
@@ -178,7 +178,7 @@ const DEMO_WEBSITES = [
     tools: ["Ophthalmology", "Specialist", "Clean"],
     image: "/demo-screenshots/eye-clinic-demo-4.png",
     gallery: ["/demo-screenshots/eye-clinic-demo-4.png"],
-    liveUrl: "https://clinics-lime.vercel.app/eye-4/",
+    liveUrl: "https://clinic.coreweblabs.com/eye-4/",
     featured: false
   },
   {
@@ -193,7 +193,7 @@ const DEMO_WEBSITES = [
     tools: ["Beauty", "Aesthetics", "AI Analysis", "Booking"],
     image: "/demo-screenshots/clinic-demo-8.png",
     gallery: ["/demo-screenshots/clinic-demo-8.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-8",
+    liveUrl: "https://clinic.coreweblabs.com/demo-8",
     featured: false
   },
   {
@@ -208,7 +208,7 @@ const DEMO_WEBSITES = [
     tools: ["Healthcare", "Doctor Profiles", "Multi-layout", "Booking"],
     image: "/demo-screenshots/clinic-demo-9.png",
     gallery: ["/demo-screenshots/clinic-demo-9.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-9",
+    liveUrl: "https://clinic.coreweblabs.com/demo-9",
     featured: false
   },
   {
@@ -223,7 +223,7 @@ const DEMO_WEBSITES = [
     tools: ["Dental", "Surgery", "Multi-layout", "Premium"],
     image: "/demo-screenshots/clinic-demo-10.png",
     gallery: ["/demo-screenshots/clinic-demo-10.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-10",
+    liveUrl: "https://clinic.coreweblabs.com/demo-10",
     featured: false
   },
   {
@@ -238,7 +238,7 @@ const DEMO_WEBSITES = [
     tools: ["Healthcare", "Multi-page", "Gallery", "Testimonials"],
     image: "/demo-screenshots/clinic-demo-11.png",
     gallery: ["/demo-screenshots/clinic-demo-11.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-11",
+    liveUrl: "https://clinic.coreweblabs.com/demo-11",
     featured: false
   },
   {
@@ -253,7 +253,7 @@ const DEMO_WEBSITES = [
     tools: ["Plastic Surgery", "eCommerce", "Multi-style", "Premium"],
     image: "/demo-screenshots/clinic-demo-12.png",
     gallery: ["/demo-screenshots/clinic-demo-12.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-12",
+    liveUrl: "https://clinic.coreweblabs.com/demo-12",
     featured: false
   },
   {
@@ -268,7 +268,7 @@ const DEMO_WEBSITES = [
     tools: ["Physiotherapy", "Rehabilitation", "Booking", "Services"],
     image: "/demo-screenshots/clinic-demo-13.png",
     gallery: ["/demo-screenshots/clinic-demo-13.png"],
-    liveUrl: "https://clinics-lime.vercel.app/demo-13",
+    liveUrl: "https://clinic.coreweblabs.com/demo-13",
     featured: false
   }
 ];

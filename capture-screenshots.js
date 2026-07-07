@@ -4,8 +4,28 @@ const fs = require("fs");
 
 const DEMOS = [
   {
-    url: "https://clinics-lime.vercel.app/eye-4/",
-    filename: "eye-clinic-demo-4.png"
+    url: "https://clinic.coreweblabs.com/demo-8",
+    filename: "clinic-demo-8.png"
+  },
+  {
+    url: "https://clinic.coreweblabs.com/demo-9",
+    filename: "clinic-demo-9.png"
+  },
+  {
+    url: "https://clinic.coreweblabs.com/demo-10",
+    filename: "clinic-demo-10.png"
+  },
+  {
+    url: "https://clinic.coreweblabs.com/demo-11",
+    filename: "clinic-demo-11.png"
+  },
+  {
+    url: "https://clinic.coreweblabs.com/demo-12",
+    filename: "clinic-demo-12.png"
+  },
+  {
+    url: "https://clinic.coreweblabs.com/demo-13",
+    filename: "clinic-demo-13.png"
   }
 ];
 
