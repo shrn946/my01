@@ -45,8 +45,7 @@ async function captureScreenshot(browser, url, filename) {
 
     await page.screenshot({
       path: outputPath,
-      fullPage: false,
-      clip: { x: 0, y: 0, width: 1440, height: 900 }
+      fullPage: true
     });
 
     console.log(`  ✅ Saved: ${filename} (${Math.round(fs.statSync(outputPath).size / 1024)} KB)`);
