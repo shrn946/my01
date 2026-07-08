@@ -454,7 +454,7 @@ async function extractLeadDataWithGemini(
 
     const prisma = getPrisma();
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
-    const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite";
+    const model = settings?.geminiModel?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-1.5-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
     const prompt = `You are a data extraction assistant. A user wants to find contact info and business details.

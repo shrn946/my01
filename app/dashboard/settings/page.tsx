@@ -477,10 +477,10 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>Gemini Model Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="gemini-3.1-flash-lite" className="rounded-xl" {...field} value={field.value || ""} />
+                      <Input placeholder="gemini-1.5-flash" className="rounded-xl" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormDescription>
-                      Leave blank to use the default (<code>gemini-3.1-flash-lite</code>). You can also use <code>gemini-2.5-pro</code> for higher quality outputs (may be slower).
+                      Leave blank to use the default (<code>gemini-1.5-flash</code>). You can also use <code>gemini-1.5-pro</code> for higher quality outputs (may be slower).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

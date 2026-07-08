@@ -11,7 +11,8 @@ export const auditCategorySchema = z.enum([
   "accessibility",
   "custom_dev",
   "small_fixes",
-  "design_improvements"
+  "design_improvements",
+  "redesign_layout"
 ]);
 
 export type AuditCategory = z.infer<typeof auditCategorySchema>;
@@ -29,4 +30,5 @@ export const AUDIT_CATEGORIES: Array<{
   { value: "custom_dev", label: "Custom Feature Development", description: "Build complex interactive tools, custom API integrations, dynamic dashboards, and specialized backend functionality." },
   { value: "small_fixes", label: "Website Changes & Content Updates", description: "Text updates, image replacements, broken links, minor functionality fixes, layout improvements, and general website maintenance." },
   { value: "design_improvements", label: "Website Design Improvements", description: "Enhance the existing website without a full redesign, including layout refinements, visual styling updates, improved spacing and typography, modern UI enhancements, mobile responsiveness, navigation improvements, and overall user experience upgrades while preserving the current content and structure." },
+  { value: "redesign_layout", label: "Website Redesign & Layout Improvement", description: "Focus on upgrading the current layout, enhancing the user experience, and implementing necessary structural changes to modernize the site." },
 ];

@@ -466,7 +466,28 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
         findings: ["The interface lacks the premium feel of modern web applications.", "Spacing and typography could be optimized for better readability."],
         recommendations: ["Upgrade UI components (buttons, cards, forms).", "Improve whitespace and typographic hierarchy.", "Enhance mobile responsiveness and navigation."],
       });
-    } else if (!["redesign", "fix_issues", "loading_speed", "seo", "maintenance", "design_improvements"].includes(category)) {
+    }
+    if (category === "redesign_layout") {
+      comments.push({
+        category, priority: "high", heading: "Layout structure and content hierarchy require modernization",
+        finding: "The current website layout does not optimally structure information flow, hindering the visual reading path.",
+        recommendation: "Reorganize the page layout grids, introduce better vertical rhythm, and upgrade content layout structure for a modern feel.",
+        evidence: `Mobile viewport score is ${input.scores.mobile}/100. Restructuring the page layout can improve UX.`,
+        strength: false,
+      });
+      recommendations.push({
+        category, priority: "high", title: "Upgrade layout and restructure pages",
+        finding: "The overall website layout needs structural updates to improve scannability.",
+        recommendation: "Implement clear grid systems, balance text block width, and realign structural containers to modern layout standards.",
+        business_impact: "An optimized website layout decreases cognitive friction for users, driving higher engagement and layout-related conversion.",
+      });
+      sections.push({
+        category, heading: "Redesign & Layout Improvements",
+        analysis: "This analysis evaluates your layout flow, visual structure, container spacing, and key component organization to modernize your site.",
+        findings: ["Information hierarchy and structural layout flow could be optimized.", "Whitespace and spacing between main structural sections require adjustment."],
+        recommendations: ["Re-align structural layout grids.", "Optimize spacing and vertical rhythm between sections.", "Implement necessary layout design changes to improve readability."],
+      });
+    } else if (!["redesign", "fix_issues", "loading_speed", "seo", "maintenance", "design_improvements", "redesign_layout"].includes(category)) {
       const label = categoryLabel(category);
       comments.push({
         category, priority: "medium", heading: `Opportunities identified for ${label}`,
@@ -581,6 +602,7 @@ Hassan Naqvi"
 DYNAMIC CATEGORY HANDLING:
 - Website Changes & Content Updates: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
 - Website Design Improvements: prioritize layout refinements, visual styling updates, improved spacing and typography, modern UI enhancements, mobile responsiveness, navigation improvements, and overall user experience upgrades while preserving the current content and structure.
+- Website Redesign & Layout Improvement: Focus on upgrading the current layout, enhancing the user experience, and implementing necessary structural changes to modernize the site.
 - Complete Re-Design: Write a short, professional redesign summary based on the website audit. Clearly explain if the current website looks outdated or does not follow modern design and user-experience standards. Mention relevant improvement areas (visual design, mobile responsiveness, page structure, navigation, trust elements, calls to action, speed, accessibility, conversion flow). Use simple, client-friendly English with a helpful, professional tone (not overly negative). Focus on why a redesign will improve the visitor experience and generate more enquiries/leads. Example: "Your website design looks outdated and does not meet current user experience or design standards. A redesign is recommended to improve the visual appearance, mobile experience, page structure, trust elements, calls to action, and overall conversion flow. The updated design should follow modern website trends while keeping the brand professional, clear, and easy for visitors to use."
 - SEO: prioritize titles, headings, local SEO, service pages, internal links, metadata, and content gaps.
 - Technical Fixes: prioritize speed, mobile performance, broken forms, console errors, security, image optimization, and browser issues.
@@ -642,7 +664,7 @@ async function loadImageParts(images: ReportMediaItem[] = []) {
 async function callGemini(prompt: string, images: ReportMediaItem[] = [], modelOverride?: string | null) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
-  const model = modelOverride?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite";
+  const model = modelOverride?.trim() || process.env.GEMINI_MODEL?.trim() || "gemini-1.5-flash";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 55_000);
