@@ -143,12 +143,6 @@ export function AuditLightbox({ items }: { items: MediaItem[] }) {
                 )}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-white/5">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-400 block mb-2.5">Suggested Action / Fix</span>
-                <p className="text-xs text-slate-400 leading-relaxed font-light">
-                  This constraint will be completely eliminated during migration. Our proposed design implements robust performance optimization, modern CSS layout modules, and clean asset encoding to resolve this issue.
-                </p>
-              </div>
             </div>
           </div>
         </div>
