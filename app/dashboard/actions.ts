@@ -912,3 +912,197 @@ export async function markFollowUpReplied(leadId: string) {
   revalidatePath("/dashboard/leads");
   return { success: true };
 }
+
+export async function fetchPortfolioLinks(): Promise<{ success: boolean; items?: any[]; error?: string }> {
+  try {
+    const prisma = getPrisma();
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } }) || await prisma.settings.findFirst();
+    const portfolioUrl = settings?.portfolioUrl || "https://www.coreweblabs.com/portfolio";
+
+    const res = await fetch(portfolioUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      },
+      cache: "no-store"
+    });
+    if (!res.ok) throw new Error("Failed to fetch portfolio");
+    const html = await res.text();
+    const $ = cheerio.load(html);
+    const items: Array<{
+      title: string;
+      category: string;
+      description: string;
+      url: string;
+      image: string;
+    }> = [];
+
+    $("article").each((i, el) => {
+      const $el = $(el);
+      const title = $el.find("h3").text().trim();
+      const category = $el.find("span").first().text().trim();
+      const description = $el.find("p").text().trim();
+      let url = $el.find("a[href]").attr("href") || "";
+      let image = $el.find("img").attr("src") || $el.find("img").attr("srcSet") || "";
+
+      if (image && image.includes("url=")) {
+        try {
+          const match = image.match(/url=([^&]+)/);
+          if (match) {
+            image = decodeURIComponent(match[1]);
+          }
+        } catch (e) {}
+      }
+      if (image && image.startsWith("/")) {
+        try {
+          const origin = new URL(portfolioUrl).origin;
+          image = `${origin}${image}`;
+        } catch (e) {
+          image = `https://www.coreweblabs.com${image}`;
+        }
+      }
+      if (url && url.startsWith("/")) {
+        try {
+          const origin = new URL(portfolioUrl).origin;
+          url = `${origin}${url}`;
+        } catch (e) {
+          url = `https://www.coreweblabs.com${url}`;
+        }
+      }
+
+      if (title && url) {
+        items.push({ title, category, description, url, image });
+      }
+    });
+
+    if (items.length === 0) {
+      return { success: true, items: FALLBACK_PORTFOLIO };
+    }
+    return { success: true, items };
+  } catch (error: any) {
+    console.error("Error scraping portfolio:", error);
+    return { success: true, items: FALLBACK_PORTFOLIO };
+  }
+}
+
+const FALLBACK_PORTFOLIO = [
+  {
+    title: "PrimeCare Dental & Implant Practice",
+    category: "Dental Clinic",
+    description: "A state-of-the-art, high-converting dental practice template engineered for patient bookings, cosmetic dentistry showcases, and seamless online scheduling.",
+    url: "https://clinic.coreweblabs.com/",
+    image: "https://www.coreweblabs.com/demo-screenshots/primecare.png"
+  },
+  {
+    title: "SmileCraft Modern Dentistry",
+    category: "Dental Clinic",
+    description: "An ultra-clean, patient-centric dental clinic web interface featuring dynamic team profiles, comprehensive procedure breakdowns, and real-time review widgets.",
+    url: "https://clinic.coreweblabs.com/demo-2",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-2.png"
+  },
+  {
+    title: "Family Care Dental & Orthodontics",
+    category: "Dental Clinic",
+    description: "An elegant healthcare layout tailored for family dentistry and orthodontic clinics emphasizing comprehensive preventative care and pediatric dental solutions.",
+    url: "https://clinic.coreweblabs.com/demo-3",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-3.png"
+  },
+  {
+    title: "Apex Dental & Surgical Center",
+    category: "Dental Clinic",
+    description: "A feature-rich medical layout showcasing transparent dental pricing plans, emergency care contacts, and interactive treatment decision trees.",
+    url: "https://clinic.coreweblabs.com/demo-4",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-4.png"
+  },
+  {
+    title: "OmniDent Multi-Specialty Clinic",
+    category: "Dental Clinic",
+    description: "A robust multi-specialty clinical hub designed for group dental practices, integrating multi-doctor schedules, insurance checkers, and virtual consultation portals.",
+    url: "https://clinic.coreweblabs.com/demo-5",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-5.png"
+  },
+  {
+    title: "Radiant Smiles Aesthetic Dentistry",
+    category: "Dental Clinic",
+    description: "A sophisticated cosmetic dentistry template emphasizing before-and-after smile transformations, teeth whitening packages, and porcelain veneer guides.",
+    url: "https://clinic.coreweblabs.com/demo-6",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-6.png"
+  },
+  {
+    title: "Align & Shine Orthodontic Specialist",
+    category: "Dental Clinic",
+    description: "A modern orthodontic clinical portal highlighting clear aligner technology, 3D digital scanning process overviews, and custom treatment financing calculators.",
+    url: "https://clinic.coreweblabs.com/dental-7",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-dental-7.png"
+  },
+  {
+    title: "VisionCare Ophthalmology & Laser Center",
+    category: "Eye Care & Ophthalmology",
+    description: "A premium optometry and ophthalmology landing page packed with vision test scheduling, LASIK surgery guides, and optical eyewear showcases.",
+    url: "https://clinic.coreweblabs.com/eye-1",
+    image: "https://www.coreweblabs.com/demo-screenshots/eye-clinic-demo-1.png"
+  },
+  {
+    title: "Optima Eye Specialists & Surgeons",
+    category: "Eye Care & Ophthalmology",
+    description: "An advanced optical care website designed to highlight modern diagnostic machinery, surgeon credentials, and comprehensive eye disease management.",
+    url: "https://clinic.coreweblabs.com/eye-2",
+    image: "https://www.coreweblabs.com/demo-screenshots/eye-clinic-demo-2.png"
+  },
+  {
+    title: "ClearView Optometry & Designer Eyewear",
+    category: "Eye Care & Ophthalmology",
+    description: "A stylish optician and vision correction showcase combining routine eye examination scheduling with interactive designer frame catalog previews.",
+    url: "https://clinic.coreweblabs.com/eye-3",
+    image: "https://www.coreweblabs.com/demo-screenshots/eye-clinic-demo-3.png"
+  },
+  {
+    title: "Precision Vision & Refractive Clinic",
+    category: "Eye Care & Ophthalmology",
+    description: "A modern refractive eye surgery web portal built for state-of-the-art vision correction, professional corneal exams, and personalized optical therapies.",
+    url: "https://clinic.coreweblabs.com/eye-4/",
+    image: "https://www.coreweblabs.com/demo-screenshots/eye-clinic-demo-4.png"
+  },
+  {
+    title: "Lumina Beauty & Aesthetics Clinic",
+    category: "Beauty & Aesthetics",
+    description: "A premium cosmetic clinic website featuring AI facial analysis, advanced plastic surgery showcases, appointment booking, and a comprehensive gallery of aesthetic transformations.",
+    url: "https://clinic.coreweblabs.com/demo-8",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-8.png"
+  },
+  {
+    title: "MediZen Health & Medical Center",
+    category: "General Healthcare",
+    description: "A comprehensive health and medical clinic template with multi-home layouts, doctor profiles, service pages, project case studies, and patient appointment scheduling.",
+    url: "https://clinic.coreweblabs.com/demo-9",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-9.png"
+  },
+  {
+    title: "MediDental Premium Dental Surgery",
+    category: "Dental Clinic",
+    description: "A premium dental clinic and surgery website with multi-homepage options, transparent service showcases, doctor directories, project portfolios, and online appointment booking.",
+    url: "https://clinic.coreweblabs.com/demo-10",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-10.png"
+  },
+  {
+    title: "Pluxes Advanced Healthcare Services",
+    category: "General Healthcare",
+    description: "A premium medical and healthcare website template featuring multiple home versions, gallery pages, video galleries, testimonials, FAQ sections, and team doctor profiles.",
+    url: "https://clinic.coreweblabs.com/demo-11",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-11.png"
+  },
+  {
+    title: "Vamary Plastic Surgery & Medical Center",
+    category: "Beauty & Aesthetics",
+    description: "A sophisticated plastic surgery and medical center template with eight home styles, an integrated shop, doctor directories, case studies, and full eCommerce functionality.",
+    url: "https://clinic.coreweblabs.com/demo-12",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-12.png"
+  },
+  {
+    title: "Resox Physiotherapy & Chiropractic Clinic",
+    category: "Physiotherapy & Rehabilitation",
+    description: "A professional physiotherapy and chiropractic clinic website featuring service pages for massage therapy, sport injuries, clinical pilates, and an integrated appointment booking form.",
+    url: "https://clinic.coreweblabs.com/demo-13",
+    image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-13.png"
+  }
+];
+

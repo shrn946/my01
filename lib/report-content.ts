@@ -27,6 +27,17 @@ export const reportContentSchema = z.object({
   hideAfterImage: z.boolean().default(false),
   afterImage: z.string().optional(),
   isAfterImageLocked: z.boolean().optional(),
+  customEmailSubject: z.string().optional(),
+  customEmailBody: z.string().optional(),
+  recipientEmail: z.string().optional(),
+  portfolioLinks: z.array(z.object({
+    title: z.string(),
+    category: z.string(),
+    description: z.string().optional(),
+    url: z.string(),
+    image: z.string().optional(),
+    selected: z.boolean().default(true),
+  })).default([]),
 });
 
 export type ReportMediaItem = z.infer<typeof reportMediaItemSchema>;
@@ -34,7 +45,14 @@ export type ReportContent = z.infer<typeof reportContentSchema>;
 
 export function getReportContent(value: unknown): ReportContent {
   const parsed = reportContentSchema.safeParse(value);
-  return parsed.success ? parsed.data : { developerComments: "", recommendations: [], history: [], includeBeforeAfter: false, hideAfterImage: false };
+  return parsed.success ? parsed.data : { 
+    developerComments: "", 
+    recommendations: [], 
+    history: [], 
+    includeBeforeAfter: false, 
+    hideAfterImage: false,
+    portfolioLinks: [] 
+  };
 }
 
 export function getReportMedia(value: unknown): ReportMediaItem[] {

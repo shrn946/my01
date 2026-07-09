@@ -253,151 +253,14 @@ export default async function ReportPage({
           </CardContent>
         </Card>
 
-        <section className="space-y-8 md:space-y-10">
-          <div className="flex items-center gap-3 md:gap-4 mb-4">
-            <span className="h-px bg-slate-200 flex-1"></span>
-            <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 text-center break-words">Strategic Analysis</h2>
-            <span className="h-px bg-slate-200 flex-1"></span>
-          </div>
-          {aiAudit.full_report_data.sections.map((section) => {
-            if (section.category === "seo") {
-              const seoComments = aiAudit.developer_comments?.filter((c: any) => c.category === 'seo') || [];
-              
-              const groupedComments: Record<string, any[]> = {
-                "Meta Tags": [],
-                "Headings": [],
-                "Content": [],
-                "Links": [],
-                "Technical SEO": [],
-                "Mobile SEO": [],
-                "General SEO": []
-              };
-
-              seoComments.forEach((comment: any) => {
-                const lower = (comment.heading + " " + comment.finding).toLowerCase();
-                let group = "General SEO";
-                if (lower.includes("meta") || lower.includes("title") || lower.includes("description")) group = "Meta Tags";
-                else if (lower.includes("heading") || lower.includes("h1") || lower.includes("h2") || lower.includes("h3")) group = "Headings";
-                else if (lower.includes("content") || lower.includes("keyword") || lower.includes("alt text") || lower.includes("copy")) group = "Content";
-                else if (lower.includes("link") || lower.includes("anchor") || lower.includes("url")) group = "Links";
-                else if (lower.includes("mobile") || lower.includes("responsive") || lower.includes("viewport")) group = "Mobile SEO";
-                else if (lower.includes("schema") || lower.includes("robot") || lower.includes("sitemap") || lower.includes("index") || lower.includes("technical") || lower.includes("canonical")) group = "Technical SEO";
-                
-                groupedComments[group].push(comment);
-              });
-
-              // Fallback to findings if no developer comments for SEO
-              const activeGroups = Object.entries(groupedComments).filter(([_, comments]) => comments.length > 0);
-
-              return (
-                <Card key={section.category} className="print-section border-none shadow-xl shadow-slate-200/50 rounded-[2rem] overflow-hidden bg-white">
-                  <CardContent className="p-6 md:p-12">
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
-                      <h3 className="text-2xl font-black tracking-tight text-slate-900 break-words">{section.heading}</h3>
-                      <span className="rounded-full bg-indigo-50/80 text-indigo-700 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] shrink-0">{categoryLabel(section.category)}</span>
-                    </div>
-                    <p className="text-base md:text-lg text-slate-600 leading-relaxed font-light mb-8">{section.analysis}</p>
-                    
-                    {activeGroups.length > 0 ? (
-                      <div className="space-y-8">
-                        {activeGroups.map(([groupName, comments]) => (
-                          <div key={groupName}>
-                            <h4 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-4">{groupName}</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                              {comments.map((comment: any, idx: number) => (
-                                <div key={idx} className="rounded-2xl border border-slate-100 bg-slate-50 p-5 flex flex-col h-full">
-                                  <div className="flex flex-wrap items-center gap-2 mb-3">
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                                      comment.priority === 'critical' ? 'bg-rose-100 text-rose-700' :
-                                      comment.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                                      comment.priority === 'medium' ? 'bg-amber-100 text-amber-700' :
-                                      'bg-slate-200 text-slate-700'
-                                    }`}>
-                                      {comment.priority}
-                                    </span>
-                                    {comment.strength && <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wider">Strength</span>}
-                                  </div>
-                                  <h5 className="font-bold text-slate-900 text-sm md:text-base leading-snug break-words mb-2">{comment.heading}</h5>
-                                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed mb-4 flex-grow">{comment.finding}</p>
-                                  <div className="pt-3 border-t border-slate-200 mt-auto">
-                                    <p className="text-xs font-semibold text-indigo-700 flex items-start gap-1.5">
-                                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> 
-                                      <span className="leading-relaxed">{comment.recommendation}</span>
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="mt-7 grid md:grid-cols-2 gap-8">
-                        <div>
-                          <h4 className="font-black text-slate-900 mb-3 text-lg">Findings</h4>
-                          <ul className="space-y-3">
-                            {section.findings.map((item) => <li key={item} className="text-sm md:text-base text-slate-700 flex gap-2"><AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />{item}</li>)}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-black text-slate-900 mb-3 text-lg">Recommendations</h4>
-                          <ul className="space-y-3">
-                            {section.recommendations.map((item) => <li key={item} className="text-sm md:text-base text-slate-700 flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>)}
-                          </ul>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            return (
-            <Card key={section.category} className="print-section border-none shadow-xl shadow-slate-200/50 rounded-[2rem] overflow-hidden bg-white">
-              <CardContent className="p-6 md:p-12">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
-                  <h3 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 break-words">{section.heading}</h3>
-                  <span className="rounded-full bg-indigo-50/80 text-indigo-700 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.15em]">{categoryLabel(section.category)}</span>
-                </div>
-                <p className="text-lg text-slate-600 leading-relaxed font-light">{section.analysis}</p>
-                <div className="mt-7 grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="font-black text-slate-900 mb-3">Findings</h4>
-                    <ul className="space-y-3">
-                      {section.findings.map((item) => <li key={item} className="text-sm text-slate-700 flex gap-2"><AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />{item}</li>)}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-black text-slate-900 mb-3">Recommendations</h4>
-                    <ul className="space-y-3">
-                      {section.recommendations.map((item) => <li key={item} className="text-sm text-slate-700 flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>)}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            );
-          })}
-          {mediaFor("findings").length > 0 && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {mediaFor("findings").map((item) => (
-                <figure key={item.id} className="print-section overflow-hidden rounded-3xl border border-slate-200">
-                  <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
-                  <figcaption className="p-4 text-sm font-semibold">{item.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
-        </section>
-
         <section className="print-section space-y-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600 shrink-0">
+            <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-indigo-600 shrink-0">
               <Terminal className="h-5 w-5 md:h-6 md:w-6" />
             </div>
             <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 break-words">Technical Observations</h2>
           </div>
-          <Card className="border-none shadow-2xl shadow-indigo-900/5 overflow-hidden relative rounded-[2rem]">
+          <Card className="border border-slate-100 shadow-lg shadow-indigo-900/5 overflow-hidden relative rounded-[2rem]">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500" />
             <CardContent 
               className="p-6 pl-8 md:p-10 md:pl-12 text-slate-600 leading-relaxed font-light break-words whitespace-pre-wrap [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_p:empty]:h-6 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
@@ -406,11 +269,79 @@ export default async function ReportPage({
           </Card>
         </section>
 
+        {/* Portfolio Links (My Previous Work & Demo Links) */}
+        {(() => {
+          const portfolioLinks = (reportContent.portfolioLinks || []) as Array<{
+            title: string;
+            category: string;
+            description?: string;
+            url: string;
+            image?: string;
+            selected?: boolean;
+          }>;
+          const selectedLinks = portfolioLinks.filter(item => item.selected !== false);
+          if (selectedLinks.length === 0) return null;
 
+          return (
+            <section className="print-section space-y-6">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-indigo-600 shrink-0">
+                    <Monitor className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                  <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 break-words">Interactive Website Demos</h2>
+                </div>
+                <p className="text-slate-600 text-sm md:text-base max-w-3xl leading-relaxed font-light mt-2 pl-1.5">
+                  Our websites are built using the latest technologies, including WordPress and Next.js, delivering lightning-fast performance, SEO-optimized architecture, responsive design, robust security, and scalable solutions to help your business grow.
+                </p>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+                {selectedLinks.map((item, idx) => (
+                  <Card key={idx} className="overflow-hidden border border-slate-100 shadow-lg shadow-slate-200/40 bg-white rounded-3xl hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col h-full group">
+                    {item.image && (
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-50 border-b border-slate-100">
+                        <img 
+                          src={item.image} 
+                          alt={item.title} 
+                          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" 
+                        />
+                      </div>
+                    )}
+                    <CardContent className="p-6 flex flex-col flex-grow">
+                      <div className="mb-3">
+                        <span className="rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-600">
+                          {item.category}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
+                        {item.title}
+                      </h3>
+                      {item.description && (
+                        <p className="text-xs text-slate-600 leading-relaxed mb-4 flex-grow line-clamp-3">
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="mt-auto pt-4 border-t border-slate-100">
+                        <a 
+                          href={item.url} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                        >
+                          View Live Demo <ArrowRight className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {mediaFor("appendix").length > 0 && (
-          <section className="print-section bg-red-50/80 border border-red-100 rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden my-10 md:my-16">
-            <div className="absolute top-0 left-0 w-2 h-full bg-red-500"></div>
+          <section className="print-section bg-red-50/50 border border-red-100 rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden my-10 md:my-16">
+            <div className="absolute top-0 left-0 w-2 h-full bg-red-500" />
             <div className="flex flex-col mb-8 md:mb-10 relative z-10">
               <h2 className="flex items-start md:items-center gap-3 print-heading text-xl md:text-3xl font-black tracking-tight text-red-950">
                 <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600 shrink-0 mt-1 md:mt-0" />
@@ -449,20 +380,6 @@ export default async function ReportPage({
               <>
                 <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">{aiAudit.proposal_content.title}</h2>
                 <p className="mt-4 md:mt-6 text-lg md:text-xl text-slate-300 leading-relaxed font-light max-w-3xl">{aiAudit.proposal_content.executive_pitch}</p>
-                
-                <div className="mt-12 mb-6">
-                  <h3 className="text-xl font-bold mb-6 text-white">Project Scope</h3>
-                  <ul className="grid md:grid-cols-2 gap-x-8 gap-y-4">
-                    {aiAudit.proposal_content.scope.map((item: string) => (
-                      <li key={item} className="flex gap-4 items-start">
-                        <div className="mt-0.5 p-1 rounded-full bg-emerald-500/20 text-emerald-400">
-                          <CheckCircle2 className="h-4 w-4 shrink-0" />
-                        </div>
-                        <span className="text-base text-slate-200">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </>
             )}
 

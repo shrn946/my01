@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload, Copy, ChevronDown, ChevronUp
+  Search, Globe, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Zap, Image as ImageIcon, FileText, Send, Eye, Save, Clock, Loader2, ArrowRight, Edit3, X, Plus, Trash2, FileImage, Wand2, Sparkles, Upload, Copy, ChevronDown, ChevronUp, ArrowUp, ArrowDown, RefreshCw
 } from "lucide-react";
-import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments, autoCorrectText, updateCustomProposalContent } from "./actions";
+import { quickAnalyzeWebsite, getMediaAssetsAction, updateLeadEmail, getLeadAction, getDashboardStats, getLeads, deleteLead, enhanceDeveloperComments, updateLeadDeveloperComments, autoCorrectText, updateCustomProposalContent, fetchPortfolioLinks } from "./actions";
 import dynamic from "next/dynamic";
 
 const RichEditor = dynamic(() => import("@/components/rich-editor").then(mod => mod.RichEditor), {
@@ -192,6 +192,206 @@ export default function DashboardClient({
   const [correctingMediaNotes, setCorrectingMediaNotes] = useState<string | null>(null);
   const [recipientEmail, setRecipientEmail] = useState("");
 
+  const [portfolioLinks, setPortfolioLinks] = useState<Array<{
+    title: string;
+    category: string;
+    description?: string;
+    url: string;
+    image?: string;
+    selected?: boolean;
+  }>>([]);
+  const [isSavingPortfolio, setIsSavingPortfolio] = useState(false);
+  const [isFetchingPortfolio, setIsFetchingPortfolio] = useState(false);
+
+  // Form for custom portfolio link
+  const [newPortfolioTitle, setNewPortfolioTitle] = useState("");
+  const [newPortfolioCategory, setNewPortfolioCategory] = useState("WordPress Dev");
+  const [newPortfolioUrl, setNewPortfolioUrl] = useState("");
+  const [newPortfolioImage, setNewPortfolioImage] = useState("");
+  const [newPortfolioDesc, setNewPortfolioDesc] = useState("");
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
+
+  const PORTFOLIO_CATEGORIES = [
+    "Healthcare and Wellness",
+    "Other",
+    "Law Firms ⚖️",
+    "Educational",
+    "Retail Parks And Shopping",
+    "Moving Services",
+    "Security and Transportation",
+    "Dental Clinic",
+    "Eye Care & Ophthalmology",
+    "Beauty & Aesthetics",
+    "General Healthcare",
+    "Physiotherapy & Rehabilitation"
+  ];
+
+  const [selectedPortfolioCategories, setSelectedPortfolioCategories] = useState<string[]>([]);
+
+  const handleSelectCategoryLinks = async (categoryName: string, selected: boolean) => {
+    let currentLinks = [...portfolioLinks];
+    
+    const hasCoreWebLabsItems = currentLinks.some(item => 
+      item.category && PORTFOLIO_CATEGORIES.some(cat => 
+        item.category.replace(/[^a-zA-Z0-9\s]/g, "").toLowerCase().trim() === cat.replace(/[^a-zA-Z0-9\s]/g, "").toLowerCase().trim()
+      )
+    ) && currentLinks.length > 10;
+
+    if (!hasCoreWebLabsItems) {
+      setIsFetchingPortfolio(true);
+      const res = await fetchPortfolioLinks();
+      setIsFetchingPortfolio(false);
+      if (res.success && res.items) {
+        const fetchedItems = res.items;
+        const merged = [...currentLinks];
+        fetchedItems.forEach(fetchedItem => {
+          const exists = merged.some(m => m.url.toLowerCase().trim() === fetchedItem.url.toLowerCase().trim());
+          if (!exists) {
+            merged.push({ ...fetchedItem, selected: false });
+          }
+        });
+        currentLinks = merged;
+      }
+    }
+
+    const updated = currentLinks.map(item => {
+      const itemCatClean = item.category.replace(/[^a-zA-Z0-9\s]/g, "").toLowerCase().trim();
+      const searchCatClean = categoryName.replace(/[^a-zA-Z0-9\s]/g, "").toLowerCase().trim();
+      
+      const match = itemCatClean === searchCatClean || 
+                    itemCatClean.includes(searchCatClean) || 
+                    searchCatClean.includes(itemCatClean);
+      if (match) {
+        return { ...item, selected };
+      }
+      return item;
+    });
+    setPortfolioLinks(updated);
+  };
+
+  const handleMovePortfolioItem = (index: number, direction: 'up' | 'down') => {
+    const nextIndex = direction === 'up' ? index - 1 : index + 1;
+    if (nextIndex < 0 || nextIndex >= portfolioLinks.length) return;
+
+    const updated = [...portfolioLinks];
+    const temp = updated[index];
+    updated[index] = updated[nextIndex];
+    updated[nextIndex] = temp;
+    setPortfolioLinks(updated);
+  };
+
+  const handleTogglePortfolioItem = (index: number) => {
+    const updated = [...portfolioLinks];
+    updated[index].selected = updated[index].selected !== false ? false : true;
+    setPortfolioLinks(updated);
+  };
+
+  const handleRemovePortfolioItem = (index: number) => {
+    const updated = portfolioLinks.filter((_, i) => i !== index);
+    setPortfolioLinks(updated);
+  };
+
+  const handleAddCustomPortfolio = () => {
+    if (!newPortfolioTitle || !newPortfolioUrl) {
+      toast({ title: "Validation Error", description: "Title and URL are required.", variant: "destructive" });
+      return;
+    }
+    const newItem = {
+      title: newPortfolioTitle,
+      category: newPortfolioCategory,
+      description: newPortfolioDesc,
+      url: newPortfolioUrl,
+      image: newPortfolioImage,
+      selected: true
+    };
+    setPortfolioLinks([...portfolioLinks, newItem]);
+    setNewPortfolioTitle("");
+    setNewPortfolioUrl("");
+    setNewPortfolioImage("");
+    setNewPortfolioDesc("");
+    toast({ title: "Link Added", description: "Custom portfolio link added to the list." });
+  };
+
+  const handleSavePortfolioLinks = async () => {
+    if (!result?.leadId) return;
+    setIsSavingPortfolio(true);
+    try {
+      const updatedReportContent = {
+        ...result.reportContent,
+        portfolioLinks,
+        selectedPortfolioCategories
+      };
+      const res = await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+      if (res.success) {
+        setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+        toast({ title: "Portfolio Links Saved", description: "Portfolio links saved successfully." });
+      } else {
+        toast({ title: "Save Failed", description: res.error, variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSavingPortfolio(false);
+    }
+  };
+
+  const handleFetchCoreWebLabsPortfolio = async () => {
+    setIsFetchingPortfolio(true);
+    try {
+      const res = await fetchPortfolioLinks();
+      if (res.success && res.items) {
+        const fetchedItems = res.items.map(item => ({
+          ...item,
+          selected: false
+        }));
+        const leadCat = result?.category || "";
+        const matchedFetched = fetchedItems.map(item => {
+          if (leadCat && item.category.toLowerCase().includes(leadCat.toLowerCase())) {
+            return { ...item, selected: true };
+          }
+          return item;
+        });
+
+        const customItems = portfolioLinks.filter(existing => 
+          !res.items?.some((fetched: any) => fetched.url === existing.url)
+        );
+
+        setPortfolioLinks([...customItems, ...matchedFetched]);
+        toast({ title: "Portfolio Loaded", description: `Loaded ${res.items.length} items from CoreWebLabs.` });
+      } else {
+        toast({ title: "Fetch Failed", description: res.error || "Could not scrape portfolio page.", variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setIsFetchingPortfolio(false);
+    }
+  };
+
+  const handleSaveEmail = async () => {
+    if (!result?.leadId) return;
+    setIsSavingEmail(true);
+    try {
+      const updatedReportContent = {
+        ...result.reportContent,
+        customEmailSubject: emailSubject,
+        customEmailBody: emailBody,
+        recipientEmail: recipientEmail,
+      };
+      const res = await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+      if (res.success) {
+        setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+        toast({ title: "Email Saved", description: "Email template saved successfully." });
+      } else {
+        toast({ title: "Save Failed", description: res.error, variant: "destructive" });
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSavingEmail(false);
+    }
+  };
+
   const handleSelectLead = async (leadId: string) => {
     setIsLoadingLead(true);
     try {
@@ -201,7 +401,7 @@ export default function DashboardClient({
         localStorage.setItem("lastLeadId", lead.id);
         setUrl(lead.website || "");
         setEditEmail(lead.email || "");
-        setRecipientEmail(lead.email || "");
+        setRecipientEmail((lead.reportContent as any)?.recipientEmail || lead.email || "");
         setEditName(lead.businessName || "");
         setEditComments(lead.developerComments || "");
         setSelectedCategories((lead.aiAnalysis as any)?.selected_categories || []);
@@ -232,6 +432,28 @@ export default function DashboardClient({
               ${(pc.scope || []).map((item: string) => `<li>${item}</li>`).join('')}
             </ul>
           `);
+        }
+        setEmailSubject((lead.reportContent as any)?.customEmailSubject || (lead.aiAnalysis as any)?.proposal_content?.email_subject || "");
+        setEmailBody((lead.reportContent as any)?.customEmailBody || (lead.aiAnalysis as any)?.proposal_content?.email_body || "");
+
+        const savedLinks = (lead.reportContent as any)?.portfolioLinks || [];
+        const savedCats = (lead.reportContent as any)?.selectedPortfolioCategories || [];
+        setPortfolioLinks(savedLinks);
+        setSelectedPortfolioCategories(savedCats);
+        if (savedLinks.length === 0) {
+          fetchPortfolioLinks().then(res => {
+            if (res.success && res.items) {
+              const fetched = res.items.map(item => {
+                const leadCat = lead.category || "";
+                const isMatch = leadCat && (
+                  item.category.toLowerCase().includes(leadCat.toLowerCase()) || 
+                  leadCat.toLowerCase().includes(item.category.toLowerCase())
+                );
+                return { ...item, selected: !!isMatch };
+              });
+              setPortfolioLinks(fetched);
+            }
+          });
         }
         toast({ title: "Lead Loaded", description: `${lead.businessName} loaded for analysis.` });
       }
@@ -611,6 +833,11 @@ export default function DashboardClient({
           ? (updatedLead.reportContent as any).recommendations
           : aiRecommendations);
         setReportMedia((updatedLead.reportMedia as any[]) || []);
+        setEmailSubject((updatedLead.reportContent as any)?.customEmailSubject || (updatedLead.aiAnalysis as any)?.proposal_content?.email_subject || "");
+        setEmailBody((updatedLead.reportContent as any)?.customEmailBody || (updatedLead.aiAnalysis as any)?.proposal_content?.email_body || "");
+        setRecipientEmail((updatedLead.reportContent as any)?.recipientEmail || updatedLead.email || "");
+        const savedLinks = (updatedLead.reportContent as any)?.portfolioLinks || [];
+        setPortfolioLinks(savedLinks);
       } else {
         setResult((prev: any) => ({ ...prev, reportStatus: "Generated" }));
       }
@@ -725,174 +952,247 @@ export default function DashboardClient({
 
         </CardContent>
       </Card>
-
-
-
       {/* Results & Actions Container */}
       <AnimatePresence>
         {result && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
-            className="grid lg:grid-cols-3 gap-6"
+            className="grid lg:grid-cols-3 gap-6 items-start max-w-7xl mx-auto"
           >
-            {/* Left Column: Data */}
+            {/* Left Main Content Column */}
             <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-xl">Business Information</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => { setIsEditingEmail(true); setIsEditingName(true); }}>
-                    <Edit3 className="h-4 w-4 mr-2" /> Edit Info
-                  </Button>
-                </CardHeader>
-                <CardContent className="grid sm:grid-cols-2 gap-4">
-                  <InfoItem icon={<Globe />} label="Website URL" value={result.website} />
-                  <InfoItem icon={<Zap />} label="Technology" value={result.designAnalysis?.technology || "Not Detected"} />
-                  
-                  <div className="flex flex-col p-3 rounded-lg border bg-card/50">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Business Name</p>
-                    {isEditingName ? (
-                      <div className="flex gap-2">
-                        <Input size={1} value={editName} onChange={e => setEditName(e.target.value)} className="h-8 flex-1 min-w-0" />
-                        <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleUpdateName}><Save className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setIsEditingName(false)}><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium break-words min-w-0 flex-1">{result.businessName}</p>
-                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100 shrink-0 mt-1" onClick={() => setIsEditingName(true)} />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col p-3 rounded-lg border bg-card/50">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Email Address</p>
-                    {isEditingEmail ? (
-                      <div className="flex gap-2">
-                        <Input size={1} value={editEmail} onChange={e => setEditEmail(e.target.value)} className="h-8 flex-1 min-w-0" />
-                        <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleUpdateEmail}><Save className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium break-all min-w-0 flex-1">{result.email || "Not Found"}</p>
-                        <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100 shrink-0 mt-1" onClick={() => setIsEditingEmail(true)} />
-                      </div>
-                    )}
-                  </div>
-
-                  <InfoItem icon={<Phone />} label="Phone" value={result.phone ? <PhoneList rawPhone={result.phone} /> : "Not Found"} />
-                  <InfoItem icon={<MapPin />} label="Address" value={result.address || "Not Found"} />
-                  
-                  <div className="flex flex-col p-3 rounded-lg border bg-card/50">
-                    <div className="flex items-center justify-between mb-2">
-                       <p className="text-xs font-semibold text-muted-foreground uppercase">Social Links</p>
-                       <Button 
-                         variant="ghost" 
-                         size="sm" 
-                         className="h-6 text-xs font-bold text-primary hover:bg-primary/10" 
-                         onClick={handleGenerateSocialProposal}
-                         disabled={!result.leadId}
-                       >
-                         <Zap className="h-3 w-3 mr-1" /> Proposal
-                       </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {(() => {
-                        // Handle new structured object format {facebook, instagram, linkedin, twitter, youtube, tiktok}
-                        if (result.socialLinks && typeof result.socialLinks === 'object' && !Array.isArray(result.socialLinks)) {
-                          const entries = Object.entries(result.socialLinks).filter(([, v]) => v);
-                          if (entries.length === 0) return <span className="text-xs text-muted-foreground">None Found</span>;
-                          return entries.map(([platform, url]) => {
-                            const colors: Record<string, string> = {
-                              facebook: "bg-blue-600", instagram: "bg-pink-600",
-                              linkedin: "bg-sky-700", twitter: "bg-slate-900",
-                              youtube: "bg-red-600", tiktok: "bg-slate-800"
-                            };
-                            const labels: Record<string, string> = {
-                              facebook: "fb", instagram: "IG", linkedin: "in",
-                              twitter: "X", youtube: "YT", tiktok: "TT"
-                            };
-                            return (
-                              <a key={platform} href={url as string} target="_blank" rel="noreferrer" className="relative group" title={url as string}>
-                                <div className={`h-6 px-2 ${colors[platform] || "bg-muted"} rounded flex items-center justify-center text-white text-[10px] font-black gap-1`}>
-                                  {labels[platform] || platform}
-                                </div>
-                                <span className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                  {(url as string).replace(/^https?:\/\//, "").split("/")[0]}
-                                </span>
-                              </a>
-                            );
-                          });
-                        }
-                        // Handle old comma-separated string format for backward compatibility
-                        if (result.socialLinks && result.socialLinks !== "None Found" && typeof result.socialLinks === 'string') {
-                          return result.socialLinks.split(',').map((link: string, i: number) => {
-                            const url = link.trim();
-                            const icon = url.includes("linkedin") ? <div className="h-6 px-2 bg-sky-700 rounded flex items-center justify-center text-white text-[10px] font-black">in</div> : 
-                                         url.includes("instagram") ? <div className="h-6 px-2 bg-pink-600 rounded flex items-center justify-center text-white text-[10px] font-black">IG</div> :
-                                         url.includes("facebook") ? <div className="h-6 px-2 bg-blue-600 rounded flex items-center justify-center text-white text-[10px] font-black">fb</div> :
-                                         url.includes("twitter") || url.includes("x.com") ? <div className="h-6 px-2 bg-slate-900 rounded flex items-center justify-center text-white text-[10px] font-black">X</div> :
-                                         url.includes("youtube") ? <div className="h-6 px-2 bg-red-600 rounded flex items-center justify-center text-white text-[10px] font-black">YT</div> :
-                                         <Globe className="h-4 w-4" />;
-                            return (
-                              <a key={i} href={url} target="_blank" rel="noreferrer" className="relative group" title={url}>
-                                {icon}
-                                <span className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                  {url.replace(/^https?:\/\//, "").split("/")[0]}
-                                </span>
-                              </a>
-                            );
-                          });
-                        }
-                        return <span className="text-xs text-muted-foreground">None Found</span>;
-                      })()}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Advanced Options Toggle for Mobile */}
-              <div className="lg:hidden">
-                <Button 
-                  variant="outline" 
-                  className="w-full font-bold mb-6" 
-                  onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                >
-                  {isAdvancedOpen ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
-                  {isAdvancedOpen ? "Hide Advanced Options" : "Show Advanced Options (Screenshots, Comments)"}
+              {/* 1. Website Information */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl">Website Information</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => { setIsEditingEmail(true); setIsEditingName(true); }}>
+                  <Edit3 className="h-4 w-4 mr-2" /> Edit Info
                 </Button>
-              </div>
+              </CardHeader>
+              <CardContent className="grid sm:grid-cols-2 gap-4">
+                <InfoItem icon={<Globe />} label="Website URL" value={result.website} />
+                <InfoItem icon={<Zap />} label="Technology" value={result.designAnalysis?.technology || "Not Detected"} />
+                
+                <div className="flex flex-col p-3 rounded-lg border bg-card/50">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Business Name</p>
+                  {isEditingName ? (
+                    <div className="flex gap-2">
+                      <Input size={1} value={editName} onChange={e => setEditName(e.target.value)} className="h-8 flex-1 min-w-0" />
+                      <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleUpdateName}><Save className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setIsEditingName(false)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium break-words min-w-0 flex-1">{result.businessName}</p>
+                      <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100 shrink-0 mt-1" onClick={() => setIsEditingName(true)} />
+                    </div>
+                  )}
+                </div>
 
-              <div className={`${!isAdvancedOpen ? "hidden lg:block space-y-6" : "space-y-6"}`}>
-                <Card className={`shadow-sm overflow-hidden mb-6 transition-colors ${result.reportContent?.includeBeforeAfter ? 'border-indigo-100' : 'border-slate-200'}`}>
-                <div className={`p-6 border-b flex justify-between items-center transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-slate-200'}`}>
-                    <div className={`flex items-center gap-2 transition-opacity ${result.reportContent?.includeBeforeAfter ? 'opacity-100' : 'opacity-60'}`}>
-                      <div className={`p-2 rounded-lg text-white transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-500' : 'bg-slate-400'}`}>
-                        <ImageIcon className="h-5 w-5" />
+                <div className="flex flex-col p-3 rounded-lg border bg-card/50">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Email Address</p>
+                  {isEditingEmail ? (
+                    <div className="flex gap-2">
+                      <Input size={1} value={editEmail} onChange={e => setEditEmail(e.target.value)} className="h-8 flex-1 min-w-0" />
+                      <Button size="icon" className="h-8 w-8 shrink-0" onClick={handleUpdateEmail}><Save className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium break-all min-w-0 flex-1">{result.email || "Not Found"}</p>
+                      <Edit3 className="h-3 w-3 opacity-30 cursor-pointer hover:opacity-100 shrink-0 mt-1" onClick={() => setIsEditingEmail(true)} />
+                    </div>
+                  )}
+                </div>
+
+                <InfoItem icon={<Phone />} label="Phone" value={result.phone ? <PhoneList rawPhone={result.phone} /> : "Not Found"} />
+                <InfoItem icon={<MapPin />} label="Address" value={result.address || "Not Found"} />
+                
+                <div className="flex flex-col p-3 rounded-lg border bg-card/50 sm:col-span-2">
+                  <div className="flex items-center justify-between mb-2">
+                     <p className="text-xs font-semibold text-muted-foreground uppercase">Social Links</p>
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       className="h-6 text-xs font-bold text-primary hover:bg-primary/10" 
+                       onClick={handleGenerateSocialProposal}
+                       disabled={!result.leadId}
+                     >
+                       <Zap className="h-3 w-3 mr-1" /> Proposal
+                     </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(() => {
+                      if (result.socialLinks && typeof result.socialLinks === 'object' && !Array.isArray(result.socialLinks)) {
+                        const entries = Object.entries(result.socialLinks).filter(([, v]) => v);
+                        if (entries.length === 0) return <span className="text-xs text-muted-foreground">None Found</span>;
+                        return entries.map(([platform, url]) => {
+                          const colors: Record<string, string> = {
+                            facebook: "bg-blue-600", instagram: "bg-pink-600",
+                            linkedin: "bg-sky-700", twitter: "bg-slate-900",
+                            youtube: "bg-red-600", tiktok: "bg-slate-800"
+                          };
+                          const labels: Record<string, string> = {
+                            facebook: "fb", instagram: "IG", linkedin: "in",
+                            twitter: "X", youtube: "YT", tiktok: "TT"
+                          };
+                          return (
+                            <a key={platform} href={url as string} target="_blank" rel="noreferrer" className="relative group" title={url as string}>
+                              <div className={`h-6 px-2 ${colors[platform] || "bg-muted"} rounded flex items-center justify-center text-white text-[10px] font-black gap-1`}>
+                                {labels[platform] || platform}
+                              </div>
+                              <span className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                {(url as string).replace(/^https?:\/\//, "").split("/")[0]}
+                              </span>
+                            </a>
+                          );
+                        });
+                      }
+                      return <span className="text-xs text-muted-foreground">None Found</span>;
+                    })()}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2. Website Analysis */}
+            <Card className="border-indigo-100 shadow-sm overflow-hidden">
+              <CardHeader className="bg-indigo-50/50 pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-indigo-500 rounded-lg text-white">
+                      <Edit3 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">Website Analysis</CardTitle>
+                      <CardDescription>Add custom developer insights, requirements, or override observations.</CardDescription>
+                    </div>
+                  </div>
+                  {isEditingComments ? (
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={handleSaveComments} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        <Save className="h-4 w-4 mr-2" /> Save Comments
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setIsEditingComments(false)}>Cancel</Button>
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={() => setIsEditingComments(true)} className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                      <Edit3 className="h-4 w-4 mr-2" /> Edit Comments
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {isEditingComments ? (
+                  <div className="space-y-4">
+                    <div className="rounded-xl border-2 border-indigo-100 overflow-hidden focus-within:border-indigo-500 transition-colors bg-white">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border-b border-indigo-100">
+                         <div className="flex gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                         </div>
+                         <div className="h-4 w-px bg-indigo-200 mx-2" />
+                         <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Advanced Developer Editor</p>
                       </div>
-                      <div>
-                        <CardTitle className="text-xl">Before / After Preview</CardTitle>
-                        <CardDescription>Comparison of the existing site vs. the proposed redesign</CardDescription>
+                      <div className="relative">
+                        <RichEditor 
+                          value={editComments} 
+                          onChange={setEditComments}
+                          placeholder="Type your professional audit comments here..."
+                        />
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          className="absolute bottom-4 right-4 rounded-xl h-10 w-10 hover:bg-primary hover:text-white shadow-sm"
+                          onClick={() => handleEnhanceDashboardComments()}
+                          disabled={isEnhancingComments || !editComments}
+                          title="Enhance with AI"
+                        >
+                          {isEnhancingComments ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5" />}
+                        </Button>
                       </div>
                     </div>
-                    <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border shadow-sm hover:bg-slate-50 transition-colors">
-                      <input 
-                        type="checkbox" 
-                        className="h-4 w-4 accent-indigo-600 rounded border-slate-300 cursor-pointer" 
-                        checked={result.reportContent?.includeBeforeAfter || false}
-                        onChange={async (e) => {
-                          const isChecked = e.target.checked;
-                          const updatedReportContent = { ...result.reportContent, includeBeforeAfter: isChecked };
-                          setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
-                          await updateLead(result.leadId, { reportContent: updatedReportContent as any });
-                        }}
-                      />
-                      <span className="text-sm font-semibold text-slate-700">Include in Report</span>
-                    </label>
+                    <p className="text-[10px] text-muted-foreground italic">Markdown is supported for basic formatting. These comments will appear on the final PNG and Web reports.</p>
+                  </div>
+                ) : (
+                  <div className="relative group">
+                    {result.reportContent?.developerComments ? (
+                      <div className="space-y-4 w-full overflow-hidden">
+                        <div 
+                          className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words whitespace-pre-wrap [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_p:empty]:h-6 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden"
+                          dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.developerComments) }}
+                        />
+                        <details className="rounded-xl border">
+                          <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
+                          <div className="border-t p-4 space-y-3">
+                            {result.aiAnalysis?.developer_comments?.map((comment: any) => (
+                              <p key={comment.heading} className="text-sm text-muted-foreground"><strong>{comment.heading}:</strong> {comment.finding}</p>
+                            ))}
+                          </div>
+                        </details>
+                      </div>
+                    ) : result.aiAnalysis?.developer_comments?.length ? (
+                      <div className="space-y-4">
+                        {result.aiAnalysis.developer_comments.map((comment: any) => (
+                          <div key={`${comment.category}-${comment.heading}`} className="rounded-2xl border bg-slate-50 p-5">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <Badge variant="outline">{comment.category}</Badge>
+                              <Badge className={
+                                comment.priority === "critical" || comment.priority === "high"
+                                  ? "bg-red-100 text-red-700 hover:bg-red-100"
+                                  : "bg-amber-100 text-amber-700 hover:bg-amber-100"
+                              }>{comment.priority}</Badge>
+                              {comment.strength && <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Strength</Badge>}
+                            </div>
+                            <h3 className="font-black text-slate-900">{comment.heading}</h3>
+                            <p className="mt-2 text-sm text-slate-700">{comment.finding}</p>
+                            <p className="mt-3 text-sm font-semibold text-indigo-800">Action: {comment.recommendation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400">
+                         <FileText className="h-10 w-10 mb-2 opacity-20" />
+                         <p className="text-sm font-medium">No comments added yet.</p>
+                         <Button variant="link" size="sm" onClick={() => setIsEditingComments(true)} className="text-indigo-600">Click to add insights</Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 3. Before / After Preview */}
+            <Card className={`shadow-sm overflow-hidden transition-colors ${result.reportContent?.includeBeforeAfter ? 'border-indigo-100' : 'border-slate-200'}`}>
+              <div className={`p-6 border-b flex justify-between items-center transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={`flex items-center gap-2 transition-opacity ${result.reportContent?.includeBeforeAfter ? 'opacity-100' : 'opacity-60'}`}>
+                  <div className={`p-2 rounded-lg text-white transition-colors ${result.reportContent?.includeBeforeAfter ? 'bg-indigo-500' : 'bg-slate-400'}`}>
+                    <ImageIcon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">Before / After Preview</CardTitle>
+                    <CardDescription>Comparison of the existing site vs. the proposed redesign</CardDescription>
+                  </div>
                 </div>
-                {result.reportContent?.includeBeforeAfter && (
-                  <div className="grid md:grid-cols-2 gap-0">
+                <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border shadow-sm hover:bg-slate-50 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    className="h-4 w-4 accent-indigo-600 rounded border-slate-300 cursor-pointer" 
+                    checked={result.reportContent?.includeBeforeAfter || false}
+                    onChange={async (e) => {
+                      const isChecked = e.target.checked;
+                      const updatedReportContent = { ...result.reportContent, includeBeforeAfter: isChecked };
+                      setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                      await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                    }}
+                  />
+                  <span className="text-sm font-semibold text-slate-700">Include in Report</span>
+                </label>
+              </div>
+              {result.reportContent?.includeBeforeAfter && (
+                <div className="grid md:grid-cols-2 gap-0">
                   {/* Before Image */}
                   <div className="p-6 border-r border-indigo-100">
                     <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Before (Existing)</p>
@@ -954,36 +1254,36 @@ export default function DashboardClient({
                     </div>
                   </div>
 
-                   {/* After Image */}
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">After (Proposed / Preview)</p>
-                        <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-2 py-1 rounded border shadow-sm hover:bg-slate-100 transition-colors">
-                          <input 
-                            type="checkbox" 
-                            className="h-3 w-3 accent-indigo-600 rounded border-slate-300 cursor-pointer" 
-                            checked={!result.reportContent?.hideAfterImage}
-                            onChange={async (e) => {
-                              const isChecked = !e.target.checked;
-                              const updatedReportContent = { ...result.reportContent, hideAfterImage: isChecked };
-                              setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
-                              await updateLead(result.leadId, { reportContent: updatedReportContent as any });
-                            }}
-                          />
-                          <span className="text-xs font-semibold text-slate-700">Show Section</span>
-                        </label>
-                      </div>
-                     <div className="flex gap-2 mb-3 flex-wrap items-center">
-                       <Input 
-                         placeholder="Enter URL to fetch After screenshot..." 
-                         value={afterUrl}
-                         onChange={(e) => setAfterUrl(e.target.value)}
-                         className="h-9 min-w-[200px]"
-                       />
-                       <Button size="sm" onClick={handleCaptureAfter} disabled={isCapturingAfter || !afterUrl}>
-                         {isCapturingAfter ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fetch After"}
-                       </Button>
-                       <label className="flex items-center gap-2 text-sm cursor-pointer border rounded-md px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors">
+                  {/* After Image */}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">After (Proposed / Preview)</p>
+                      <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-2 py-1 rounded border shadow-sm hover:bg-slate-100 transition-colors">
+                        <input 
+                          type="checkbox" 
+                          className="h-3 w-3 accent-indigo-600 rounded border-slate-300 cursor-pointer" 
+                          checked={!result.reportContent?.hideAfterImage}
+                          onChange={async (e) => {
+                            const isChecked = !e.target.checked;
+                            const updatedReportContent = { ...result.reportContent, hideAfterImage: isChecked };
+                            setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                            await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                          }}
+                        />
+                        <span className="text-xs font-semibold text-slate-700">Show Section</span>
+                      </label>
+                    </div>
+                    <div className="flex gap-2 mb-3 flex-wrap items-center">
+                      <Input 
+                        placeholder="Enter URL to fetch After screenshot..." 
+                        value={afterUrl}
+                        onChange={(e) => setAfterUrl(e.target.value)}
+                        className="h-9 min-w-[200px] flex-1"
+                      />
+                      <Button size="sm" onClick={handleCaptureAfter} disabled={isCapturingAfter || !afterUrl}>
+                        {isCapturingAfter ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fetch After"}
+                      </Button>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer border rounded-md px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors">
                         {isUploadingCustomAfter ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" /> : <Upload className="h-4 w-4 text-slate-500" />}
                         <span className="text-slate-600 font-medium">Upload</span>
                         <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
@@ -1001,31 +1301,30 @@ export default function DashboardClient({
                           }
                         }} disabled={isUploadingCustomAfter} />
                       </label>
-                       <Button 
-                         size="sm" 
-                         variant="secondary" 
-                         onClick={handleLockAfter} 
-                         disabled={!result.reportContent?.afterImage || result.reportContent?.isAfterImageLocked}
-                       >
-                         {result.reportContent?.isAfterImageLocked ? "Locked" : <Save className="h-4 w-4" />}
-                       </Button>
-                     </div>
-                     <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
-                       {result.reportContent?.afterImage ? (
-                         <img 
-                           src={`${result.reportContent?.afterImage}?v=${new Date().getTime()}`} 
-                           alt="After / Proposed Screenshot" 
-                           className="w-full h-full object-contain bg-muted/20 object-center" 
-                           loading="lazy"
-                         />
-                       ) : (
-                         <div className="flex flex-col items-center gap-2 p-4 text-center">
-                           <FileImage className="h-8 w-8 text-indigo-200" />
-                           <p className="text-sm font-medium text-indigo-400">Enter a URL above and click "Fetch After"</p>
-                           <p className="text-xs text-indigo-300">Or generate the report — After image appears here after URL is provided</p>
-                         </div>
-                       )}
-                       <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        onClick={handleLockAfter} 
+                        disabled={!result.reportContent?.afterImage || result.reportContent?.isAfterImageLocked}
+                      >
+                        {result.reportContent?.isAfterImageLocked ? "Locked" : <Save className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <div className="relative aspect-video rounded-xl border border-indigo-100 overflow-hidden bg-white shadow-sm flex items-center justify-center group">
+                      {result.reportContent?.afterImage ? (
+                        <img 
+                          src={`${result.reportContent?.afterImage}?v=${new Date().getTime()}`} 
+                          alt="After / Proposed Screenshot" 
+                          className="w-full h-full object-contain bg-muted/20 object-center" 
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 p-4 text-center">
+                          <FileImage className="h-8 w-8 text-indigo-200" />
+                          <p className="text-sm font-medium text-indigo-400">Enter a URL above and click "Fetch After"</p>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
                         <MediaSelector 
                           currentImage={result.reportContent?.afterImage} 
                           media={media} 
@@ -1033,445 +1332,554 @@ export default function DashboardClient({
                           label="After"
                         />
                       </div>
-                     </div>
-                   </div>
-                </div>
-                )}
-              </Card>
-
-              <Card className="border-indigo-100 shadow-sm overflow-hidden">
-                <CardHeader className="bg-indigo-50/50 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 bg-indigo-500 rounded-lg text-white">
-                        <Edit3 className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">Custom Comments</CardTitle>
-                        <CardDescription>Add your own comments, requirements, observations, or special instructions for this report. These comments are included exactly as entered and can be used to highlight specific issues, business goals, design preferences, functionality requests, or other important details that should be considered during report generation.</CardDescription>
-                      </div>
                     </div>
-                    {isEditingComments ? (
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleSaveComments} className="bg-indigo-600 hover:bg-indigo-700">
-                          <Save className="h-4 w-4 mr-2" /> Save Comments
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setIsEditingComments(false)}>Cancel</Button>
-                      </div>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => setIsEditingComments(true)} className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                        <Edit3 className="h-4 w-4 mr-2" /> Edit Comments
-                      </Button>
-                    )}
                   </div>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  {isEditingComments ? (
-                    <div className="space-y-4">
-                      <div className="rounded-xl border-2 border-indigo-100 overflow-hidden focus-within:border-indigo-500 transition-colors bg-white">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border-b border-indigo-100">
-                           <div className="flex gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                              <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                              <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                           </div>
-                           <div className="h-4 w-px bg-indigo-200 mx-2" />
-                           <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Advanced Developer Editor</p>
-                        </div>
-                        <div className="relative">
-                          <RichEditor 
-                            value={editComments} 
-                            onChange={setEditComments}
-                            placeholder="Type your professional audit comments here..."
-                          />
-                          <Button 
-                            size="icon" 
-                            variant="outline" 
-                            className="absolute bottom-4 right-4 rounded-xl h-10 w-10 hover:bg-primary hover:text-white shadow-sm"
-                            onClick={() => handleEnhanceDashboardComments()}
-                            disabled={isEnhancingComments || !editComments}
-                            title="Enhance with AI"
-                          >
-                            {isEnhancingComments ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5" />}
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground italic">Markdown is supported for basic formatting. These comments will appear on the final PNG and Web reports.</p>
-                      <p className="text-[10px] text-muted-foreground">The original AI analysis remains preserved. Saved revisions: {result.reportContent?.history?.length || 0}</p>
-                    </div>
-                  ) : (
-                    <div className="relative group">
-                      {result.reportContent?.developerComments ? (
-                        <div className="space-y-4 w-full overflow-hidden">
-                          <div 
-                            className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words whitespace-pre-wrap [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_p:empty]:h-6 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden"
-                            dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.developerComments) }}
-                          />
-                          <details className="rounded-xl border">
-                            <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
-                            <div className="border-t p-4 space-y-3">
-                              {result.aiAnalysis?.developer_comments?.map((comment: any) => (
-                                <p key={comment.heading} className="text-sm text-muted-foreground"><strong>{comment.heading}:</strong> {comment.finding}</p>
-                              ))}
-                            </div>
-                          </details>
-                        </div>
-                      ) : result.aiAnalysis?.developer_comments?.length ? (
-                        <div className="space-y-4">
-                          {result.aiAnalysis.developer_comments.map((comment: any) => (
-                            <div key={`${comment.category}-${comment.heading}`} className="rounded-2xl border bg-slate-50 p-5">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <Badge variant="outline">{comment.category}</Badge>
-                                <Badge className={
-                                  comment.priority === "critical" || comment.priority === "high"
-                                    ? "bg-red-100 text-red-700 hover:bg-red-100"
-                                    : "bg-amber-100 text-amber-700 hover:bg-amber-100"
-                                }>{comment.priority}</Badge>
-                                {comment.strength && <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Strength</Badge>}
-                              </div>
-                              <h3 className="font-black text-slate-900">{comment.heading}</h3>
-                              <p className="mt-2 text-sm text-slate-700">{comment.finding}</p>
-                              <p className="mt-3 text-sm font-semibold text-indigo-800">Action: {comment.recommendation}</p>
-                              <p className="mt-2 text-xs text-muted-foreground">Evidence: {comment.evidence}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : result.developerComments ? (
-                        <div 
-                          className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed break-words whitespace-pre-wrap [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_p:empty]:h-6 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
-                          dangerouslySetInnerHTML={{ __html: cleanHtml(result.developerComments) }}
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400">
-                           <FileText className="h-10 w-10 mb-2 opacity-20" />
-                           <p className="text-sm font-medium">No developer comments added yet.</p>
-                           <Button variant="link" size="sm" onClick={() => setIsEditingComments(true)} className="text-indigo-600">Click to add technical insights</Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              </div>
+                </div>
+              )}
+            </Card>
 
-              {result.aiAnalysis && (
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-xl">Focused Proposal Content</CardTitle>
-                        <CardDescription>Generated only for the selected service categories.</CardDescription>
+            {/* 4. Report Screenshots & References */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-xl">Report Screenshots & References</CardTitle>
+                  </div>
+                  <CardDescription>Upload issue screenshots, competitor websites, branding references, or design inspirations.</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <MediaUploader 
+                  leadId={result.leadId} 
+                  onUploadSuccess={(items) => {
+                    setReportMedia((current) => {
+                      const next = [...current, ...items];
+                      setResult((resultState: any) => ({ ...resultState, reportMedia: next, reportStatus: "Not Generated" }));
+                      return next;
+                    });
+                  }} 
+                />
+
+                {reportMedia.length > 0 && (
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {reportMedia.map((item) => (
+                      <div key={item.id} className="overflow-hidden rounded-2xl border bg-white flex flex-col">
+                        <img src={item.url} alt={item.caption} className="aspect-video w-full object-contain bg-muted/20" loading="lazy" />
+                        <div className="p-4 flex flex-col flex-1 gap-3">
+                          <div className="flex justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-bold">{item.caption}</p>
+                              <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.section.replace("_", " ")}</p>
+                            </div>
+                            <Button type="button" size="icon" variant="ghost" onClick={() => handleRemoveReportMedia(item.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                          <div className="space-y-1.5 flex-1 flex flex-col">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-[10px] uppercase font-bold text-muted-foreground">Notes / Fixes</Label>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-5 px-1.5 text-[10px] text-primary"
+                                onClick={async () => {
+                                  setCorrectingMediaNotes(item.id);
+                                  try {
+                                    const corrected = await autoCorrectText(item.notes || "");
+                                    const res = await updateLeadReportMediaNotes(result.leadId, item.id, corrected);
+                                    if (res.success) {
+                                      setReportMedia(res.media);
+                                    }
+                                  } catch (e) {
+                                    toast({ title: "Auto-Correct Failed", variant: "destructive" });
+                                  } finally {
+                                    setCorrectingMediaNotes(null);
+                                  }
+                                }}
+                                disabled={correctingMediaNotes === item.id || !item.notes}
+                              >
+                                {correctingMediaNotes === item.id ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                                AI Auto-Correct
+                              </Button>
+                            </div>
+                            <Textarea 
+                              placeholder="Explain the issue or required fix..."
+                              value={item.notes || ""}
+                              onChange={(e) => {
+                                const updated = reportMedia.map(m => m.id === item.id ? { ...m, notes: e.target.value } : m);
+                                setReportMedia(updated);
+                              }}
+                              onBlur={async (e) => {
+                                await updateLeadReportMediaNotes(result.leadId, item.id, e.target.value);
+                              }}
+                              className="flex-1 min-h-[80px] text-xs resize-y"
+                            />
+                          </div>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 5. Focused Proposal Content */}
+            {result.aiAnalysis && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl">Focused Proposal Content</CardTitle>
+                      <CardDescription>Define proposal scope and details to show in the strategic section.</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      {!result.reportContent?.customProposal && (
+                        <Button 
+                          size="sm" 
+                          onClick={async () => {
+                            let textToSave = editProposalContent;
+                            if (!textToSave && result.aiAnalysis?.proposal_content) {
+                              const pc = result.aiAnalysis.proposal_content;
+                              textToSave = `
+                                <h3>${pc.title || ""}</h3>
+                                <p>${pc.executive_pitch || ""}</p>
+                                <ul>
+                                  ${(pc.scope || []).map((item: string) => `<li>${item}</li>`).join('')}
+                                </ul>
+                              `;
+                            }
+                            setIsSavingProposalContent(true);
+                            const success = await updateCustomProposalContent(result.leadId, textToSave);
+                            setIsSavingProposalContent(false);
+                            if (success) {
+                              setResult((prev: any) => ({
+                                ...prev,
+                                reportContent: { ...prev.reportContent, customProposal: textToSave }
+                              }));
+                              toast({ title: "Proposal Saved", description: "Default AI proposal saved successfully." });
+                            }
+                          }}
+                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+                        >
+                          <Save className="h-4 w-4 mr-2" /> Save AI Proposal
+                        </Button>
+                      )}
                       {isEditingProposalContent ? (
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={handleSaveProposalContent} className="bg-indigo-600 hover:bg-indigo-700" disabled={isSavingProposalContent}>
-                            {isSavingProposalContent ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Save
+                          <Button size="sm" onClick={handleSaveProposalContent} className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isSavingProposalContent}>
+                            {isSavingProposalContent ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Save Revisions
                           </Button>
                           <Button size="sm" variant="ghost" onClick={() => setIsEditingProposalContent(false)}>Cancel</Button>
                         </div>
                       ) : (
-                        <Button size="sm" variant="outline" onClick={() => setIsEditingProposalContent(true)} className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                        <Button size="sm" variant="outline" onClick={() => {
+                          if (!editProposalContent) {
+                            if (result.reportContent?.customProposal) {
+                              setEditProposalContent(result.reportContent.customProposal);
+                            } else if (result.aiAnalysis?.proposal_content) {
+                              const pc = result.aiAnalysis.proposal_content;
+                              setEditProposalContent(`
+                                <h3>${pc.title || ""}</h3>
+                                <p>${pc.executive_pitch || ""}</p>
+                                <ul>
+                                  ${(pc.scope || []).map((item: string) => `<li>${item}</li>`).join('')}
+                                </ul>
+                              `);
+                            }
+                          }
+                          setIsEditingProposalContent(true);
+                        }} className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
                           <Edit3 className="h-4 w-4 mr-2" /> Edit Proposal
                         </Button>
                       )}
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isEditingProposalContent ? (
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {isEditingProposalContent ? (
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div className="relative">
+                        <Label className="text-xs uppercase font-bold text-muted-foreground block mb-2">Proposal Editor</Label>
                         <RichEditor 
                           value={editProposalContent} 
                           onChange={setEditProposalContent}
                         />
                       </div>
-                    ) : result.reportContent?.customProposal ? (
-                      <div 
-                        className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed break-words whitespace-pre-wrap [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_p:empty]:h-6 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
-                        dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.customProposal) }}
-                      />
-                    ) : (
-                      <>
-                        <div className="flex flex-wrap gap-2">
-                          {result.aiAnalysis.selected_categories?.map((category: AuditCategory) => (
-                            <Badge key={category}>{AUDIT_CATEGORIES.find((item) => item.value === category)?.label}</Badge>
-                          ))}
-                        </div>
-                        <h3 className="font-black">{result.aiAnalysis.proposal_content?.title}</h3>
-                        <p className="text-sm text-muted-foreground">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
-                        <ul className="space-y-2">
+                      <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px] text-slate-700 leading-relaxed text-sm overflow-y-auto max-h-[400px]">
+                        <Label className="text-xs uppercase font-bold text-muted-foreground block mb-4">Original AI Proposal (Reference)</Label>
+                        <h3 className="font-bold text-base mb-2">{result.aiAnalysis.proposal_content?.title}</h3>
+                        <p className="text-xs text-slate-600 mb-4">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
+                        <ul className="space-y-1.5 list-disc pl-5">
                           {result.aiAnalysis.proposal_content?.scope?.map((item: string) => (
-                            <li key={item} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
+                            <li key={item} className="text-xs text-slate-600">{item}</li>
                           ))}
                         </ul>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {!hideEmailCard && result.aiAnalysis && (
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-xl">Ready-to-Send Email</CardTitle>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setHideEmailCard(true)}>
-                          <X className="h-4 w-4" />
-                        </Button>
                       </div>
-                      <CardDescription>Personalized to the selected proposal scope.</CardDescription>
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="font-bold shadow-sm"
-                        onClick={() => {
-                          if (!isEditingEmailContent) {
-                            setEmailSubject(result.aiAnalysis.proposal_content?.email_subject || "");
-                            setEmailBody(result.aiAnalysis.proposal_content?.email_body || "");
-                          }
-                          setIsEditingEmailContent(!isEditingEmailContent);
-                        }}
-                      >
-                        {isEditingEmailContent ? <><X className="h-4 w-4 mr-1" /> Cancel Edit</> : <><Edit3 className="h-4 w-4 mr-1" /> Edit Email</>}
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="font-bold shadow-sm"
-                        onClick={handleSendEmail}
-                        disabled={isSendingEmail || (!result.email && !recipientEmail)}
-                      >
-                        {isSendingEmail ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending</> : <><Send className="mr-2 h-4 w-4" /> Send Email</>}
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {(!result.email && !recipientEmail) && (
-                      <div className="mb-4 p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-sm flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        <strong>Missing Email:</strong> You need to add a recipient email address below.
+                  ) : result.reportContent?.customProposal ? (
+                    <div 
+                      className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed break-words whitespace-pre-wrap [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-5 [&_ul]:ml-5 [&_li]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_p]:mb-4 last:[&_p]:mb-0 [&_p:empty]:h-6 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_a]:text-blue-600 [&_a]:underline overflow-hidden w-full"
+                      dangerouslySetInnerHTML={{ __html: cleanHtml(result.reportContent.customProposal) }}
+                    />
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap gap-2">
+                        {result.aiAnalysis.selected_categories?.map((category: AuditCategory) => (
+                          <Badge key={category}>{AUDIT_CATEGORIES.find((item) => item.value === category)?.label}</Badge>
+                        ))}
                       </div>
-                    )}
-                    
-                    <div className="rounded-xl border p-5 bg-card/50">
-                      {isEditingEmailContent ? (
-                        <div className="space-y-4">
-                          <div className="space-y-1.5">
-                            <Label className="text-xs uppercase font-bold text-muted-foreground">Recipient Email</Label>
-                            <Input 
-                              type="email"
-                              value={recipientEmail} 
-                              onChange={(e) => setRecipientEmail(e.target.value)} 
-                              className="font-medium"
-                              placeholder="Enter email address"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs uppercase font-bold text-muted-foreground">Subject Line</Label>
-                              <Button 
-                                type="button" 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 text-xs text-primary"
-                                onClick={async () => {
-                                  setIsCorrectingEmailSubject(true);
-                                  try {
-                                    const corrected = await autoCorrectText(emailSubject);
-                                    setEmailSubject(corrected);
-                                  } catch (e) {
-                                    toast({ title: "Auto-Correct Failed", variant: "destructive" });
-                                  } finally {
-                                    setIsCorrectingEmailSubject(false);
-                                  }
-                                }}
-                                disabled={isCorrectingEmailSubject || !emailSubject}
-                              >
-                                {isCorrectingEmailSubject ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
-                                AI Auto-Correct
-                              </Button>
-                            </div>
-                            <Input 
-                              value={emailSubject} 
-                              onChange={(e) => setEmailSubject(e.target.value)} 
-                              className="font-medium"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs uppercase font-bold text-muted-foreground">Message Body</Label>
-                              <Button 
-                                type="button" 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 text-xs text-primary"
-                                onClick={async () => {
-                                  setIsCorrectingEmailBody(true);
-                                  try {
-                                    const corrected = await autoCorrectText(emailBody);
-                                    setEmailBody(corrected);
-                                  } catch (e) {
-                                    toast({ title: "Auto-Correct Failed", variant: "destructive" });
-                                  } finally {
-                                    setIsCorrectingEmailBody(false);
-                                  }
-                                }}
-                                disabled={isCorrectingEmailBody || !emailBody}
-                              >
-                                {isCorrectingEmailBody ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
-                                AI Auto-Correct
-                              </Button>
-                            </div>
-                            <Textarea 
-                              value={emailBody} 
-                              onChange={(e) => setEmailBody(e.target.value)} 
-                              className="min-h-[250px] resize-y"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <p className="text-sm font-black border-b pb-3 mb-3">{result.aiAnalysis.proposal_content?.email_subject}</p>
-                          <p className="whitespace-pre-line text-sm text-muted-foreground leading-relaxed">{result.aiAnalysis.proposal_content?.email_body}</p>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {!hideMediaCard && (
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-xl">Report Screenshots & References</CardTitle>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setHideMediaCard(true)}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <CardDescription>Upload issue screenshots, competitor websites, branding references, design inspirations, and before/after examples. Captions and notes are included in the report generation process to provide additional context.</CardDescription>
-                    </div>
-                  </CardHeader>
-                <CardContent className="space-y-6">
-                  <MediaUploader 
-                    leadId={result.leadId} 
-                    onUploadSuccess={(items) => {
-                      setReportMedia((current) => {
-                        const next = [...current, ...items];
-                        setResult((resultState: any) => ({ ...resultState, reportMedia: next, reportStatus: "Not Generated" }));
-                        return next;
-                      });
-                    }} 
-                  />
-
-                  {reportMedia.length > 0 && (
-                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {reportMedia.map((item) => (
-                        <div key={item.id} className="overflow-hidden rounded-2xl border bg-white flex flex-col">
-                          <img src={item.url} alt={item.caption} className="aspect-video w-full object-contain bg-muted/20" loading="lazy" />
-                          <div className="p-4 flex flex-col flex-1 gap-3">
-                            <div className="flex justify-between gap-3">
-                              <div>
-                                <p className="text-sm font-bold">{item.caption}</p>
-                                <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.section.replace("_", " ")}</p>
-                              </div>
-                              <Button type="button" size="icon" variant="ghost" onClick={() => handleRemoveReportMedia(item.id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                            <div className="space-y-1.5 flex-1 flex flex-col">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-[10px] uppercase font-bold text-muted-foreground">Notes / Fixes</Label>
-                                <Button 
-                                  type="button" 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-5 px-1.5 text-[10px] text-primary"
-                                  onClick={async () => {
-                                    setCorrectingMediaNotes(item.id);
-                                    try {
-                                      const corrected = await autoCorrectText(item.notes || "");
-                                      const res = await updateLeadReportMediaNotes(result.leadId, item.id, corrected);
-                                      if (res.success) {
-                                        setReportMedia(res.media);
-                                      }
-                                    } catch (e) {
-                                      toast({ title: "Auto-Correct Failed", variant: "destructive" });
-                                    } finally {
-                                      setCorrectingMediaNotes(null);
-                                    }
-                                  }}
-                                  disabled={correctingMediaNotes === item.id || !item.notes}
-                                >
-                                  {correctingMediaNotes === item.id ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
-                                  AI Auto-Correct
-                                </Button>
-                              </div>
-                              <Textarea 
-                                placeholder="Explain the issue or required fix..."
-                                value={item.notes || ""}
-                                onChange={(e) => {
-                                  const updated = reportMedia.map(m => m.id === item.id ? { ...m, notes: e.target.value } : m);
-                                  setReportMedia(updated);
-                                }}
-                                onBlur={async (e) => {
-                                  await updateLeadReportMediaNotes(result.leadId, item.id, e.target.value);
-                                }}
-                                className="flex-1 min-h-[80px] text-xs resize-y"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                      <h3 className="font-black">{result.aiAnalysis.proposal_content?.title}</h3>
+                      <p className="text-sm text-muted-foreground">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
+                      <ul className="space-y-2">
+                        {result.aiAnalysis.proposal_content?.scope?.map((item: string) => (
+                          <li key={item} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
+                        ))}
+                      </ul>
+                    </>
                   )}
                 </CardContent>
               </Card>
-              )}
-            </div>
+            )}
 
-            {/* Right Column: Actions */}
-            <div className="space-y-6">
+            {/* 6. Ready-to-Send Email */}
+            {result.aiAnalysis && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Select Proposal Categories</CardTitle>
-                  <CardDescription>Choose one or more. Reports will exclude every unselected category.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-xl">Ready-to-Send Email</CardTitle>
+                    </div>
+                    <CardDescription>Review, customize, and save your outreach email draft.</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={handleSaveEmail} 
+                      disabled={isSavingEmail}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm"
+                    >
+                      {isSavingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Save Template
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={handleSendEmail}
+                      disabled={isSendingEmail || (!result.email && !recipientEmail)}
+                      className="font-bold shadow-sm"
+                    >
+                      {isSendingEmail ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending</> : <><Send className="mr-2 h-4 w-4" /> Send Email</>}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {AUDIT_CATEGORIES.map((category) => {
-                    const checked = selectedCategories.includes(category.value);
-                    return (
-                      <label key={category.value} className={`block cursor-pointer rounded-xl border p-3 transition-colors ${checked ? "border-primary bg-primary/5" : "bg-card/50"}`}>
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={async () => {
-                              setSelectedCategories((current) =>
-                                checked
-                                  ? current.filter((item) => item !== category.value)
-                                  : [...current, category.value]
-                              );
-                              
-                              if (category.value === "redesign" && !checked) {
-                                const updatedReportContent = { ...result.reportContent, includeBeforeAfter: true };
-                                setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
-                                await updateLead(result.leadId, { reportContent: updatedReportContent as any });
-                              }
+                  {(!result.email && !recipientEmail) && (
+                    <div className="p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-sm flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <strong>Missing Email:</strong> You need to add a recipient email address below.
+                    </div>
+                  )}
+                  
+                  <div className="rounded-xl border p-5 bg-card/50 space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs uppercase font-bold text-muted-foreground">Recipient Email</Label>
+                      <Input 
+                        type="email"
+                        value={recipientEmail} 
+                        onChange={(e) => setRecipientEmail(e.target.value)} 
+                        className="font-medium bg-white"
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs uppercase font-bold text-muted-foreground">Subject Line</Label>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs text-primary"
+                          onClick={async () => {
+                            setIsCorrectingEmailSubject(true);
+                            try {
+                              const corrected = await autoCorrectText(emailSubject);
+                              setEmailSubject(corrected);
+                            } catch (e) {
+                              toast({ title: "Auto-Correct Failed", variant: "destructive" });
+                            } finally {
+                              setIsCorrectingEmailSubject(false);
+                            }
+                          }}
+                          disabled={isCorrectingEmailSubject || !emailSubject}
+                        >
+                          {isCorrectingEmailSubject ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                          AI Auto-Correct
+                        </Button>
+                      </div>
+                      <Input 
+                        value={emailSubject} 
+                        onChange={(e) => setEmailSubject(e.target.value)} 
+                        className="font-medium bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs uppercase font-bold text-muted-foreground">Message Body</Label>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs text-primary"
+                          onClick={async () => {
+                            setIsCorrectingEmailBody(true);
+                            try {
+                              const corrected = await autoCorrectText(emailBody);
+                              setEmailBody(corrected);
+                            } catch (e) {
+                              toast({ title: "Auto-Correct Failed", variant: "destructive" });
+                            } finally {
+                              setIsCorrectingEmailBody(false);
+                            }
+                          }}
+                          disabled={isCorrectingEmailBody || !emailBody}
+                        >
+                          {isCorrectingEmailBody ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                          AI Auto-Correct
+                        </Button>
+                      </div>
+                      <Textarea 
+                        value={emailBody} 
+                        onChange={(e) => setEmailBody(e.target.value)} 
+                        className="min-h-[250px] resize-y bg-white"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 7. Portfolio Links */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl">Portfolio Links</CardTitle>
+                    <CardDescription>Select, customize, and arrange the portfolio examples to show in the report.</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={handleFetchCoreWebLabsPortfolio} 
+                      disabled={isFetchingPortfolio}
+                      className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                    >
+                      {isFetchingPortfolio ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />} Fetch CoreWebLabs
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={handleSavePortfolioLinks} 
+                      disabled={isSavingPortfolio}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm"
+                    >
+                      {isSavingPortfolio ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Save Selection
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Portfolio Categories Selection */}
+                <div className="space-y-2 pb-4 border-b border-slate-100">
+                  <Label className="text-xs uppercase font-black text-muted-foreground block mb-2">Select Portfolio Categories to Auto-Add:</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {PORTFOLIO_CATEGORIES.map((cat) => {
+                      const isCatSelected = selectedPortfolioCategories.includes(cat);
+                      return (
+                        <label key={cat} className={`flex items-center gap-2 cursor-pointer p-2 rounded-lg border text-xs font-semibold transition-colors ${isCatSelected ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={isCatSelected}
+                            onChange={async (e) => {
+                              const checked = e.target.checked;
+                              const updatedCats = checked 
+                                ? [...selectedPortfolioCategories, cat]
+                                : selectedPortfolioCategories.filter(c => c !== cat);
+                              setSelectedPortfolioCategories(updatedCats);
+                              await handleSelectCategoryLinks(cat, checked);
                             }}
-                            className="mt-1 h-4 w-4 accent-primary"
+                            className="h-3.5 w-3.5 rounded accent-indigo-600 cursor-pointer"
                           />
-                          <div>
-                            <p className="text-sm font-black">{category.label}</p>
-                            <p className="mt-1 text-xs text-muted-foreground">{category.description}</p>
+                          <span>{cat}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Current list of items */}
+                {portfolioLinks.length > 0 ? (
+                  <div className="space-y-2 max-h-[350px] overflow-y-auto pr-2">
+                    {portfolioLinks.map((item, index) => (
+                      <div key={index} className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${item.selected !== false ? 'bg-indigo-50/40 border-indigo-100' : 'bg-slate-50/50 border-slate-100'}`}>
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <input 
+                            type="checkbox" 
+                            checked={item.selected !== false} 
+                            onChange={() => handleTogglePortfolioItem(index)}
+                            className="h-4 w-4 rounded accent-indigo-600 cursor-pointer"
+                          />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900 truncate">{item.title}</p>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                              {item.category} &bull; <a href={item.url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">{item.url}</a>
+                            </p>
                           </div>
                         </div>
-                      </label>
-                    );
-                  })}
+                        <div className="flex items-center gap-1 ml-4 shrink-0">
+                          <Button 
+                            type="button" 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-slate-500 hover:text-slate-900"
+                            onClick={() => handleMovePortfolioItem(index, 'up')}
+                            disabled={index === 0}
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            type="button" 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-slate-500 hover:text-slate-900"
+                            onClick={() => handleMovePortfolioItem(index, 'down')}
+                            disabled={index === portfolioLinks.length - 1}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            type="button" 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                            onClick={() => handleRemovePortfolioItem(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 rounded-xl border border-dashed text-slate-400">
+                    <Globe className="h-8 w-8 mb-2 opacity-30" />
+                    <p className="text-sm font-medium">No portfolio items loaded. Click "Fetch CoreWebLabs" to load examples.</p>
+                  </div>
+                )}
+
+                {/* Add Custom Form */}
+                <div className="pt-4 border-t border-slate-100 space-y-4">
+                  <h4 className="text-sm font-bold text-slate-900">Add Custom Portfolio Link</h4>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Title</Label>
+                      <Input 
+                        placeholder="e.g. Acme Dental Clinic" 
+                        value={newPortfolioTitle}
+                        onChange={(e) => setNewPortfolioTitle(e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Category</Label>
+                      <Input 
+                        placeholder="e.g. Healthcare" 
+                        value={newPortfolioCategory}
+                        onChange={(e) => setNewPortfolioCategory(e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Website URL</Label>
+                      <Input 
+                        placeholder="https://acmedental.com" 
+                        value={newPortfolioUrl}
+                        onChange={(e) => setNewPortfolioUrl(e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Screenshot URL (Optional)</Label>
+                      <Input 
+                        placeholder="https://example.com/screenshot.png" 
+                        value={newPortfolioImage}
+                        onChange={(e) => setNewPortfolioImage(e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="sm:col-span-2 space-y-1.5">
+                      <Label className="text-xs font-semibold">Short Description (Optional)</Label>
+                      <Textarea 
+                        placeholder="Brief explanation of the website design and tech stack..." 
+                        value={newPortfolioDesc}
+                        onChange={(e) => setNewPortfolioDesc(e.target.value)}
+                        className="min-h-[60px] bg-white"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    type="button" 
+                    onClick={handleAddCustomPortfolio} 
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add Portfolio Link
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+            {/* Right Sidebar Column (Report Generation - Sticky) */}
+            <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-8">
+              {/* 8. Report Generation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">Report Generation</CardTitle>
+                  <CardDescription>Choose report categories, start generating the final report, and access public outputs.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex flex-col gap-3">
+                    {AUDIT_CATEGORIES.map((category) => {
+                      const checked = selectedCategories.includes(category.value);
+                      return (
+                        <label key={category.value} className={`block cursor-pointer rounded-xl border p-3 transition-colors ${checked ? "border-primary bg-primary/5" : "bg-card/50"}`}>
+                          <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={async () => {
+                                setSelectedCategories((current) =>
+                                  checked
+                                    ? current.filter((item) => item !== category.value)
+                                    : [...current, category.value]
+                                );
+                                
+                                if (category.value === "redesign" && !checked) {
+                                  const updatedReportContent = { ...result.reportContent, includeBeforeAfter: true };
+                                  setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                                  await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                                }
+                              }}
+                              className="mt-1 h-4 w-4 accent-primary"
+                            />
+                            <div>
+                              <p className="text-sm font-black">{category.label}</p>
+                              <p className="mt-1 text-xs text-muted-foreground">{category.description}</p>
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
                   
                   <Button 
                     className="w-full" 
@@ -1485,53 +1893,40 @@ export default function DashboardClient({
                       <><Zap className="mr-2 h-5 w-5" /> {result.reportStatus === "Generated" ? "Regenerate Report" : "Start Generation"}</>
                     )}
                   </Button>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Outputs</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <div className="grid grid-cols-1 gap-2">
+                  {/* Outputs */}
+                  <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-center" 
+                      disabled={result.reportStatus !== "Generated" && !result.leadId}
+                      asChild
+                    >
+                      <a href={result.leadId ? `/report/${result.leadId}` : "#"} target="_blank" rel="noreferrer">
+                        <Eye className="mr-2 h-4 w-4" /> View Public Report
+                      </a>
+                    </Button>
+
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold" 
+                      disabled={!result.leadId}
+                      asChild
+                    >
+                      <a href={result.leadId ? `/admin/leads/${result.leadId}` : "#"} target="_blank" rel="noreferrer">
+                        <Send className="mr-2 h-4 w-4" /> Send Proposal
+                      </a>
+                    </Button>
                   </div>
 
-                  <Button 
-                    variant="outline" 
-                    className="justify-start" 
-                    disabled={result.reportStatus !== "Generated" && !result.leadId}
-                    asChild
-                  >
-                    <a href={result.leadId ? `/report/${result.leadId}` : "#"} target="_blank" rel="noreferrer">
-                      <Eye className="mr-2 h-4 w-4" /> View Public Report
-                    </a>
-                  </Button>
-
-                  <Button 
-                    className="justify-start bg-green-600 hover:bg-green-700" 
-                    disabled={!result.leadId}
-                    asChild
-                  >
-                    <a href={result.leadId ? `/admin/leads/${result.leadId}` : "#"} target="_blank" rel="noreferrer">
-                      <Send className="mr-2 h-4 w-4" /> Send Proposal
-                    </a>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Progress Tracker */}
-              <AnimatePresence>
-                {reportState.active && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-                    <Card className="border-primary/50 shadow-md">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-semibold flex justify-between">
-                          <span>Generation Progress</span>
-                          <span>Step {reportState.step}/{reportState.totalSteps}</span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
+                  {/* Progress Tracker */}
+                  <AnimatePresence>
+                    {reportState.active && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
+                        <div className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span>Progress</span>
+                            <span>Step {reportState.step}/{reportState.totalSteps}</span>
+                          </div>
                           <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
                             <motion.div 
                               className="bg-primary h-full" 
@@ -1546,7 +1941,7 @@ export default function DashboardClient({
                               const isPast = reportState.step > stepNum;
                               const isCurrent = reportState.step === stepNum;
                               return (
-                                <div key={step} className={`flex items-center text-sm ${isPast ? 'text-primary' : isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                                <div key={step} className={`flex items-center text-xs ${isPast ? 'text-primary' : isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                                   {isPast ? <CheckCircle2 className="h-4 w-4 mr-2" /> : isCurrent ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Clock className="h-4 w-4 mr-2 opacity-50" />}
                                   {step}
                                 </div>
@@ -1554,11 +1949,11 @@ export default function DashboardClient({
                             })}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </CardContent>
+              </Card>
             </div>
           </motion.div>
         )}
