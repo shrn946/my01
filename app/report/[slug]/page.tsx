@@ -57,6 +57,9 @@ export default async function ReportPage({
     ? reportContent.recommendations
     : aiAudit.recommendations.map((item) => item.recommendation);
 
+  const designAnalysis = lead.designAnalysis as any;
+  const technology = designAnalysis?.technology || "Not Detected";
+
 
   if (format === "png") {
     return (
@@ -269,6 +272,34 @@ export default async function ReportPage({
             />
           </Card>
         </section>
+
+        {/* Technology Stack Panel */}
+        {technology && technology !== "Unknown" && technology !== "Not Detected" && (
+          <section className="print-section space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-indigo-600 shrink-0">
+                <Zap className="h-5 w-5 md:h-6 md:w-6" />
+              </div>
+              <h2 className="print-heading text-2xl md:text-3xl font-black tracking-tight text-slate-900 break-words">Detected Technology Stack</h2>
+            </div>
+            <Card className="border border-slate-100 shadow-lg shadow-indigo-900/5 overflow-hidden relative rounded-[2rem] bg-slate-50/50">
+              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500" />
+              <CardContent className="p-8">
+                <div className="flex flex-wrap gap-3">
+                  {technology.split(" + ").map((techItem: string) => (
+                    <div key={techItem} className="flex items-center gap-2 rounded-2xl bg-white border border-slate-100 px-5 py-3 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                      <span className="font-bold text-sm text-slate-800">{techItem}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-5 text-xs text-slate-500 font-light leading-relaxed">
+                  * Note: Stack components are dynamically extracted from the website's response headers, generator tags, and content structure. Outdated platform themes or builder frameworks are flagged in the observations above.
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {/* Portfolio Links (My Previous Work & Demo Links) */}
         {(() => {

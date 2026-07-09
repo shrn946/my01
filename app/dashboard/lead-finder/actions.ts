@@ -522,6 +522,7 @@ async function analyzeWebsite(url: string, businessName: string = "") {
   const result = {
     ssl: url.startsWith("https://"),
     wordpress: false,
+    technology: "Unknown",
     contactForm: false,
     mobileFriendly: true,
     qualityScore: 50,
@@ -567,14 +568,74 @@ async function analyzeWebsite(url: string, businessName: string = "") {
       // SSL Detection
       result.ssl = normalizedUrl.startsWith("https://");
 
-      // WordPress Detection
+      // WordPress Detection & Advanced Tech Stack Parsing
       const htmlContent = html.toLowerCase();
-      if (
-        htmlContent.includes("wp-content") ||
-        htmlContent.includes("wp-includes") ||
-        $('meta[name="generator"]').attr("content")?.toLowerCase().includes("wordpress")
-      ) {
+      
+      const isWordPress = htmlContent.includes("wp-content") || 
+                          htmlContent.includes("wp-includes") || 
+                          $('meta[name="generator"]').attr("content")?.toLowerCase().includes("wordpress");
+                          
+      if (isWordPress) {
         result.wordpress = true;
+        const stack: string[] = ["WordPress"];
+        
+        // Detect Page Builder
+        if (htmlContent.includes("elementor")) {
+          stack.push("Elementor");
+        } else if (htmlContent.includes("divi")) {
+          stack.push("Divi Builder");
+        } else if (htmlContent.includes("wpbakery") || htmlContent.includes("js_composer")) {
+          stack.push("WPBakery");
+        } else if (htmlContent.includes("beaver-builder")) {
+          stack.push("Beaver Builder");
+        }
+        
+        // Detect eCommerce
+        if (htmlContent.includes("woocommerce")) {
+          stack.push("WooCommerce");
+        }
+        
+        // Detect common themes
+        if (htmlContent.includes("themes/divi/")) {
+          stack.push("Divi Theme");
+        } else if (htmlContent.includes("themes/astra/")) {
+          stack.push("Astra Theme");
+        } else if (htmlContent.includes("themes/hello-elementor/")) {
+          stack.push("Hello Elementor");
+        } else if (htmlContent.includes("themes/generatepress/")) {
+          stack.push("GeneratePress");
+        } else if (htmlContent.includes("themes/woodmart/")) {
+          stack.push("WoodMart");
+        } else if (htmlContent.includes("themes/avada/")) {
+          stack.push("Avada Theme");
+        }
+        
+        // Detect Cache / Performance plugins
+        if (htmlContent.includes("wp-rocket") || htmlContent.includes("wprocket")) {
+          stack.push("WP Rocket");
+        } else if (htmlContent.includes("litespeed-cache") || htmlContent.includes("litespeed")) {
+          stack.push("LiteSpeed Cache");
+        }
+        
+        // Unique components
+        result.technology = Array.from(new Set(stack)).join(" + ");
+      } else {
+        // Fallback for Shopify, Squarespace, Wix
+        if (htmlContent.includes("shopify")) {
+          result.technology = "Shopify eCommerce";
+        } else if (htmlContent.includes("squarespace")) {
+          result.technology = "Squarespace";
+        } else if (htmlContent.includes("wix.com")) {
+          result.technology = "Wix";
+        } else if (htmlContent.includes("webflow")) {
+          result.technology = "Webflow";
+        } else if (htmlContent.includes("drupal")) {
+          result.technology = "Drupal CMS";
+        } else if (htmlContent.includes("joomla")) {
+          result.technology = "Joomla CMS";
+        } else {
+          result.technology = "Custom HTML / CMS Not Detected";
+        }
       }
 
       // Viewport tag (Mobile friendliness)
@@ -980,7 +1041,7 @@ export async function searchAndAnalyzeLeads(
             mobileScore: analysis.mobileScore,
             source: "Lead Finder Search",
             designAnalysis: {
-              technology: analysis.wordpress ? "WordPress" : "Unknown",
+              technology: analysis.technology || (analysis.wordpress ? "WordPress" : "Unknown"),
               ssl: analysis.ssl,
               mobile: analysis.mobileFriendly,
               contactForm: analysis.contactForm,
