@@ -102,7 +102,7 @@ export async function getBlogPosts(featured = false): Promise<BlogPostItem[]> {
       }
     },
     [`blog-posts-${featured}`],
-    { tags: ["blog"], revalidate: 3600 }
+    { tags: ["blog"], revalidate: 604800 }
   )();
 }
 
@@ -122,7 +122,7 @@ export async function getBlogPostsByCategory(categoryName: string): Promise<Blog
       }
     },
     [`blog-posts-category-${categoryName}`],
-    { tags: ["blog"], revalidate: 3600 }
+    { tags: ["blog"], revalidate: 604800 }
   )();
 }
 
@@ -161,7 +161,7 @@ export async function getRelatedBlogPosts(currentSlug: string, categoryName: str
       }
     },
     [`related-blog-posts-${currentSlug}`],
-    { tags: ["blog"], revalidate: 3600 }
+    { tags: ["blog"], revalidate: 604800 }
   )();
 }
 
@@ -177,7 +177,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostItem | nu
       }
     },
     [`blog-post-${slug}`],
-    { tags: ["blog"], revalidate: 3600 }
+    { tags: ["blog"], revalidate: 604800 }
   )();
 }
 
@@ -197,7 +197,7 @@ export async function getProjects(featured = false): Promise<ProjectItem[]> {
       }
     },
     [`projects-${featured}`],
-    { tags: ["projects"], revalidate: 1 }
+    { tags: ["projects"], revalidate: 604800 }
   )();
 }
 
@@ -217,7 +217,7 @@ export async function getProjectsByCategory(categoryName: string): Promise<Proje
       }
     },
     [`projects-category-${categoryName}`],
-    { tags: ["projects"], revalidate: 3600 }
+    { tags: ["projects"], revalidate: 604800 }
   )();
 }
 
@@ -256,7 +256,7 @@ export async function getRelatedProjects(currentSlug: string, categoryName: stri
       }
     },
     [`related-projects-${currentSlug}`],
-    { tags: ["projects"], revalidate: 3600 }
+    { tags: ["projects"], revalidate: 604800 }
   )();
 }
 
@@ -272,7 +272,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectItem | null
       }
     },
     [`project-${slug}`],
-    { tags: ["projects"], revalidate: 3600 }
+    { tags: ["projects"], revalidate: 604800 }
   )();
 }
 
@@ -291,7 +291,7 @@ export async function getReviews(featured = false): Promise<ReviewItem[]> {
       }
     },
     [`reviews-${featured}`],
-    { tags: ["reviews"], revalidate: 1 }
+    { tags: ["reviews"], revalidate: 604800 }
   )();
 }
 
@@ -308,7 +308,7 @@ export async function getPortfolioExamples() {
       }
     },
     ["portfolio-examples"],
-    { tags: ["portfolio"], revalidate: 3600 }
+    { tags: ["portfolio"], revalidate: 604800 }
   )();
 }
 
@@ -327,7 +327,7 @@ export async function getHeroSlides(activeOnly = true) {
       }
     },
     [`hero-slides-${activeOnly}`],
-    { tags: ["hero"], revalidate: 3600 }
+    { tags: ["hero"], revalidate: 604800 }
   )();
 }
 
@@ -354,7 +354,7 @@ export async function getInnerHeroSettings() {
       }
     },
     ["inner-hero-settings"],
-    { tags: ["settings"], revalidate: 3600 }
+    { tags: ["settings"], revalidate: 604800 }
   )();
 }
 
@@ -401,8 +401,7 @@ export async function getMenuSettings() {
       visible: true,
       children: [
         { id: "articles", label: "Articles", href: "/blog", visible: true },
-        { id: "videos", label: "Videos", href: "/videos", visible: true },
-        { id: "addons", label: "Free Addons", href: "/free-addons", visible: true }
+        { id: "videos", label: "Videos", href: "/videos", visible: true }
       ]
     },
     { id: "reviews", label: "Reviews", href: "/reviews", visible: true },
@@ -420,6 +419,6 @@ export async function getMenuSettings() {
       }
     },
     ["menu-settings"],
-    { tags: ["settings"], revalidate: 3600 }
+    { tags: ["settings"], revalidate: 604800 }
   )();
 }

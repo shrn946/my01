@@ -2,33 +2,13 @@ import type { MetadataRoute } from "next";
 import { getBlogPosts, getProjects } from "@/lib/data";
 import videosData from "@/lib/videos.json";
 
-async function getGithubPlugins() {
-  try {
-    const res = await fetch("https://api.github.com/users/shrn946/repos?type=public&sort=updated", {
-      next: { revalidate: 3600 }
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.map((repo: any) => ({
-      slug: repo.name,
-      updatedAt: repo.updated_at
-    })).filter((repo: any) => {
-      const excluded = ["shrn946", "my-portfolio", "port01backup", "my01", "youtubeapp"];
-      return !excluded.includes(repo.slug) && !repo.slug.includes("portfolio");
-    });
-  } catch {
-    return [];
-  }
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.coreweblabs.com";
   
   // Fetch dynamic content in parallel with fallback to empty arrays to prevent failing sitemap generation
-  const [projects, posts, githubRepos] = await Promise.all([
+  const [projects, posts] = await Promise.all([
     getProjects().catch(() => []),
-    getBlogPosts().catch(() => []),
-    getGithubPlugins().catch(() => [])
+    getBlogPosts().catch(() => [])
   ]);
 
   // Static routes with specific SEO priorities and change frequencies
@@ -40,12 +20,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/blog", priority: 0.9, changeFrequency: "daily" },
     { path: "/reviews", priority: 0.8, changeFrequency: "weekly" },
     { path: "/contact", priority: 0.8, changeFrequency: "monthly" },
-    { path: "/free-addons", priority: 0.9, changeFrequency: "daily" },
     { path: "/videos", priority: 0.9, changeFrequency: "daily" }
   ];
 
   const staticUrls = staticRoutes.map((route) => ({
-    url: `${base}${route}`,
+    url: `${base}${route.path}`,
     lastModified: new Date(),
     changeFrequency: route.changeFrequency as any,
     priority: route.priority
@@ -72,19 +51,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7
   }));
 
-  const addonUrls = githubRepos.map((repo: { slug: string; updatedAt: string }) => ({
-    url: `${base}/free-addons/${repo.slug}`,
-    lastModified: new Date(repo.updatedAt),
-    changeFrequency: "weekly" as const,
-    priority: 0.7
-  }));
-
   return [
     ...staticUrls,
     ...projectUrls,
     ...postUrls,
-    ...videoUrls,
-    ...addonUrls
+    ...videoUrls
   ];
 }
+
 

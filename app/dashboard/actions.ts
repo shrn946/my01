@@ -5,7 +5,7 @@ import { getPrisma } from "@/lib/prisma";
 import { auditWebsiteHtml } from "@/lib/site-audit";
 import { launchBrowser } from "@/lib/browser";
 import { getLeadAiFields, saveLeadReportContent } from "@/lib/lead-ai-storage";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { sendLeadEmail } from "@/lib/email-actions";
 import { detectBusinessCategory } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -1209,8 +1209,7 @@ export async function getMenuAction() {
         visible: true,
         children: [
           { id: "articles", label: "Articles", href: "/blog", visible: true },
-          { id: "videos", label: "Videos", href: "/videos", visible: true },
-          { id: "addons", label: "Free Addons", href: "/free-addons", visible: true }
+          { id: "videos", label: "Videos", href: "/videos", visible: true }
         ]
       },
       { id: "reviews", label: "Reviews", href: "/reviews", visible: true },
@@ -1230,6 +1229,8 @@ export async function updateMenuAction(navItems: any) {
       update: { navItems },
       create: { id: "default", navItems }
     });
+    revalidateTag("settings", "default");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

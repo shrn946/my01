@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   description: "Explore our collection of WordPress projects, live website demos, dental clinic templates, and custom designs."
 };
 
-// Revalidate cache every 10 minutes
-export const revalidate = 600;
+// Revalidate cache every 7 days (updated on-demand via Server Actions)
+export const revalidate = 604800;
 
 const DEMO_WEBSITES = [
   {

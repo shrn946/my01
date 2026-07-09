@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { mkdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { hashPassword, requireRole } from "@/lib/auth";
@@ -109,6 +109,7 @@ export async function saveProject(formData: FormData) {
 
   if (id) await prisma.project.update({ where: { id }, data });
   else await prisma.project.create({ data });
+  revalidateTag("projects", "default");
   revalidatePath("/");
   revalidatePath("/portfolio");
   revalidatePath("/admin");
@@ -118,6 +119,7 @@ export async function deleteProject(formData: FormData) {
   await requireRole("ADMIN");
   const prisma = getPrisma();
   await prisma.project.delete({ where: { id: readString(formData, "id") } });
+  revalidateTag("projects", "default");
   revalidatePath("/portfolio");
   revalidatePath("/admin");
 }
@@ -144,6 +146,7 @@ export async function saveBlogPost(formData: FormData) {
 
   if (id) await prisma.blogPost.update({ where: { id }, data });
   else await prisma.blogPost.create({ data });
+  revalidateTag("blog", "default");
   revalidatePath("/");
   revalidatePath("/blog");
   revalidatePath("/admin");
@@ -153,6 +156,7 @@ export async function deleteBlogPost(formData: FormData) {
   await requireRole("ADMIN");
   const prisma = getPrisma();
   await prisma.blogPost.delete({ where: { id: readString(formData, "id") } });
+  revalidateTag("blog", "default");
   revalidatePath("/blog");
   revalidatePath("/admin");
 }
@@ -177,6 +181,7 @@ export async function saveReview(formData: FormData) {
 
   if (id) await prisma.review.update({ where: { id }, data });
   else await prisma.review.create({ data });
+  revalidateTag("reviews", "default");
   revalidatePath("/");
   revalidatePath("/reviews");
   revalidatePath("/admin");
@@ -186,6 +191,7 @@ export async function deleteReview(formData: FormData) {
   await requireRole("ADMIN");
   const prisma = getPrisma();
   await prisma.review.delete({ where: { id: readString(formData, "id") } });
+  revalidateTag("reviews", "default");
   revalidatePath("/reviews");
   revalidatePath("/admin");
 }
@@ -204,6 +210,7 @@ export async function savePortfolioExample(formData: FormData) {
 
   if (id) await prisma.portfolioExample.update({ where: { id }, data });
   else await prisma.portfolioExample.create({ data });
+  revalidateTag("portfolio", "default");
   revalidatePath("/admin");
 }
 
@@ -211,6 +218,7 @@ export async function deletePortfolioExample(formData: FormData) {
   await requireRole("ADMIN");
   const prisma = getPrisma();
   await prisma.portfolioExample.delete({ where: { id: readString(formData, "id") } });
+  revalidateTag("portfolio", "default");
   revalidatePath("/admin");
 }
 
@@ -230,6 +238,7 @@ export async function saveHeroSlide(formData: FormData) {
 
   if (id) await prisma.heroSlide.update({ where: { id }, data });
   else await prisma.heroSlide.create({ data });
+  revalidateTag("hero", "default");
   revalidatePath("/");
   revalidatePath("/admin");
 }
@@ -238,6 +247,7 @@ export async function deleteHeroSlide(formData: FormData) {
   await requireRole("ADMIN");
   const prisma = getPrisma();
   await prisma.heroSlide.delete({ where: { id: readString(formData, "id") } });
+  revalidateTag("hero", "default");
   revalidatePath("/");
   revalidatePath("/admin");
 }
@@ -260,6 +270,7 @@ export async function saveInnerHeroSettings(formData: FormData) {
   if (existing) await prisma.innerHeroSettings.update({ where: { id: existing.id }, data });
   else await prisma.innerHeroSettings.create({ data });
 
+  revalidateTag("settings", "default");
   revalidatePath("/", "layout");
   revalidatePath("/admin");
 }
