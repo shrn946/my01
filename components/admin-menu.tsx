@@ -13,6 +13,8 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
+import { getMenuAction, updateMenuAction } from "@/app/dashboard/actions";
+
 export function AdminMenu() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,29 +22,23 @@ export function AdminMenu() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch("/api/menu")
-      .then((res) => res.json())
-      .then((data) => {
-        setItems(data);
-        setLoading(false);
-      });
+    getMenuAction().then((data) => {
+      setItems(data as MenuItem[]);
+      setLoading(false);
+    });
   }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/menu", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(items),
-      });
-      if (res.ok) {
+      const res = await updateMenuAction(items);
+      if (res.success) {
         toast({ title: "Success", description: "Menu updated successfully." });
       } else {
-        throw new Error();
+        throw new Error(res.error);
       }
-    } catch {
-      toast({ variant: "destructive", title: "Error", description: "Failed to save menu." });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message || "Failed to save menu." });
     }
     setSaving(false);
   };

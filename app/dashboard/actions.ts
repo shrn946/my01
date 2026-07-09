@@ -8,6 +8,7 @@ import { getLeadAiFields, saveLeadReportContent } from "@/lib/lead-ai-storage";
 import { revalidatePath } from "next/cache";
 import { sendLeadEmail } from "@/lib/email-actions";
 import { detectBusinessCategory } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth";
 
 
 export async function quickAnalyzeWebsite(url: string) {
@@ -1133,4 +1134,105 @@ const FALLBACK_PORTFOLIO = [
     image: "https://www.coreweblabs.com/demo-screenshots/clinic-demo-13.png"
   }
 ];
+
+export async function trackReportViewAction(leadId: string) {
+  try {
+    const prisma = getPrisma();
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) return { success: false, error: "Lead not found" };
+
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    const user = await getCurrentUser();
+    const isAdmin = user?.role === "ADMIN";
+
+    if ((!lead.reportViewedAt || lead.reportViewedAt < oneHourAgo) && !isAdmin) {
+      const settings = await prisma.settings.findUnique({ where: { id: "default" } }) || await prisma.settings.findFirst();
+      const resendApiKey = settings?.resendApiKey || process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        const { Resend } = await import("resend");
+        const resend = new Resend(resendApiKey);
+
+        const companyName = settings?.companyName || "CoreWeb Labs";
+        const siteUrl = settings?.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || "https://www.coreweblabs.com";
+        const leadUrl = `${siteUrl}/admin/leads/${lead.id}`;
+        
+        const senderName = settings?.senderName || companyName;
+        const senderEmail = settings?.senderEmail || "notifications@coreweblabs.com";
+
+        await resend.emails.send({
+          from: `${senderName} <${senderEmail}>`,
+          to: "hassannaqvi@coreweblabs.com",
+          subject: `🔥 HOT LEAD: ${lead.businessName || lead.website} just viewed their report!`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #2563eb;">Report Viewed!</h2>
+              <p><strong>${lead.businessName || lead.website}</strong> just opened their Web Audit Report.</p>
+              <p>This is a great time to give them a call or send a quick follow-up message while they are "warm".</p>
+              <br/>
+              <a href="${leadUrl}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Lead in Dashboard</a>
+            </div>
+          `
+        }).catch(console.error);
+      }
+    }
+
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        reportViewedAt: now,
+        reportViewCount: { increment: 1 }
+      }
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error tracking view:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getMenuAction() {
+  try {
+    const prisma = getPrisma();
+    const settings = await prisma.settings.findUnique({ where: { id: "default" } }) || await prisma.settings.findFirst();
+    const DEFAULT_MENU = [
+      { id: "home", label: "Home", href: "/", visible: true },
+      { id: "about", label: "About", href: "/about", visible: true },
+      { id: "services", label: "Services", href: "/services", visible: true },
+      { id: "portfolio", label: "Portfolio", href: "/portfolio", visible: true },
+      { 
+        id: "blog-dropdown",
+        label: "Blog", 
+        href: "/blog",
+        visible: true,
+        children: [
+          { id: "articles", label: "Articles", href: "/blog", visible: true },
+          { id: "videos", label: "Videos", href: "/videos", visible: true },
+          { id: "addons", label: "Free Addons", href: "/free-addons", visible: true }
+        ]
+      },
+      { id: "reviews", label: "Reviews", href: "/reviews", visible: true },
+      { id: "contact", label: "Contact", href: "/contact", visible: true }
+    ];
+    return settings?.navItems || DEFAULT_MENU;
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function updateMenuAction(navItems: any) {
+  try {
+    const prisma = getPrisma();
+    await prisma.settings.upsert({
+      where: { id: "default" },
+      update: { navItems },
+      create: { id: "default", navItems }
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { trackReportViewAction } from "@/app/dashboard/actions";
 
 export function ReportViewTracker({ leadId }: { leadId: string }) {
   const tracked = useRef(false);
@@ -17,11 +18,7 @@ export function ReportViewTracker({ leadId }: { leadId: string }) {
 
     tracked.current = true;
 
-    fetch("/api/audits/viewed", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId }),
-    }).catch((e) => console.error("Failed to track view", e));
+    trackReportViewAction(leadId).catch((e) => console.error("Failed to track view", e));
   }, [leadId]);
 
   return null;
