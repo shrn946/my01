@@ -3,11 +3,14 @@
 import { useActionState } from "react";
 import { Lock, Loader2 } from "lucide-react";
 import { loginAction } from "@/lib/auth-actions";
+import { useSearchParams } from "next/navigation";
 
 const initialState = { ok: false, message: "" };
 
-export function LoginForm({ next = "/admin" }: { next?: string }) {
+export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, initialState);
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/admin";
 
   return (
     <form action={action} className="rounded-[2.5rem] border border-black/5 bg-white p-8 shadow-premium lg:p-12">

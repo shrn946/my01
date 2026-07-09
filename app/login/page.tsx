@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { LoginForm } from "@/components/login-form";
 import { FadeIn } from "@/components/fade-in";
@@ -8,9 +9,7 @@ export const metadata: Metadata = {
   description: "Login to the portfolio dashboard."
 };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next } = await searchParams;
-
+export default function LoginPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-slate-50/50 py-20 px-6">
       <div className="w-full max-w-xl">
@@ -24,7 +23,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <p className="mt-4 text-lg text-slate-500 font-medium">Access your professional control center.</p>
           </div>
           
-          <LoginForm next={next ?? "/admin"} />
+          <Suspense fallback={<div className="text-center py-12 font-bold text-slate-400">Loading form...</div>}>
+            <LoginForm />
+          </Suspense>
           
           <p className="mt-10 text-center text-sm font-bold text-slate-400">
             Forgot your password? <span className="text-primary hover:underline cursor-pointer">Contact support</span>

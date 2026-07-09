@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { AdminTabs } from "@/components/admin-tabs";
 import { BlogEditor } from "@/components/blog-editor";
 import { AdminMenu } from "@/components/admin-menu";
@@ -10,10 +11,14 @@ import { deleteBlogPost, deleteHeroSlide, deleteMedia, deleteProject, deleteRevi
 import { requireRole } from "@/lib/auth";
 import { getBlogPosts, getContactMessages, getHeroSlides, getInnerHeroSettings, getMediaAssets, getProjects, getReviews, getUsers, getPortfolioExamples } from "@/lib/data";
 import { formatDate, cn } from "@/lib/utils";
-import { Plus, Trash2, ExternalLink, ChevronDown, LayoutDashboard, FileText, FolderKanban, Star, Users as UsersIcon, MessageSquare, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, ExternalLink, ChevronDown, LayoutDashboard, FileText, FolderKanban, Star, Users as UsersIcon, MessageSquare, Image as ImageIcon, Eye, Mail } from "lucide-react";
 import { FadeIn } from "@/components/fade-in";
-
 import { CopyButton } from "@/components/copy-button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import EmailTemplatesClient from "./email-templates/templates-client";
+import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +29,8 @@ export const metadata: Metadata = {
 
 export default async function AdminPage() {
   const user = await requireRole("ADMIN");
-  const [projects, posts, reviews, messages, users, media, slides, innerHeroSettings, portfolioExamples] = await Promise.all([
+  const prisma = getPrisma();
+  const [projects, posts, reviews, messages, users, media, slides, innerHeroSettings, portfolioExamples, leads, emailTemplates] = await Promise.all([
     getProjects(),
     getBlogPosts(),
     getReviews(),
@@ -33,7 +39,9 @@ export default async function AdminPage() {
     getMediaAssets(),
     getHeroSlides(false),
     getInnerHeroSettings(),
-    getPortfolioExamples()
+    getPortfolioExamples(),
+    prisma.lead.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.emailTemplate.findMany({ orderBy: { createdAt: "desc" } })
   ]);
 
   return (
@@ -279,6 +287,71 @@ export default async function AdminPage() {
                 children: (
                   <AdminBlock title="Site Navigation Menu">
                     <AdminMenu />
+                  </AdminBlock>
+                )
+              },
+              {
+                label: "Leads",
+                children: (
+                  <AdminBlock title="Leads Management">
+                    <div className="flex justify-between items-center mb-6">
+                      <p className="text-sm font-bold text-slate-500">Track and follow up on generated leads.</p>
+                      <Link href="/admin/extractor">
+                        <Button className="bg-primary text-white"><Plus className="w-4 h-4 mr-2" /> Add New Lead</Button>
+                      </Link>
+                    </div>
+
+                    <div className="overflow-hidden rounded-[2.5rem] border border-black/5 bg-white shadow-premium">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="pl-8">Business / URL</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Score</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Last Contact</TableHead>
+                            <TableHead className="pr-8">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {leads.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No leads found. Start by extracting one.</TableCell>
+                            </TableRow>
+                          ) : leads.map(lead => (
+                            <TableRow key={lead.id} className="hover:bg-slate-50">
+                              <TableCell className="pl-8 py-4">
+                                <div className="font-bold text-ink">{lead.businessName || "Unknown"}</div>
+                                <div className="text-xs text-slate-400 font-mono mt-0.5">{lead.website}</div>
+                              </TableCell>
+                              <TableCell><Badge variant="outline">{lead.status}</Badge></TableCell>
+                              <TableCell>
+                                {lead.leadScore ? (
+                                  <Badge variant={lead.leadScore < 60 ? "destructive" : lead.leadScore < 80 ? "default" : "secondary"}>
+                                    {lead.leadScore}
+                                  </Badge>
+                                ) : "-"}
+                              </TableCell>
+                              <TableCell>{lead.email ? "Yes" : "No"}</TableCell>
+                              <TableCell>{lead.lastContactedAt ? new Date(lead.lastContactedAt).toLocaleDateString() : "Never"}</TableCell>
+                              <TableCell className="pr-8">
+                                <Link href={`/admin/leads/${lead.id}`}>
+                                  <Button variant="ghost" size="sm" className="hover:text-primary"><Eye className="w-4 h-4 mr-2" /> View</Button>
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </AdminBlock>
+                )
+              },
+              {
+                label: "Email Templates",
+                children: (
+                  <AdminBlock title="Email Outreach Templates">
+                    <EmailTemplatesClient initialTemplates={emailTemplates} />
                   </AdminBlock>
                 )
               }
