@@ -17,6 +17,21 @@ export const revalidate = 600;
 
 const DEMO_WEBSITES = [
   {
+    title: "Lawyers CoreWebLabs - Main Legal Hub",
+    slug: "lawyers-coreweblabs-main-legal-hub",
+    category: "Law Firms ⚖️",
+    description: "A premium legal services portal and attorney directories landing hub for modern law practices and corporate law firms.",
+    overview: "Designed as the main landing page, this legal portal directs clients to specialized attorneys, templates, and consultation channels.",
+    problem: "Law firms need a centralized hub that builds deep trust and profiles different legal teams dynamically.",
+    solution: "Built a modern, comprehensive lawyer hub with category navigation and quick consultation pathways.",
+    result: "Significantly enhances patient and client registration rates.",
+    tools: ["React", "Legal Hub", "SEO", "Responsive"],
+    image: "/demo-screenshots/lawyers-main.jpg",
+    gallery: ["/demo-screenshots/lawyers-main.jpg"],
+    liveUrl: "https://lawyers.coreweblabs.com/",
+    featured: true
+  },
+  {
     title: "Lawia - Attorney & Lawyers React Template",
     slug: "lawia-attorney-lawyers-react-template",
     category: "Law Firms ⚖️",
@@ -26,8 +41,8 @@ const DEMO_WEBSITES = [
     solution: "Integrated a clean consultations form, modern team grids, and case result counters.",
     result: "Significantly improves new consultation request rates.",
     tools: ["React", "Lawyers", "Consulting", "Responsive"],
-    image: "/demo-screenshots/lawyers-demo-1.png",
-    gallery: ["/demo-screenshots/lawyers-demo-1.png"],
+    image: "/demo-screenshots/lawyers-demo-1.jpg",
+    gallery: ["/demo-screenshots/lawyers-demo-1.jpg"],
     liveUrl: "https://lawyers.coreweblabs.com/demo-01",
     featured: true
   },
@@ -41,8 +56,8 @@ const DEMO_WEBSITES = [
     solution: "Created a sophisticated, grid-based dashboard layout highlighting areas of legal expertise.",
     result: "Drives higher corporate contact inquiry conversions.",
     tools: ["WordPress", "Corporate", "Grid"],
-    image: "/demo-screenshots/lawyers-demo-2.png",
-    gallery: ["/demo-screenshots/lawyers-demo-2.png"],
+    image: "/demo-screenshots/lawyers-demo-2.jpg",
+    gallery: ["/demo-screenshots/lawyers-demo-2.jpg"],
     liveUrl: "https://lawyers.coreweblabs.com/demo-02",
     featured: false
   },
@@ -56,8 +71,8 @@ const DEMO_WEBSITES = [
     solution: "Built responsive practice area grids and a sticky appointment scheduler.",
     result: "Improves appointment booking rates and user retention.",
     tools: ["Elementor", "Lawyers", "Trustworthy"],
-    image: "/demo-screenshots/lawyers-demo-3.png",
-    gallery: ["/demo-screenshots/lawyers-demo-3.png"],
+    image: "/demo-screenshots/lawyers-demo-3.jpg",
+    gallery: ["/demo-screenshots/lawyers-demo-3.jpg"],
     liveUrl: "https://lawyers.coreweblabs.com/demo-03",
     featured: false
   },

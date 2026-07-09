@@ -5,6 +5,14 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, PlayCircle } from "lucide-react";
 import videosData from "@/lib/videos.json";
 
+export const runtime = "edge";
+
+export async function generateStaticParams() {
+  return videosData.map((v) => ({
+    slug: v.slug,
+  }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const video = videosData.find((v) => v.slug === slug);

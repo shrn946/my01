@@ -4,6 +4,21 @@ import { FadeIn } from "@/components/fade-in";
 import Link from "next/link";
 import { Download, Star, GitFork, CheckCircle2, FileCode2, ArrowLeft, Code2 } from "lucide-react";
 
+export const runtime = "edge";
+
+export async function generateStaticParams() {
+  try {
+    const res = await fetch("https://api.github.com/users/shrn946/repos?type=public&sort=updated");
+    if (!res.ok) return [];
+    const repos = await res.json();
+    return repos.map((repo: any) => ({
+      slug: repo.name,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 async function getGithubPluginDetails(slug: string) {
   try {
     const res = await fetch(`https://api.github.com/users/shrn946/repos?type=public&sort=updated`, {

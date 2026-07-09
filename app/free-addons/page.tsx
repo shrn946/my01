@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Download free open-source WordPress plugins, Elementor addons, and scripts developed by Hassan Naqvi."
 };
 
+export const runtime = "edge";
+
 async function getGithubPlugins() {
   try {
     const res = await fetch("https://api.github.com/users/shrn946/repos?type=public&sort=updated", {

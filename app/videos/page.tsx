@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "Watch my latest video tutorials on WordPress, Elementor, and custom web development."
 };
 
+export const runtime = "edge";
+
 export default async function VideosPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const resolvedParams = await searchParams;
   const currentPage = Number(resolvedParams?.page) || 1;
