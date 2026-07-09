@@ -454,9 +454,13 @@ export default async function ReportPage({
             <div className="mt-12 md:mt-16 pt-8 md:pt-10 border-t border-white/10 flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between">
               <div className="max-w-xl text-center md:text-left">
                 <p className="font-black text-2xl md:text-3xl tracking-tight text-white break-words">{aiAudit.proposal_content.call_to_action}</p>
-                <p className="mt-3 text-base text-slate-400 flex items-center justify-center md:justify-start gap-2 font-light">
-                  <ShieldCheck className="h-5 w-5 text-blue-400 shrink-0" /> Guaranteed focused implementation strategy.
-                </p>
+                <div className="mt-3 text-base text-slate-400 flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1 font-light">
+                  <span className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-blue-400 shrink-0" /> Guaranteed focused implementation strategy.</span>
+                  <span className="text-slate-500">|</span>
+                  <a href="https://www.coreweblabs.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline font-bold">www.coreweblabs.com</a>
+                  <span className="text-slate-500">|</span>
+                  <a href="https://www.coreweblabs.com/contact" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline font-bold">Contact Us</a>
+                </div>
               </div>
               <Button className="bg-white text-slate-950 hover:bg-slate-200 h-14 px-8 text-lg font-bold rounded-full w-full md:w-auto shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300" asChild>
                 <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hassannaqvi@coreweblabs.com'}?subject=${encodeURIComponent(aiAudit.proposal_content.subject)}`}>
