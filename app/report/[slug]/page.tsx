@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ReportImageHover } from "@/components/report-image-hover";
 import { ReportViewTracker } from "./view-tracker";
 import { cleanHtml } from "@/lib/utils";
+import { AuditLightbox } from "@/components/audit-lightbox";
 
 export const dynamic = "force-dynamic";
 
@@ -349,19 +350,7 @@ export default async function ReportPage({
               </h2>
               <p className="mt-3 text-red-800 font-medium text-base md:text-lg max-w-2xl">The following screenshots highlight specific technical, design, or content issues discovered during our analysis.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8 relative z-10">
-              {mediaFor("appendix").map((item) => (
-                <figure key={item.id} className="print-section overflow-hidden rounded-xl border border-red-100 shadow-xl shadow-red-900/5 bg-white">
-                  <div className="relative border-b border-slate-100">
-                    <img src={item.url} alt={item.caption} className="w-full h-auto object-contain" />
-                  </div>
-                  <figcaption className="p-6">
-                    <p className="font-bold text-slate-900 mb-2">{item.caption}</p>
-                    {item.notes && <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">{item.notes}</p>}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
+            <AuditLightbox items={mediaFor("appendix")} />
           </section>
         )}
 
