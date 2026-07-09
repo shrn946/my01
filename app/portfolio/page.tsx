@@ -17,6 +17,51 @@ export const revalidate = 600;
 
 const DEMO_WEBSITES = [
   {
+    title: "Lawia - Attorney & Lawyers React Template",
+    slug: "lawia-attorney-lawyers-react-template",
+    category: "Law Firms ⚖️",
+    description: "A premium React template for attorneys and law firms featuring clean legal consultations forms, lawyer bios, and case results counters.",
+    overview: "A highly responsive React-based attorney template offering state-of-the-art visual components for legal representation.",
+    problem: "Law firms struggle to find customizable templates that convey professional credibility and feature consult bookings.",
+    solution: "Integrated a clean consultations form, modern team grids, and case result counters.",
+    result: "Significantly improves new consultation request rates.",
+    tools: ["React", "Lawyers", "Consulting", "Responsive"],
+    image: "/demo-screenshots/lawyers-demo-1.png",
+    gallery: ["/demo-screenshots/lawyers-demo-1.png"],
+    liveUrl: "https://lawyers.coreweblabs.com/demo-01",
+    featured: true
+  },
+  {
+    title: "Lawgne - Corporate Law Firm Template",
+    slug: "lawgne-corporate-law-firm-template",
+    category: "Law Firms ⚖️",
+    description: "An elegant corporate law firm template designed for corporate legal departments, attorneys, legal counselors, and consulting firms.",
+    overview: "A highly customizable corporate design system focusing on business law and corporate legal consultation workflows.",
+    problem: "Corporate law firms require a highly serious and premium digital aesthetic to attract enterprise clients.",
+    solution: "Created a sophisticated, grid-based dashboard layout highlighting areas of legal expertise.",
+    result: "Drives higher corporate contact inquiry conversions.",
+    tools: ["WordPress", "Corporate", "Grid"],
+    image: "/demo-screenshots/lawyers-demo-2.png",
+    gallery: ["/demo-screenshots/lawyers-demo-2.png"],
+    liveUrl: "https://lawyers.coreweblabs.com/demo-02",
+    featured: false
+  },
+  {
+    title: "Lawyers - Attorneys Business Template",
+    slug: "lawyers-attorneys-business-template",
+    category: "Law Firms ⚖️",
+    description: "A classic trustworthy lawyers website template emphasizing practice areas, client testimonials, and online appointment requests.",
+    overview: "Classic trustworthy theme highlighting attorney credentials, office locations, and legal case studies.",
+    problem: "Legal practices struggle to organize multiple practice areas clearly on mobile devices.",
+    solution: "Built responsive practice area grids and a sticky appointment scheduler.",
+    result: "Improves appointment booking rates and user retention.",
+    tools: ["Elementor", "Lawyers", "Trustworthy"],
+    image: "/demo-screenshots/lawyers-demo-3.png",
+    gallery: ["/demo-screenshots/lawyers-demo-3.png"],
+    liveUrl: "https://lawyers.coreweblabs.com/demo-03",
+    featured: false
+  },
+  {
     title: "PrimeCare Dental & Implant Practice",
     slug: "primecare-dental-implant-practice",
     category: "Dental Clinic",

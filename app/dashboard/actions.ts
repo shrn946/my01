@@ -986,6 +986,27 @@ export async function fetchPortfolioLinks(): Promise<{ success: boolean; items?:
 
 const FALLBACK_PORTFOLIO = [
   {
+    title: "Lawia - Attorney & Lawyers React Template",
+    category: "Law Firms ⚖️",
+    description: "A premium React template for attorneys and law firms featuring clean legal consultations forms, lawyer bios, and case results counters.",
+    url: "https://lawyers.coreweblabs.com/demo-01",
+    image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-1.png"
+  },
+  {
+    title: "Lawgne - Corporate Law Firm Template",
+    category: "Law Firms ⚖️",
+    description: "An elegant corporate law firm template designed for corporate legal departments, attorneys, legal counselors, and consulting firms.",
+    url: "https://lawyers.coreweblabs.com/demo-02",
+    image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-2.png"
+  },
+  {
+    title: "Lawyers - Attorneys Business Template",
+    category: "Law Firms ⚖️",
+    description: "A classic trustworthy lawyers website template emphasizing practice areas, client testimonials, and online appointment requests.",
+    url: "https://lawyers.coreweblabs.com/demo-03",
+    image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-3.png"
+  },
+  {
     title: "PrimeCare Dental & Implant Practice",
     category: "Dental Clinic",
     description: "A state-of-the-art, high-converting dental practice template engineered for patient bookings, cosmetic dentistry showcases, and seamless online scheduling.",
