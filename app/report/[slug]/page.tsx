@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { AlertCircle, ArrowRight, CheckCircle2, Monitor, ShieldCheck, Target, Terminal, Zap } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Monitor, ShieldCheck, Target, Terminal, Zap, Edit2 } from "lucide-react";
 
 import { AUDIT_CATEGORIES } from "@/lib/audit-categories";
 import { getAiAudit } from "@/lib/ai-audit";
@@ -12,6 +12,7 @@ import { ReportImageHover } from "@/components/report-image-hover";
 import { ReportViewTracker } from "./view-tracker";
 import { cleanHtml } from "@/lib/utils";
 import { AuditLightbox } from "@/components/audit-lightbox";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,9 @@ export default async function ReportPage({
   const prisma = getPrisma();
   const lead = await prisma.lead.findUnique({ where: { id: slug } });
   if (!lead) return notFound();
+
+  const user = await getCurrentUser();
+  const isAdmin = user?.role === "ADMIN";
 
   const aiFields = await getLeadAiFields(prisma, lead.id);
   const aiAudit = getAiAudit(aiFields.aiAnalysis);
@@ -212,6 +216,18 @@ export default async function ReportPage({
                   </div>
                 </div>
               </div>
+              {isAdmin && (
+                <div className="mt-6 flex justify-start print:hidden">
+                  <a
+                    href={`/dashboard?leadId=${lead.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 transition-all border border-indigo-500/20 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
+                  >
+                    <Edit2 className="h-4 w-4" /> Edit Proposal
+                  </a>
+                </div>
+              )}
             </div>
           </div>
           

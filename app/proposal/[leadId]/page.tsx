@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { CheckCircle2, Globe, Mail, Phone, Terminal, Zap } from "lucide-react";
+import { CheckCircle2, Globe, Mail, Phone, Terminal, Zap, Edit2 } from "lucide-react";
 
 import { AUDIT_CATEGORIES } from "@/lib/audit-categories";
 import { getAiAudit } from "@/lib/ai-audit";
 import { getLeadAiFields } from "@/lib/lead-ai-storage";
 import { getPrisma } from "@/lib/prisma";
 import { getReportContent, getReportMedia } from "@/lib/report-content";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,9 @@ export default async function ProposalPage({
   const prisma = getPrisma();
   const lead = await prisma.lead.findUnique({ where: { id: leadId } });
   if (!lead) return notFound();
+
+  const user = await getCurrentUser();
+  const isAdmin = user?.role === "ADMIN";
 
   const aiFields = await getLeadAiFields(prisma, lead.id);
   const audit = getAiAudit(aiFields.aiAnalysis);
@@ -103,6 +107,18 @@ export default async function ProposalPage({
                   </div>
                 </div>
               </div>
+              {isAdmin && (
+                <div className="mt-6 flex justify-start print:hidden">
+                  <a
+                    href={`/dashboard?leadId=${lead.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 transition-all border border-indigo-500/20 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
+                  >
+                    <Edit2 className="h-4 w-4" /> Edit Proposal
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </header>
