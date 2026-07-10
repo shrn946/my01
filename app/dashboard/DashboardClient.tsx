@@ -639,8 +639,12 @@ export default function DashboardClient({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const queryLeadId = params.get("leadId");
     const queryUrl = params.get("url");
-    if (queryUrl) {
+    if (queryLeadId) {
+      handleSelectLead(queryLeadId);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (queryUrl) {
       setUrl(queryUrl);
       performAnalysis(queryUrl);
       // Clear URL params to avoid re-triggering on refresh

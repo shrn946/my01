@@ -99,7 +99,8 @@ import {
   Check,
   Wand2,
   Sparkles,
-  MousePointerClick
+  MousePointerClick,
+  LayoutDashboard
 } from "lucide-react";
 
 const InstagramIcon = ({ className }: { className?: string }) => (
@@ -159,6 +160,7 @@ export default function LeadsPage() {
   const [emailBody, setEmailBody] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
   const [isEnhancingComments, setIsEnhancingComments] = useState(false);
   const [isCorrectingEmailSubject, setIsCorrectingEmailSubject] = useState(false);
@@ -473,11 +475,11 @@ export default function LeadsPage() {
   const categoriesFoundCount = Object.keys(stats.categoryCounts).filter(cat => stats.categoryCounts[cat] > 0).length;
 
   return (
-    <div className="space-y-8 pb-20 max-w-7xl mx-auto relative">
+    <div className="space-y-8 pb-20 max-w-6xl mx-auto relative">
       {/* Title & Top Action bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight flex items-center gap-2">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="h-8 w-8 text-primary" /> Leads Database
           </h1>
           <p className="text-muted-foreground mt-2">Browse, filter, audit, and launch outbox outreach campaigns on saved prospects.</p>
@@ -818,9 +820,9 @@ export default function LeadsPage() {
 
                         {/* Column: Actions */}
                         <div className="p-4 lg:py-0 lg:pr-5 lg:pl-2 lg:col-span-2 flex items-center justify-end gap-2 bg-muted/5 lg:bg-transparent border-t lg:border-t-0 border-dashed">
-                          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300" title="Analyze on Dashboard" asChild>
-                            <a href={`/dashboard?url=${encodeURIComponent(lead.website)}`} target="_blank" rel="noreferrer">
-                              <Wand2 className="h-4 w-4" />
+                          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300" title="Open in Dashboard" asChild>
+                            <a href={`/dashboard?leadId=${lead.id}`} target="_blank" rel="noreferrer">
+                              <LayoutDashboard className="h-4 w-4" />
                             </a>
                           </Button>
                           <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl shrink-0" title="View Report" asChild>
@@ -839,6 +841,7 @@ export default function LeadsPage() {
                                   setSelectedLead(lead);
                                   setRecipientEmail(lead.email?.split(",")[0]?.trim() || "");
                                   setShowEmailSection(false);
+                                  setIsEditingEmail(false);
                                 }}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -916,6 +919,61 @@ export default function LeadsPage() {
                                         <div className="flex justify-between items-center">
                                           <span className="text-muted-foreground">Detected Niche</span>
                                           <span className="font-semibold text-primary">{selectedLead.category || "Other"}</span>
+                                        </div>
+                                        <div className="flex flex-col gap-1.5 pt-2 border-t border-dashed">
+                                          <span className="text-muted-foreground text-xs">Email Address</span>
+                                          {isEditingEmail ? (
+                                            <div className="flex gap-2 w-full mt-1">
+                                              <Input 
+                                                value={recipientEmail} 
+                                                onChange={e => setRecipientEmail(e.target.value)} 
+                                                className="h-9 flex-1 rounded-xl bg-white" 
+                                              />
+                                              <Button 
+                                                size="icon" 
+                                                className="h-9 w-9 rounded-xl shrink-0" 
+                                                onClick={async () => {
+                                                  setIsUpdatingEmail(true);
+                                                  const res = await updateLeadEmail(selectedLead.id, recipientEmail.trim());
+                                                  if (res.success) {
+                                                    toast({ title: "Email Updated", description: "Lead's email address has been saved." });
+                                                    setSelectedLead((prev: any) => ({ ...prev, email: recipientEmail.trim() }));
+                                                    setIsEditingEmail(false);
+                                                    fetchLeadsAndStats();
+                                                  } else {
+                                                    toast({ title: "Update Failed", description: res.error, variant: "destructive" });
+                                                  }
+                                                  setIsUpdatingEmail(false);
+                                                }} 
+                                                disabled={isUpdatingEmail}
+                                              >
+                                                {isUpdatingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                                              </Button>
+                                              <Button 
+                                                size="icon" 
+                                                variant="ghost" 
+                                                className="h-9 w-9 rounded-xl shrink-0" 
+                                                onClick={() => {
+                                                  setIsEditingEmail(false);
+                                                  setRecipientEmail(selectedLead.email?.split(",")[0]?.trim() || "");
+                                                }}
+                                              >
+                                                <X className="h-4 w-4" />
+                                              </Button>
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center justify-between gap-2 mt-1">
+                                              <span className="font-semibold truncate max-w-[320px]">{selectedLead.email || "No Email Address"}</span>
+                                              <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-8 w-8 rounded-lg" 
+                                                onClick={() => setIsEditingEmail(true)}
+                                              >
+                                                <Edit3 className="h-3.5 w-3.5 text-primary" />
+                                              </Button>
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
