@@ -96,16 +96,10 @@ export default function ServicesPage() {
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Link 
-                href="/proposal" 
+                href="/portfolio" 
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 font-bold text-white shadow-soft transition-all duration-300 hover:bg-primary/95 hover:shadow-premium hover:-translate-y-0.5"
               >
-                Get Free Proposal <ArrowRight size={18} />
-              </Link>
-              <Link 
-                href="/portfolio" 
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-8 py-4 font-bold text-ink shadow-soft transition-all duration-300 hover:bg-slate-50 hover:-translate-y-0.5"
-              >
-                View Portfolio
+                View Portfolio <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -526,16 +520,10 @@ export default function ServicesPage() {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link 
-              href="/proposal" 
+              href="/contact" 
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 font-bold text-white shadow-soft transition-all duration-300 hover:bg-primary/95 hover:shadow-premium hover:-translate-y-0.5"
             >
-              Get Free Proposal <ArrowRight size={18} />
-            </Link>
-            <Link 
-              href="/contact" 
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur px-8 py-4 font-bold text-white shadow-soft transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5"
-            >
-              Schedule Consultation
+              Schedule Consultation <ArrowRight size={18} />
             </Link>
           </div>
         </div>
