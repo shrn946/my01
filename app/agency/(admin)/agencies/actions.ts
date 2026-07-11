@@ -79,27 +79,62 @@ export async function importAgenciesFromCSV(csvText: string) {
 }
 
 export async function autoCrawlAgencyWebsite(url: string) {
+  const normalizeUrl = (u: string) => {
+    if (!u.startsWith("http://") && !u.startsWith("https://")) {
+      return "https://" + u;
+    }
+    return u;
+  };
+  
+  const targetUrl = normalizeUrl(url);
+  let parsedUrl;
   try {
-    const normalizeUrl = (u: string) => {
-      if (!u.startsWith("http://") && !u.startsWith("https://")) {
-        return "https://" + u;
-      }
-      return u;
-    };
-    
-    const targetUrl = normalizeUrl(url);
-    const parsedUrl = new URL(targetUrl);
-    const baseOrigin = parsedUrl.origin;
+    parsedUrl = new URL(targetUrl);
+  } catch (e) {
+    return { success: false, error: "Invalid Website URL format." };
+  }
 
-    const res = await fetch(targetUrl, {
+  const baseOrigin = parsedUrl.origin;
+  const fallbackName = parsedUrl.hostname.replace("www.", "").split(".")[0];
+  const capitalizedFallback = fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
+
+  let res;
+  let html = "";
+  try {
+    res = await fetch(targetUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
       },
-      next: { revalidate: 0 }
+      next: { revalidate: 0 },
+      signal: AbortSignal.timeout(6000)
     });
 
-    if (!res.ok) throw new Error("Failed to fetch website");
-    const html = await res.text();
+    if (res && res.ok) {
+      html = await res.text();
+    } else {
+      return {
+        success: true,
+        name: capitalizedFallback,
+        website: targetUrl,
+        emails: [],
+        phone: "",
+        linkedin: "",
+        note: `Note: Website scan blocked by cloud firewall (Status ${res?.status || "Unknown"}). Fallback record created.`
+      };
+    }
+  } catch (e: any) {
+    return {
+      success: true,
+      name: capitalizedFallback,
+      website: targetUrl,
+      emails: [],
+      phone: "",
+      linkedin: "",
+      note: `Note: Connection timed out or DNS failed during scan. Fallback record created.`
+    };
+  }
+
+  try {
     const cheerio = await import("cheerio");
     const $ = cheerio.load(html);
 
