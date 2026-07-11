@@ -1015,6 +1015,20 @@ const FALLBACK_PORTFOLIO = [
     image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-3.jpg"
   },
   {
+    title: "Juris - Criminal Defense and Personal Injury Law Firm",
+    category: "Law Firms ⚖️",
+    description: "A comprehensive criminal defense and personal injury law firm website template with active case outcome trackers, attorney lists, and quick appointment booking.",
+    url: "https://lawyers.coreweblabs.com/demo-04",
+    image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-4.png"
+  },
+  {
+    title: "Aegis Legal - Family Law & Estate Planning Template",
+    category: "Law Firms ⚖️",
+    description: "A modern, empathetic web template designed for family law, divorce mediation, and estate planning attorneys.",
+    url: "https://lawyers.coreweblabs.com/demo-05",
+    image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-5.png"
+  },
+  {
     title: "PrimeCare Dental & Implant Practice",
     category: "Dental Clinic",
     description: "A state-of-the-art, high-converting dental practice template engineered for patient bookings, cosmetic dentistry showcases, and seamless online scheduling.",
