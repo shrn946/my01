@@ -329,7 +329,7 @@ const DEFAULT_NICHES = [
 
   // Professional Services
   "Mortgage Brokers", "Financial Advisors", "Tax Consultants", 
-  "Business Consultants", "IT Support Companies", "Marketing Agencies", 
+  "Business Consultants", "IT Support Companies", "Marketing Agencies", "Web Design Agencies", 
   "Recruitment Agencies", "Translation Services", "Architecture Firms", 
   "Interior Designers", "Engineering Firms", "Notaries",
 

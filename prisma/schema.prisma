@@ -303,4 +303,97 @@ enum Role {
   CLIENT
 }
 
+model Agency {
+  id                 String           @id @default(cuid())
+  name               String
+  website            String
+  contactName        String?
+  email              String?
+  linkedin           String?
+  country            String?
+  city               String?
+  services           String[]
+  techStack          String[]
+  notes              String?
+  status             String           @default("New")
+  slug               String           @unique
+  proposalHeadline   String?
+  proposalIntro      String?
+  proposalViewCount  Int              @default(0)
+  proposalViewedAt   DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  emails             AgencyEmail[]
+  followups          AgencyFollowup[]
+}
+
+model AgencyEmailTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  category    String?
+  subject     String
+  bodyHtml    String
+  bodyText    String?
+  description String?
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AgencyEmail {
+  id           String    @id @default(cuid())
+  agencyId     String
+  templateId   String?
+  subject      String
+  bodyHtml     String
+  bodyText     String?
+  status       String    @default("Draft")
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  agency       Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+}
+
+model AgencyFollowup {
+  id        String   @id @default(cuid())
+  agencyId  String
+  dueDate   DateTime
+  status    String   @default("Pending")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  agency    Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+}
+
+model AgencySettings {
+  id                 String   @id @default("default")
+  companyName        String?
+  companyLogo        String?
+  senderName         String?
+  senderEmail        String?
+  teamEmail          String?
+  whatsapp           String?
+  website            String?
+  portfolioUrl       String?
+  linkedin           String?
+  facebook           String?
+  instagram          String?
+  x                  String?
+  youtube            String?
+  github             String?
+  behance            String?
+  dribbble           String?
+  emailSignature     String?
+  brandColors        Json?
+  defaultTemplateId  String?
+  proposalTheme      String?  @default("Modern")
+  seoDefaults        Json?
+  ogImage            String?
+  favicon            String?
+  analyticsIds       Json?
+  howWeCanHelp       Json?
+  updatedAt          DateTime @updatedAt
+}
+
 
