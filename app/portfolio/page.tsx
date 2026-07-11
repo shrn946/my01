@@ -107,6 +107,21 @@ const DEMO_WEBSITES = [
     featured: false
   },
   {
+    title: "Lex Shield - Business Law & Intellectual Property Firm",
+    slug: "lex-shield-business-law-intellectual-property-firm",
+    category: "Law Firms ⚖️",
+    description: "A premium corporate litigation and intellectual property protection law firm website designed to showcase business-focused legal consultations.",
+    overview: "A high-end legal framework tailored specifically for enterprise corporate representation, patent litigation, and transaction attorneys.",
+    problem: "Business law practitioners need an aesthetic that commands corporate authority while highlighting distinct IP registration workflows.",
+    solution: "Designed a clean, corporate grid layout emphasizing corporate defense, copyright/trademark filings, and confidential inquiry forms.",
+    result: "Drives higher corporate client intake and streamlines business litigation consultation pipelines.",
+    tools: ["React", "Business Law", "IP Law", "Responsive"],
+    image: "/demo-screenshots/lawyers-demo-6.jpg",
+    gallery: ["/demo-screenshots/lawyers-demo-6.jpg"],
+    liveUrl: "https://lawyers.coreweblabs.com/demo-06",
+    featured: false
+  },
+  {
     title: "PrimeCare Dental & Implant Practice",
     slug: "primecare-dental-implant-practice",
     category: "Dental Clinic",

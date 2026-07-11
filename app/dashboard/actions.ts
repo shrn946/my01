@@ -1029,6 +1029,13 @@ const FALLBACK_PORTFOLIO = [
     image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-5.png"
   },
   {
+    title: "Lex Shield - Business Law & Intellectual Property Firm",
+    category: "Law Firms ⚖️",
+    description: "A premium corporate litigation and intellectual property protection law firm website designed to showcase business-focused legal consultations.",
+    url: "https://lawyers.coreweblabs.com/demo-06",
+    image: "https://www.coreweblabs.com/demo-screenshots/lawyers-demo-6.jpg"
+  },
+  {
     title: "PrimeCare Dental & Implant Practice",
     category: "Dental Clinic",
     description: "A state-of-the-art, high-converting dental practice template engineered for patient bookings, cosmetic dentistry showcases, and seamless online scheduling.",
