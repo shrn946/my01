@@ -22,6 +22,8 @@ import {
   Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/auth";
+import ReportEditSection from "@/components/ReportEditSection";
 
 export const revalidate = 0;
 
@@ -40,6 +42,10 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
 
   const settings = await getAgencySettings();
 
+  // Get current user to check if they are an admin
+  const user = await getCurrentUser();
+  const isAdmin = user?.role === "ADMIN";
+
   // Get portfolio projects from database
   const dbProjects = await prisma.project.findMany({
     orderBy: { createdAt: "desc" }
@@ -47,24 +53,24 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
 
   // Mocked projects to guarantee 18 premium items with law/dental websites
   const mockProjects = [
-    { id: "mock-1", title: "Apex Dental Group Portal", description: "A high-performance custom WordPress site for a multi-location dental practice, featuring instant appointment bookings and custom interactive maps.", image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Elementor Pro", "Custom API"] },
-    { id: "mock-2", title: "Vanguard Legal Associates", description: "Secure, multilingual custom theme built for a top-tier corporate law firm, integrated with Clio billing and contract portals.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Tailwind CSS", "Clio API"] },
-    { id: "mock-3", title: "Beacon Family Dentistry", description: "Bespoke WooCommerce billing portal and appointment workflow designed to run fully white-label under partner agency brand.", image: "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?auto=format&fit=crop&w=600&q=80", tools: ["WooCommerce", "WordPress", "Custom Plugin"] },
-    { id: "mock-4", title: "Summit Litigation Partners", description: "Modern WebGL-driven corporate law interface optimized to load in under 600ms, featuring robust case studies archive.", image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80", tools: ["React", "WordPress headless", "GSAP"] },
-    { id: "mock-5", title: "Vibe Creative Studio", description: "Creative portfolio site featuring complex WebGL shaders, premium custom theme design, and drag-and-drop builder modules.", image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "GSAP", "Three.js"] },
-    { id: "mock-6", title: "Glow Skin & Dental Spa", description: "Premium booking platform with automated email reminders and deposit checkout pipeline via Stripe custom flow.", image: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "WooCommerce", "Stripe API"] },
-    { id: "mock-7", title: "Nova Law Partners", description: "High-end corporate website for litigation lawyers with responsive CMS archive, filtering, and custom search modules.", image: "https://images.unsplash.com/photo-1505664194779-8bebcb95c02e?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "ACF Pro", "Tailwind"] },
-    { id: "mock-8", title: "Elite Dental Care Clinic", description: "Modern clinic web app displaying dynamic specialist scheduling tables, patient intakes forms, and secure document vaults.", image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Gravity Forms", "WooCommerce"] },
-    { id: "mock-9", title: "Scribe Legal Advisors", description: "Clean corporate portal built on Gutenberg native blocks using custom styling tokens for lightning speed PageSpeed scores.", image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Gutenberg", "Core Web Vitals"] },
-    { id: "mock-10", title: "Smile Craft Dental Care", description: "Custom Gutenberg-based portal featuring patient feedback dashboard, services directory, and live chat automation.", image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Gutenberg Blocks", "Stripe"] },
-    { id: "mock-11", title: "Metropolis Co-Working App", description: "Vite/Next.js frontend with WordPress REST API backend for desk booking and monthly subscriptions billing.", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "Headless WP", "Tailwind CSS"] },
-    { id: "mock-12", title: "E-Commerce Athletics Shop", description: "WooCommerce store optimized for high-volume traffic with Redis cache, Algolia search, and stripe customized checkouts.", image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80", tools: ["WooCommerce", "Algolia", "Redis"] },
-    { id: "mock-13", title: "Real Estate Listings Portal", description: "WordPress real estate search tool connected via cron job to local MLS listings with dynamic map interfaces.", image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "MLS API", "Google Maps"] },
-    { id: "mock-14", title: "Omni Health Diagnostics", description: "Medical testing results dashboard with secure customer access portals and direct backend reporting tools.", image: "https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "React", "Secure API"] },
-    { id: "mock-15", title: "Pinnacle Capital Partners", description: "Financial advisory landing page built for modern digital marketing with high-converting intake funnels.", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Elementor", "HubSpot"] },
-    { id: "mock-16", title: "Green Energy Corp Portal", description: "Corporate brand site for renewable energy projects, featuring responsive SVG animations and dynamic chart tables.", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "Gutenberg", "Lottie"] },
-    { id: "mock-17", title: "Venture Capital Hub", description: "Sleek portfolio portal showing funded startups, investment details, and dynamic custom post types.", image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80", tools: ["WordPress", "ACF Pro", "Tailwind CSS"] },
-    { id: "mock-18", title: "Zest Food Delivery Hub", description: "Custom WooCommerce local food hub setup with time slots, order boundaries, and print receipts integrations.", image: "https://images.unsplash.com/photo-1526367790999-015078648c7e?auto=format&fit=crop&w=600&q=80", tools: ["WooCommerce", "Print API", "Google Pay"] }
+    { id: "mock-1", title: "Apex Dental Group Portal", description: "A high-performance custom website for a multi-location dental practice, featuring instant appointment bookings and custom interactive maps.", image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "Tailwind CSS", "Custom API"] },
+    { id: "mock-2", title: "Vanguard Legal Associates", description: "Secure, multilingual custom theme built for a top-tier corporate law firm, integrated with Clio billing and contract portals.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80", tools: ["React", "Tailwind CSS", "Clio API"] },
+    { id: "mock-3", title: "Beacon Family Dentistry", description: "Bespoke WooCommerce billing portal and appointment workflow designed to run fully white-label under partner agency brand.", image: "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?auto=format&fit=crop&w=600&q=80", tools: ["WooCommerce", "Tailwind CSS", "Custom Plugin"] },
+    { id: "mock-4", title: "Summit Litigation Partners", description: "Modern WebGL-driven corporate law interface optimized to load in under 600ms, featuring robust case studies archive.", image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80", tools: ["React", "Headless CMS", "GSAP"] },
+    { id: "mock-5", title: "Vibe Creative Studio", description: "Creative portfolio site featuring complex WebGL shaders, premium custom theme design, and drag-and-drop builder modules.", image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "GSAP", "Three.js"] },
+    { id: "mock-6", title: "Glow Skin & Dental Spa", description: "Premium booking platform with automated email reminders and deposit checkout pipeline via Stripe custom flow.", image: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=600&q=80", tools: ["React", "E-commerce", "Stripe API"] },
+    { id: "mock-7", title: "Nova Law Partners", description: "High-end corporate website for litigation lawyers with responsive CMS archive, filtering, and custom search modules.", image: "https://images.unsplash.com/photo-1505664194779-8bebcb95c02e?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "Tailwind", "REST API"] },
+    { id: "mock-8", title: "Elite Dental Care Clinic", description: "Modern clinic web app displaying dynamic specialist scheduling tables, patient intakes forms, and secure document vaults.", image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80", tools: ["React", "Tailwind CSS", "Node.js"] },
+    { id: "mock-9", title: "Scribe Legal Advisors", description: "Clean corporate portal built on Gutenberg native blocks using custom styling tokens for lightning speed PageSpeed scores.", image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80", tools: ["Tailwind CSS", "TypeScript", "Core Web Vitals"] },
+    { id: "mock-10", title: "Smile Craft Dental Care", description: "Custom Gutenberg-based portal featuring patient feedback dashboard, services directory, and live chat automation.", image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&w=600&q=80", tools: ["React", "Tailwind CSS", "Stripe"] },
+    { id: "mock-11", title: "Metropolis Co-Working App", description: "Vite/Next.js frontend with WordPress REST API backend for desk booking and monthly subscriptions billing.", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "Headless CMS", "Tailwind CSS"] },
+    { id: "mock-12", title: "E-Commerce Athletics Shop", description: "WooCommerce store optimized for high-volume traffic with Redis cache, Algolia search, and stripe customized checkouts.", image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80", tools: ["React", "Algolia", "Redis"] },
+    { id: "mock-13", title: "Real Estate Listings Portal", description: "WordPress real estate search tool connected via cron job to local MLS listings with dynamic map interfaces.", image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80", tools: ["React", "MLS API", "Google Maps"] },
+    { id: "mock-14", title: "Omni Health Diagnostics", description: "Medical testing results dashboard with secure customer access portals and direct backend reporting tools.", image: "https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&w=600&q=80", tools: ["React", "Node.js", "Secure API"] },
+    { id: "mock-15", title: "Pinnacle Capital Partners", description: "Financial advisory landing page built for modern digital marketing with high-converting intake funnels.", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "Tailwind CSS", "HubSpot"] },
+    { id: "mock-16", title: "Green Energy Corp Portal", description: "Corporate brand site for renewable energy projects, featuring responsive SVG animations and dynamic chart tables.", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80", tools: ["React", "Tailwind", "Lottie"] },
+    { id: "mock-17", title: "Venture Capital Hub", description: "Sleek portfolio portal showing funded startups, investment details, and dynamic custom post types.", image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80", tools: ["Next.js", "Tailwind CSS", "API integrations"] },
+    { id: "mock-18", title: "Zest Food Delivery Hub", description: "Custom WooCommerce local food hub setup with time slots, order boundaries, and print receipts integrations.", image: "https://images.unsplash.com/photo-1526367790999-015078648c7e?auto=format&fit=crop&w=600&q=80", tools: ["E-commerce", "Print API", "Google Pay"] }
   ];
 
   // Merge database items with mock items to guarantee 18 items
@@ -90,12 +96,12 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
 
   // Load custom services from settings or default fallback list
   const defaultServices = [
-    { title: "White-label WordPress Development", description: "Pixel-perfect custom theme and plugin builds designed specifically to represent your brand.", icon: "Code" },
-    { title: "Elementor & Page Builders", description: "Fast, editable layouts using Elementor, Divi, Bricks, or Oxygen according to your workflow.", icon: "Globe" },
-    { title: "WooCommerce & E-commerce", description: "Robust, secure shopping experiences with custom checkouts, subscriptions, and integrations.", icon: "ShoppingBag" },
-    { title: "Figma/PSD to WordPress", description: "Hand-coded, responsive Gutenberg block layouts or builders direct from design files.", icon: "Layers" },
-    { title: "Next.js & Headless WordPress", description: "State-of-the-art fast frontends connected to a familiar WordPress admin panel via WPGraphQL.", icon: "Zap" },
-    { title: "Performance Optimization", description: "Turn slow WP builds into lightning fast assets hitting 90+ Mobile PageSpeed scores.", icon: "Shield" }
+    { title: "Website Development Services", description: "Pixel-perfect custom website and web app builds designed specifically to represent your brand.", icon: "Code" },
+    { title: "Modern Design Frameworks", description: "Fast, editable layouts using custom CSS and modern UI libraries tailored to your design.", icon: "Globe" },
+    { title: "E-commerce Solutions", description: "Robust, secure shopping experiences with custom checkouts, subscriptions, and integrations.", icon: "ShoppingBag" },
+    { title: "Figma to Code", description: "Hand-coded, responsive and semantic frontends directly from your design files.", icon: "Layers" },
+    { title: "Next.js & Headless CMS", description: "State-of-the-art fast frontends connected to modern backend content management systems.", icon: "Zap" },
+    { title: "Performance Optimization", description: "Turn slow loading sites into lightning fast assets hitting 90+ Mobile PageSpeed scores.", icon: "Shield" }
   ];
 
   const activeServices = (settings.howWeCanHelp as any[]) || [];
@@ -125,10 +131,10 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* Sticky Header */}
-      <header className="border-b border-slate-200 backdrop-blur-md sticky top-0 z-50 py-4 px-6 md:px-12 flex justify-between items-center bg-white/95">
+      <header className="border-b border-slate-200 sticky top-0 z-50 py-4 px-6 md:px-12 flex justify-between items-center bg-white/95">
         <div className="flex items-center gap-2">
           {settings.companyLogo ? (
             <img src={settings.companyLogo} alt={settings.companyName || "Logo"} className="h-8 object-contain" />
@@ -140,7 +146,7 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
         </div>
         <div className="flex items-center gap-4">
           <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md shadow-indigo-600/10 h-9">
-            <a href={`mailto:${settings.senderEmail || "hassannaqvi@coreweblabs.com"}?subject=White-label partnership query`}>
+            <a href={`mailto:${settings.senderEmail || "hassannaqvi@coreweblabs.com"}?subject=Website development partnership query`}>
               Contact Hassan
             </a>
           </Button>
@@ -153,10 +159,10 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
           <Building2 className="w-3.5 h-3.5 text-indigo-600" /> Exclusive Partnership Proposal
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight text-slate-900">
-          {agency.proposalHeadline || `Augment Your Capacity with Reliable White-label WordPress Support`}
+          {agency.proposalHeadline || `Augment Your Capacity with Reliable White-label Website Development Support`}
         </h1>
         <p className="text-slate-650 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-          {agency.proposalIntro || `We act as a seamless, high-performance extension to your agency. Ship custom Gutenberg, WooCommerce, and Next.js builds on time, without hiring overhead.`}
+          {agency.proposalIntro || `We act as a seamless, high-performance extension to your agency. Ship custom web pages, e-commerce stores, and Next.js builds on time, without hiring overhead.`}
         </p>
         <div className="pt-4 flex justify-center gap-3">
           <Button asChild size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 shadow-lg shadow-indigo-600/10 h-12">
@@ -175,7 +181,7 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
       </section>
 
       {/* About The Agency Section */}
-      <section className="py-16 border-t border-b border-slate-250/70 bg-white">
+      <section className="py-16 border-t border-b border-slate-200 bg-slate-50">
         <div className="max-w-5xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           <div className="md:col-span-2 space-y-4">
             <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -184,10 +190,10 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
             <p className="text-slate-650 text-base leading-relaxed">
               We admire the outstanding projects created by the team at <span className="font-bold text-slate-800">{agency.name}</span>. 
               As an agency, managing design pipeline fluctuations can cause resource bottlenecks. 
-              We operate as a silent, specialized WordPress engineering partner, allowing your project managers to focus on design and strategy.
+              We operate as a silent, specialized website development partner, allowing your project managers to focus on design and strategy.
             </p>
           </div>
-          <div className="p-6 rounded-xl border border-slate-200 bg-slate-50 space-y-4 shadow-sm">
+          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-4 shadow-sm">
             <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Outreach Context</h3>
             <div className="space-y-2 text-xs text-slate-500">
               <div className="flex justify-between border-b border-slate-200 pb-2">
@@ -196,7 +202,7 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
               </div>
               <div className="flex justify-between border-b border-slate-200 pb-2">
                 <span>Core Target Stack:</span>
-                <span className="text-slate-800 font-semibold">{agency.services.slice(0, 2).join(", ") || "Custom Dev"}</span>
+                <span className="text-slate-800 font-semibold">Website Development</span>
               </div>
             </div>
           </div>
@@ -206,30 +212,69 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
       {/* How We Can Help Section */}
       <section className="py-20 max-w-5xl mx-auto px-6 md:px-12 space-y-12">
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-extrabold text-slate-900">How We Can Help</h2>
+          <div className="flex items-center justify-center gap-2">
+            <h2 className="text-3xl font-extrabold text-slate-900">Services Offered</h2>
+            {isAdmin && (
+              <ReportEditSection agencyId={agency.id} type="services" initialItems={agency.services || []} />
+            )}
+          </div>
           <p className="text-slate-650 max-w-lg mx-auto">Augment your active project pipeline with our production-grade technical capability.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayServices.map((service: any, idx) => (
-            <div key={idx} className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-350 transition-colors shadow-sm space-y-3">
-              <div className="p-2 rounded-lg bg-indigo-50 w-fit">
-                {getServiceIcon(service.icon)}
+          {agency.services && agency.services.length > 0 ? (
+            agency.services.map((serviceName: string, idx) => (
+              <div key={idx} className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-350 transition-colors shadow-sm space-y-3">
+                <div className="p-2 rounded-lg bg-indigo-50 w-fit">
+                  <Code className="w-5 h-5 text-indigo-650" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-base">{serviceName}</h3>
+                <p className="text-slate-600 text-xs leading-relaxed">Professional, pixel-perfect development tailored for your needs.</p>
               </div>
-              <h3 className="font-bold text-slate-900 text-base">{service.title}</h3>
-              <p className="text-slate-650 text-xs leading-relaxed">{service.description}</p>
+            ))
+          ) : (
+            displayServices.map((service: any, idx) => (
+              <div key={idx} className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-350 transition-colors shadow-sm space-y-3">
+                <div className="p-2 rounded-lg bg-indigo-50 w-fit">
+                  {getServiceIcon(service.icon)}
+                </div>
+                <h3 className="font-bold text-slate-900 text-base">{service.title}</h3>
+                <p className="text-slate-650 text-xs leading-relaxed">{service.description}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* Technology Stack Section */}
+      <section className="py-20 bg-slate-50 border-t border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-8 text-center">
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <h2 className="text-3xl font-extrabold text-slate-900">Technology Stack</h2>
+              {isAdmin && (
+                <ReportEditSection agencyId={agency.id} type="techStack" initialItems={agency.techStack || []} />
+              )}
             </div>
-          ))}
+            <p className="text-slate-600 max-w-lg mx-auto">Modern tools and frameworks powering our development process.</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {(agency.techStack && agency.techStack.length > 0 ? agency.techStack : ["React", "Next.js", "Tailwind CSS", "TypeScript", "Node.js", "PostgreSQL", "Prisma"]).map((tech, idx) => (
+              <span key={idx} className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold text-slate-800 shadow-sm hover:border-slate-300 transition-colors">
+                {tech}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Why Partner With Us Section */}
-      <section className="py-20 bg-white border-t border-b border-slate-250/70">
+      <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h2 className="text-3xl font-black text-slate-900">Why Partner With {settings.companyName || "Us"}?</h2>
             <p className="text-slate-650 leading-relaxed text-sm">
-              We specialize in custom Gutenberg blocks, theme development, complex e-commerce integrations, and API syncs. 
+              We specialize in custom frontend development, custom theme design, complex e-commerce integrations, and API syncs. 
               We operate exclusively behind the scenes, integrating into your Slack workspace or project board without direct client communication.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
@@ -258,13 +303,13 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
 
       {/* Portfolio Section */}
       {sortedProjects.length > 0 && (
-        <section className="py-20 bg-slate-50 border-b border-slate-250/70">
+        <section className="py-20 bg-slate-50 border-t border-b border-slate-200">
           <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-12">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-200 pb-6">
               <div>
-                <h2 className="text-3xl font-black text-slate-900">Our White-Label Engineering Portfolio</h2>
+                <h2 className="text-3xl font-black text-slate-900">Our Website Development Services Portfolio</h2>
                 <p className="text-slate-600 mt-1 max-w-xl">
-                  Explore custom law, dental, and e-commerce websites engineered to support agency capacity and pass rigorous QA checks.
+                  Explore custom corporate, professional, and e-commerce websites engineered to support agency capacity and pass rigorous QA checks.
                 </p>
               </div>
               {settings.portfolioUrl && (
@@ -310,31 +355,31 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
           <h2 className="text-3xl font-extrabold text-slate-900">
             Frequently Asked Questions
           </h2>
-          <p className="text-slate-600">Everything you need to know about white-label collaboration.</p>
+          <p className="text-slate-600">Everything you need to know about our development collaboration.</p>
         </div>
 
         <div className="space-y-6">
           {[
             { q: "Do you sign Non-Disclosure Agreements (NDAs)?", a: "Yes. We operate fully behind the scenes under your brand. We sign NDAs before receiving any project specifications." },
-            { q: "How do we coordinate during a sprint?", a: "We adapt to your workspace. We join Slack channels or work in ClickUp, Asana, Jira or GitHub, providing direct updates to your PM team." },
-            { q: "What is your typical turnaround time?", a: "Typical landing page setups take 3-5 days. Complete custom Gutenberg/Elementor websites take 2-4 weeks depending on structure complexity." },
-            { q: "Do you support maintenance and updates?", a: "Yes. We offer white-label monthly maintenance care plans (backups, core updates, malware scanning, minor tweaks) representing your agency." }
+            { q: "What is your development process?", a: "We work from your design files (Figma, Adobe XD, etc.) and convert them into clean, high-performance, and responsive code, keeping you updated at every milestone." },
+            { q: "How do we handle client communications?", a: "We operate as a silent partner. All deliverables are white-labeled under your brand, and we never contact your clients directly." },
+            { q: "Do you support maintenance and updates?", a: "Yes. We offer white-label monthly support and maintenance plans representing your agency." }
           ].map((item, idx) => (
             <div key={idx} className="p-6 rounded-xl border border-slate-200 bg-white shadow-sm space-y-2">
               <h4 className="font-bold text-slate-900 text-sm">{item.q}</h4>
-              <p className="text-slate-600 text-xs leading-relaxed">{item.a}</p>
+              <p className="text-slate-650 text-xs leading-relaxed">{item.a}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-white border-t border-slate-250/70 text-center text-slate-500 text-xs">
+      <footer className="py-12 bg-white border-t border-slate-200 text-center text-slate-500 text-xs">
         <p className="font-semibold text-slate-700 mb-1">{settings.companyName || "CoreWebLabs"}</p>
-        <p>White-label wordpress engineering partners for modern digital agencies.</p>
-        {settings.website && (
+        <p>White-label website development partners for modern digital agencies.</p>
+        {settings.portfolioUrl && (
           <p className="mt-2 text-indigo-650 hover:underline">
-            <a href={settings.website} target="_blank" rel="noreferrer">{settings.website.replace(/^https?:\/\/(www\.)?/, "")}</a>
+            <a href={settings.portfolioUrl} target="_blank" rel="noreferrer">View Our Portfolio</a>
           </p>
         )}
       </footer>

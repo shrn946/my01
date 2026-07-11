@@ -347,8 +347,9 @@ model AgencyEmail {
   subject      String
   bodyHtml     String
   bodyText     String?
-  status       String    @default("Draft")
-  errorMessage String?
+  status          String    @default("Draft")
+  includeProposal Boolean   @default(true)
+  errorMessage    String?
   sentAt       DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

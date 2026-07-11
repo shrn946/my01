@@ -462,6 +462,7 @@ export async function saveAgencyEmailDraft(data: {
   subject: string;
   bodyHtml: string;
   templateId?: string;
+  includeProposal?: boolean;
 }) {
   try {
     const prisma = getPrisma();
@@ -521,7 +522,7 @@ export async function sendAgencyEmail(id: string, customBody?: string, customSub
     const body = customBody || emailObj.bodyHtml;
 
     const { compileEmailHtml } = await import("./email-wrap");
-    const compiledHtml = compileEmailHtml(body, settings, emailObj.agency);
+    const compiledHtml = compileEmailHtml(body, settings, emailObj.agency, emailObj.includeProposal);
 
     const fromAddress = settings.senderEmail || "hassannaqvi@coreweblabs.com";
     const fromName = settings.senderName || "Hassan";

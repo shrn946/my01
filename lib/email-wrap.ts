@@ -1,6 +1,6 @@
-export function compileEmailHtml(bodyContent: string, settings: any, agency: any) {
+export function compileEmailHtml(bodyContent: string, settings: any, agency: any, includeProposal: boolean = true) {
   // Replace variables in the content first
-  const proposalUrl = `${settings.website || 'https://www.coreweblabs.com'}/agency/proposal/${agency.slug}`;
+  const proposalUrl = includeProposal ? `${settings.website || 'https://www.coreweblabs.com'}/agency/proposal/${agency.slug}` : "";
   const vars: Record<string, string> = {
     agency_name: agency.name || "Agency Partner",
     contact_name: agency.contactName || "Team",
@@ -140,11 +140,11 @@ export function compileEmailHtml(bodyContent: string, settings: any, agency: any
       <div class="content">
         ${compiledBody}
         
-        ${compiledBody.includes("proposal_url") || compiledBody.includes("/proposal/")
-          ? "" // Already contains proposal URL or link
-          : `<div class="cta-container">
+        ${includeProposal && !(compiledBody.includes("proposal_url") || compiledBody.includes("/proposal/"))
+          ? `<div class="cta-container">
               <a href="${proposalUrl}" class="btn" target="_blank">View Custom Partnership Proposal</a>
              </div>`
+          : ""
         }
 
         <div class="signature">

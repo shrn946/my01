@@ -11,13 +11,14 @@ export async function updateProposalContent(id: string, headline: string, intro:
   });
 }
 
-export async function createCustomEmail(agencyId: string, subject: string, bodyHtml: string, templateId?: string) {
+export async function createCustomEmail(agencyId: string, subject: string, bodyHtml: string, templateId?: string, includeProposal: boolean = true) {
   try {
     const res = await saveAgencyEmailDraft({
       agencyId,
       subject,
       bodyHtml,
-      templateId
+      templateId,
+      includeProposal
     });
     revalidatePath(`/agency/agencies/${agencyId}`);
     return res;
@@ -99,7 +100,7 @@ export async function getCompiledEmailPreviewAction(emailId: string, customSubje
     const finalSubject = customSubject || emailObj.subject;
     const rawBody = customBody || emailObj.bodyHtml;
 
-    const compiledHtml = compileEmailHtml(rawBody, settings, emailObj.agency);
+    const compiledHtml = compileEmailHtml(rawBody, settings, emailObj.agency, emailObj.includeProposal);
 
     return {
       success: true,

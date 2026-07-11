@@ -58,6 +58,7 @@ type EmailItem = {
   errorMessage: string | null;
   sentAt: Date | null;
   createdAt: Date;
+  includeProposal: boolean;
 };
 
 type FollowupItem = {
@@ -115,8 +116,9 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
   const [proposalIntro, setProposalIntro] = useState(agency.proposalIntro || "");
 
   const [composeSubject, setComposeSubject] = useState(`White-label Web Development Partnership - CoreWebLabs & ${agency.name}`);
-  const [composeBody, setComposeBody] = useState(`<p>Hi ${agency.contactName || "Team"},</p>\n<p>Hope you are doing well.</p>\n<p>I would love to connect to see if we can support your design agency as a white-label development partner.</p>\n<p>You can view our dedicated partnership proposal here: {{proposal_url}}</p>\n<p>Best regards,</p>`);
+  const [composeBody, setComposeBody] = useState(`<p>Hi ${agency.contactName || "Team"},</p>\n<p>Hope you are doing well.</p>\n<p>I would love to connect to see if we can support your design agency as a website development partner.</p>\n<p>You can view our dedicated partnership proposal here: {{proposal_url}}</p>\n<p>Best regards,</p>`);
   const [isComposing, setIsComposing] = useState(false);
+  const [includeProposal, setIncludeProposal] = useState(true);
 
   const [followupDate, setFollowupDate] = useState("");
   const [followupNotes, setFollowupNotes] = useState("");
@@ -198,7 +200,7 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
     }
 
     startTransition(async () => {
-      const res = await createCustomEmail(agency.id, composeSubject, composeBody);
+      const res = await createCustomEmail(agency.id, composeSubject, composeBody, undefined, includeProposal);
       if (res.success) {
         toast({ title: "Email Draft Saved" });
         setIsComposing(false);
@@ -584,6 +586,19 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
                   <p className="text-slate-450 text-[11px]">Merge tags like <code className="text-indigo-650 font-bold">{"{{proposal_url}}"}</code> are supported.</p>
                 </div>
 
+                <div className="flex items-center gap-2 py-2">
+                  <input
+                    type="checkbox"
+                    id="includeProposal"
+                    checked={includeProposal}
+                    onChange={(e) => setIncludeProposal(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <Label htmlFor="includeProposal" className="cursor-pointer text-slate-700 font-semibold select-none">
+                    Include proposal link CTA in this email
+                  </Label>
+                </div>
+
                 <div className="flex gap-2 justify-end">
                   <Button variant="ghost" onClick={() => setIsComposing(false)} className="text-slate-500">Cancel</Button>
                   <Button onClick={handleCreateEmailDraft} className="bg-indigo-600 hover:bg-indigo-700 text-white">
@@ -617,9 +632,13 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
                           {email.status}
                         </span>
 
-                        {email.status === "Draft" && (
+                        {email.status === "Draft" ? (
                           <Button size="sm" onClick={() => handleSendEmail(email.id)} className="bg-indigo-600 hover:bg-indigo-700 text-white h-7 py-0 px-3">
                             <Send className="w-3.5 h-3.5 mr-1" /> Send Email
+                          </Button>
+                        ) : (
+                          <Button size="sm" onClick={() => handleSendEmail(email.id)} className="bg-slate-655 hover:bg-slate-700 text-white h-7 py-0 px-3 font-semibold">
+                            <Send className="w-3.5 h-3.5 mr-1" /> Send Again
                           </Button>
                         )}
 
