@@ -77,6 +77,36 @@ const DEMO_WEBSITES = [
     featured: false
   },
   {
+    title: "Juris - Criminal Defense and Personal Injury Law Firm",
+    slug: "juris-criminal-defense-and-personal-injury-law-firm",
+    category: "Law Firms ⚖️",
+    description: "A comprehensive criminal defense and personal injury law firm website template with active case outcome trackers, attorney lists, and quick appointment booking.",
+    overview: "Designed specifically for defense attorneys and litigation experts, this layout features a high-impact consultation call-to-action.",
+    problem: "Litigation firms need to showcase successful case results and practice areas prominently to convert high-stress visitors.",
+    solution: "Built a conversion-focused layout featuring prominent client testimonials, case studies, and easy-to-use consultation requests.",
+    result: "Significantly increases consultation requests and client intake efficiency.",
+    tools: ["React", "Criminal Law", "Responsive", "Case Studies"],
+    image: "/demo-screenshots/lawyers-demo-4.png",
+    gallery: ["/demo-screenshots/lawyers-demo-4.png"],
+    liveUrl: "https://lawyers.coreweblabs.com/demo-04",
+    featured: false
+  },
+  {
+    title: "Aegis Legal - Family Law & Estate Planning Template",
+    slug: "aegis-legal-family-law-estate-planning-template",
+    category: "Law Firms ⚖️",
+    description: "A modern, empathetic web template designed for family law, divorce mediation, and estate planning attorneys.",
+    overview: "A warm yet highly professional design system tailored for legal practitioners handling sensitive family disputes and legacy planning.",
+    problem: "Family law practices require a balance of authoritative trust and reassuring design elements to engage emotional clients.",
+    solution: "Implemented a clean, content-first layout with helpful FAQ modules, simple fee explainers, and confidential inquiry forms.",
+    result: "Improves client trust scores and boosts direct inquiries for estate planning.",
+    tools: ["WordPress", "Family Law", "FAQ Guide", "Elementor"],
+    image: "/demo-screenshots/lawyers-demo-5.png",
+    gallery: ["/demo-screenshots/lawyers-demo-5.png"],
+    liveUrl: "https://lawyers.coreweblabs.com/demo-05",
+    featured: false
+  },
+  {
     title: "PrimeCare Dental & Implant Practice",
     slug: "primecare-dental-implant-practice",
     category: "Dental Clinic",
