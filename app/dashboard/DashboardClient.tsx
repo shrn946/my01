@@ -177,6 +177,7 @@ export default function DashboardClient({
   const [isSavingProposalContent, setIsSavingProposalContent] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [reportMedia, setReportMedia] = useState<any[]>([]);
+  const [analyzeWithoutReport, setAnalyzeWithoutReport] = useState(false);
   const [stats, setStats] = useState(initialStats || {
     searchesUsed: 0,
     remainingSearches: 40,
@@ -406,6 +407,7 @@ export default function DashboardClient({
         setEditComments(lead.developerComments || "");
         setSelectedCategories((lead.aiAnalysis as any)?.selected_categories || []);
         setReportMedia((lead.reportMedia as any[]) || []);
+        setAnalyzeWithoutReport(!!(lead.reportContent as any)?.analyzeWithoutReport);
         setEditProposals((lead.reportContent as any)?.recommendations?.length
           ? (lead.reportContent as any).recommendations
           : lead.improvementProposals && lead.improvementProposals.length > 0 ? lead.improvementProposals : [
@@ -529,6 +531,7 @@ export default function DashboardClient({
           setEditComments(lead.developerComments || "");
           setSelectedCategories((lead.aiAnalysis as any)?.selected_categories || []);
           setReportMedia((lead.reportMedia as any[]) || []);
+          setAnalyzeWithoutReport(!!(lead.reportContent as any)?.analyzeWithoutReport);
           setEditProposals((lead.reportContent as any)?.recommendations?.length
             ? (lead.reportContent as any).recommendations
             : lead.improvementProposals && lead.improvementProposals.length > 0 ? lead.improvementProposals : [
@@ -796,7 +799,13 @@ export default function DashboardClient({
 
   const handleGenerateReport = async () => {
     if (!result?.leadId) return;
-    if (selectedCategories.length === 0) {
+    
+    let categoriesToUse = selectedCategories;
+    if (analyzeWithoutReport && selectedCategories.length === 0) {
+      categoriesToUse = ["small_fixes", "design_improvements"];
+    }
+
+    if (categoriesToUse.length === 0) {
       toast({ title: "Select a category", description: "Choose at least one service category before generation.", variant: "destructive" });
       return;
     }
@@ -809,7 +818,7 @@ export default function DashboardClient({
       let currentStep = 0;
 
       setReportState(s => ({ ...s, step: ++currentStep }));
-      const aiRes = await actionRecommendations(result.leadId, selectedCategories);
+      const aiRes = await actionRecommendations(result.leadId, categoriesToUse);
       if (!aiRes.success) {
         throw new Error("Focused AI analysis failed");
       }
@@ -837,6 +846,7 @@ export default function DashboardClient({
           ? (updatedLead.reportContent as any).recommendations
           : aiRecommendations);
         setReportMedia((updatedLead.reportMedia as any[]) || []);
+        setAnalyzeWithoutReport(!!(updatedLead.reportContent as any)?.analyzeWithoutReport);
         setEmailSubject((updatedLead.reportContent as any)?.customEmailSubject || (updatedLead.aiAnalysis as any)?.proposal_content?.email_subject || "");
         setEmailBody((updatedLead.reportContent as any)?.customEmailBody || (updatedLead.aiAnalysis as any)?.proposal_content?.email_body || "");
         setRecipientEmail((updatedLead.reportContent as any)?.recipientEmail || updatedLead.email || "");
@@ -1883,13 +1893,38 @@ export default function DashboardClient({
                         </label>
                       );
                     })}
+
+                    <div className="pt-2 border-t border-slate-100 mt-2">
+                      <label className={`block cursor-pointer rounded-xl border p-3 transition-colors ${analyzeWithoutReport ? "border-primary bg-primary/5" : "bg-card/50"}`}>
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={analyzeWithoutReport}
+                            onChange={async (e) => {
+                              const checked = e.target.checked;
+                              setAnalyzeWithoutReport(checked);
+                              if (result?.leadId) {
+                                const updatedReportContent = { ...result.reportContent, analyzeWithoutReport: checked };
+                                setResult((prev: any) => ({ ...prev, reportContent: updatedReportContent }));
+                                await updateLead(result.leadId, { reportContent: updatedReportContent as any });
+                              }
+                            }}
+                            className="mt-1 h-4 w-4 accent-primary"
+                          />
+                          <div>
+                            <p className="text-sm font-black">Analyze Website Without Report</p>
+                            <p className="mt-1 text-xs text-muted-foreground">Do not generate or link the full audit report. Send standard email, and only include issues/screenshots directly in the email.</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                   
                   <Button 
                     className="w-full" 
                     size="lg"
                     onClick={handleGenerateReport}
-                    disabled={reportState.active || selectedCategories.length === 0}
+                    disabled={reportState.active || (selectedCategories.length === 0 && !analyzeWithoutReport)}
                   >
                     {reportState.active ? (
                       <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...</>
@@ -1906,8 +1941,8 @@ export default function DashboardClient({
                       disabled={result.reportStatus !== "Generated" && !result.leadId}
                       asChild
                     >
-                      <a href={result.leadId ? `/report/${result.leadId}` : "#"} target="_blank" rel="noreferrer">
-                        <Eye className="mr-2 h-4 w-4" /> View Public Report
+                      <a href={result.leadId ? (analyzeWithoutReport ? `/report/${result.leadId}/issues` : `/report/${result.leadId}`) : "#"} target="_blank" rel="noreferrer">
+                        <Eye className="mr-2 h-4 w-4" /> {analyzeWithoutReport ? "View Issues Report" : "View Public Report"}
                       </a>
                     </Button>
 

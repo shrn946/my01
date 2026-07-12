@@ -32,6 +32,7 @@ function professionalEmailHtml({
   findings,
   media,
   contactUrl,
+  analyzeWithoutReport = false,
 }: {
   body: string;
   businessName: string;
@@ -40,6 +41,7 @@ function professionalEmailHtml({
   findings: string[];
   media: Array<{ url: string; caption: string }>;
   contactUrl: string;
+  analyzeWithoutReport?: boolean;
 }) {
   const findingsHtml = findings.slice(0, 5).map((item) =>
     `<tr><td style="padding:10px 0;color:#3f3f46;font-size:15px;line-height:24px;border-bottom:1px solid #f4f4f5;"><span style="color:#2563eb;font-weight:800;display:inline-block;margin-right:8px;">✓</span> ${escapeHtml(item)}</td></tr>`,
@@ -50,6 +52,26 @@ function professionalEmailHtml({
       <img src="${item.url}" width="500" alt="${escapeHtml(item.caption)}" style="display:block;width:100%;max-width:500px;height:auto;border-radius:12px;border:1px solid #e4e4e7;margin:0 auto;">
       <p style="margin:8px 0 0;color:#71717a;font-size:13px;line-height:20px;text-align:center;">${escapeHtml(item.caption)}</p>
     </td></tr>`).join("");
+
+  let headerTitle = "Website Audit & Recommendations";
+  let showFindings = true;
+  let showReportButton = true;
+  let buttonText = "View Full Audit Report";
+
+  if (analyzeWithoutReport) {
+    if (media && media.length > 0) {
+      headerTitle = "Website Issues Report";
+      showFindings = true;
+      showReportButton = true;
+      buttonText = "View Website Issues Report";
+    } else {
+      headerTitle = "Website Feedback & Recommendations";
+      showFindings = false;
+      showReportButton = false;
+    }
+  }
+
+  const findingsTitle = analyzeWithoutReport ? "Observed Website Issues" : "Key Observations";
 
   return `<!doctype html>
   <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -67,42 +89,44 @@ function professionalEmailHtml({
                 <td style="padding-left:12px;font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-0.5px;vertical-align:middle;">CoreWeb<span style="color:#2563eb;">Labs</span></td>
               </tr>
             </table>
-            <h1 style="margin:16px 0 0;font-size:26px;line-height:34px;color:#0f172a;font-weight:800;">Website Audit & Recommendations</h1>
+            <h1 style="margin:16px 0 0;font-size:26px;line-height:34px;color:#0f172a;font-weight:800;">${headerTitle}</h1>
             <p style="margin:12px 0 0;color:#64748b;font-size:16px;">Prepared for <strong>${escapeHtml(businessName)}</strong></p>
           </td></tr>
 
           <!-- Body Text -->
           <tr><td class="email-pad" style="padding:40px 40px 20px;background-color:#ffffff;">
-            <div style="color:#334155;font-size:16px;line-height:26px;">${body.replace(/\n/g, "<br>")}</div>
+            <div style="color:#334155;font-size:16px;line-height:26px;">
+              ${body.replace(/\n/g, "<br>")}
+              ${analyzeWithoutReport && media && media.length > 0 ? `
+                <p style="margin-top:20px;color:#334155;font-size:16px;line-height:26px;font-weight:600;">
+                  I've identified a few issues with your website. Please review the <a href="${reportUrl}" style="color:#2563eb;text-decoration:underline;">Issues Report</a> for screenshots and more details.
+                </p>
+              ` : ""}
+            </div>
           </td></tr>
-
-
 
           <!-- Findings -->
+          ${showFindings ? `
           <tr><td class="email-pad" style="padding:30px 40px;background-color:#fafaf9;border-top:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;">
-            <h2 style="margin:0 0 16px;font-size:18px;color:#0f172a;font-weight:700;">Key Observations</h2>
+            <h2 style="margin:0 0 16px;font-size:18px;color:#0f172a;font-weight:700;">${findingsTitle}</h2>
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${findingsHtml}</table>
           </td></tr>
+          ` : ""}
 
           <!-- Extra Media -->
           ${mediaHtml ? `<tr><td class="email-pad" style="padding:20px 40px;"><table role="presentation" width="100%">${mediaHtml}</table></td></tr>` : ""}
 
           <!-- Action Buttons -->
+          ${showReportButton ? `
           <tr><td class="email-pad" style="padding:40px;background-color:#ffffff;text-align:center;">
-            <a class="email-button" href="${reportUrl}" target="_blank" style="display:inline-block;padding:14px 28px;border-radius:8px;background-color:#2563eb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;box-shadow:0 2px 4px rgba(37,99,235,0.2);">View Full Audit Report</a>
+            <a class="email-button" href="${reportUrl}" target="_blank" style="display:inline-block;padding:14px 28px;border-radius:8px;background-color:#2563eb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;box-shadow:0 2px 4px rgba(37,99,235,0.2);">${buttonText}</a>
           </td></tr>
+          ` : ""}
 
           <!-- Footer -->
           <tr><td class="email-pad" style="padding:40px;background-color:#0f172a;text-align:center;">
             <h2 style="margin:0;font-size:22px;color:#ffffff;font-weight:700;">Ready to discuss the recommended improvements?</h2>
             <a class="email-button" href="https://www.coreweblabs.com/contact" target="_blank" style="display:inline-block;margin-top:24px;padding:16px 32px;border-radius:10px;background-color:#3b82f6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;box-shadow:0 4px 14px 0 rgba(59,130,246,0.39);">Book a Consultation</a>
-            
-            <div style="margin-top:40px;padding-top:32px;border-top:1px solid #1e293b;color:#94a3b8;font-size:15px;line-height:26px;">
-              <p style="margin:0 0 12px;">
-                <span style="color:#cbd5e1;font-weight:600;">Freelancer Profile:</span> 
-                <a href="https://www.freelancer.com/u/wordpressexp01" target="_blank" style="color:#60a5fa;text-decoration:none;">freelancer.com/u/wordpressexp01</a>
-              </p>
-            </div>
           </td></tr>
 
         </table>
@@ -123,6 +147,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     const aiFields = await getLeadAiFields(prisma, leadId);
     const audit = getAiAudit(aiFields.aiAnalysis);
     const reportContent = getReportContent(aiFields.reportContent);
+    const analyzeWithoutReport = !!(aiFields.reportContent as any)?.analyzeWithoutReport;
     const reportMedia = getReportMedia(aiFields.reportMedia)
       .filter((item) => item.includeInEmail || item.section === "email")
       .map((item) => ({ url: absoluteUrl(baseUrl, item.url), caption: item.caption }));
@@ -143,7 +168,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     let status = "Sent";
     let errorMsg = null;
     
-    const reportUrl = absoluteUrl(baseUrl, `/report/${leadId}`);
+    const reportUrl = absoluteUrl(baseUrl, analyzeWithoutReport ? `/report/${leadId}/issues` : `/report/${leadId}`);
 
     const htmlBody = professionalEmailHtml({
       body: customBody,
@@ -155,6 +180,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
         : audit?.png_report_data.findings || lead.topIssues?.split("\n").filter(Boolean) || [],
       media: reportMedia,
       contactUrl: settings?.portfolioUrl || `mailto:${settings?.senderEmail || "hello@example.com"}`,
+      analyzeWithoutReport,
     });
 
     try {
@@ -164,7 +190,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
           to: toEmail.split(",").map((e) => e.trim()).filter(Boolean),
           subject: subject,
           html: htmlBody,
-          text: customBody.replace(/<[^>]*>?/gm, '') + `\n\nView Full Audit Report: ${reportUrl}`, // Plain text fallback
+          text: customBody.replace(/<[^>]*>?/gm, '') + (analyzeWithoutReport ? (reportMedia.length > 0 ? `\n\nI've identified a few issues with your website. Please review the Issues Report for screenshots and more details: ${reportUrl}` : "") : `\n\nView Full Audit Report: ${reportUrl}`), // Plain text fallback
           tags: [
             { name: "lead_id", value: leadId }
           ]

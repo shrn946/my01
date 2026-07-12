@@ -741,6 +741,7 @@ export async function generateAiAudit(input: AuditInput): Promise<{ audit: AiAud
 }
 
 export function getAiAudit(value: unknown): AiAudit | null {
+  if (!value) return null;
   const parsed = aiAuditSchema.safeParse(value);
   if (!parsed.success) {
     console.error("AI Audit validation failed:", parsed.error);
