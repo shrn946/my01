@@ -1382,14 +1382,25 @@ export async function importLeadsAction(leadsData: any[]) {
         continue;
       }
 
-      const businessName = row["Business Name"] || row["businessName"] || "Unknown Business";
-      const email = row["Email"] || row["email"] || null;
-      const phone = row["Phone"] || row["phone"] || null;
-      const city = row["City"] || row["city"] || null;
-      const country = row["Country"] || row["country"] || null;
-      const category = row["Category/Niche"] || row["category"] || null;
-      
-      let status = row["Status"] || row["status"] || "New";
+      // Helper to treat "N/A" / "Not Scanned" / empty as null
+      const val = (v: any) => (!v || v === "N/A" || v === "Not Scanned" ? null : String(v).trim());
+
+      // Support both exported CSV column names and original names
+      const businessName =
+        val(row["Company Name"]) || val(row["Business Name"]) || val(row["businessName"]) || "Unknown Business";
+      const email =
+        val(row["Email Address"]) || val(row["Email"]) || val(row["email"]) || null;
+      const phone = val(row["Phone"]) || val(row["phone"]) || null;
+      // Exported CSV uses "Business Address" as a combined address field
+      const address =
+        val(row["Business Address"]) || val(row["City"]) || val(row["city"]) || val(row["Country"]) || val(row["country"]) || null;
+      const category =
+        val(row["Industry"]) || val(row["Category/Niche"]) || val(row["category"]) || null;
+
+      // CMS/Platform column maps to wordpress flag
+      const cmsPlatform = val(row["CMS/Platform"]) || "";
+
+      let status = val(row["Status"]) || val(row["status"]) || "New";
 
       let detectedCategory = category;
       if (!detectedCategory || detectedCategory.toLowerCase() === "other" || detectedCategory.toLowerCase() === "general") {
@@ -1398,12 +1409,16 @@ export async function importLeadsAction(leadsData: any[]) {
 
       // Heuristics or imported values
       const ssl = website.startsWith("https://");
-      const wordpress = row["WordPress Setup"] === "Yes" || row["wordpress"] === true || row["wordpress"] === "Yes";
+      const wordpress =
+        cmsPlatform.toLowerCase() === "wordpress" ||
+        row["WordPress Setup"] === "Yes" ||
+        row["wordpress"] === true ||
+        row["wordpress"] === "Yes";
       const contactForm = row["Contact Form"] === "Yes" || row["contactForm"] === true || row["contactForm"] === "Yes";
       const mobileFriendly = row["Mobile Friendly"] === "Yes" || row["mobileFriendly"] === true || row["mobileFriendly"] === "Yes";
 
       const qualityScore = parseInt(row["Quality Score"]) || 50;
-      const opportunityScore = parseInt(row["Opportunity Score"]) || 50;
+      const opportunityScore = parseInt(row["Opportunity Score"]) || 0;
 
       await prisma.lead.create({
         data: {
@@ -1411,8 +1426,7 @@ export async function importLeadsAction(leadsData: any[]) {
           website,
           email,
           phone,
-          city,
-          address: country, // we use address field for Country
+          address, // Business Address / City / Country combined
           category: detectedCategory,
           status,
           leadScore: opportunityScore,

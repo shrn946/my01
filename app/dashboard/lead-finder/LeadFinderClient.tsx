@@ -616,15 +616,28 @@ export default function LeadFinderClient({
     toast({ title: "Importing Leads", description: "Reading Excel file and validating contents..." });
 
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet);
+      const isCsv = file.name.toLowerCase().endsWith(".csv");
+      let rawJson: any[];
 
-      if (json.length === 0) {
+      if (isCsv) {
+        const text = await file.text();
+        const workbook = XLSX.read(text, { type: "string" });
+        const sheetName = workbook.SheetNames[0];
+        rawJson = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      } else {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        rawJson = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      }
+
+      if (rawJson.length === 0) {
         throw new Error("The selected Excel file contains no data.");
       }
+
+      // Sanitize to plain objects — SheetJS rows aren't always plain enough
+      // for Next.js Server Actions which require serializable data only.
+      const json: Record<string, unknown>[] = JSON.parse(JSON.stringify(rawJson));
 
       const res = await importLeadsAction(json);
       if (res.success) {
@@ -1842,7 +1855,7 @@ export default function LeadFinderClient({
           <div className="flex flex-wrap items-center gap-3">
             <input 
               type="file" 
-              accept=".xlsx, .xls" 
+              accept=".xlsx, .xls, .csv" 
               id="excel-import-file" 
               className="hidden" 
               onChange={handleImportExcel}
@@ -1856,7 +1869,7 @@ export default function LeadFinderClient({
               disabled={isImporting}
             >
               {isImporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-              Import Excel
+              Import Excel / CSV
             </Button>
             <Button 
               variant="outline" 
