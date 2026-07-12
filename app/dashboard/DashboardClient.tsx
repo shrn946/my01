@@ -1941,7 +1941,7 @@ export default function DashboardClient({
                       disabled={result.reportStatus !== "Generated" && !result.leadId}
                       asChild
                     >
-                      <a href={result.leadId ? (analyzeWithoutReport ? `/report/${result.leadId}/issues` : `/report/${result.leadId}`) : "#"} target="_blank" rel="noreferrer">
+                      <a href={result.leadId ? (analyzeWithoutReport ? `/report/${result.leadId}?format=issues` : `/report/${result.leadId}`) : "#"} target="_blank" rel="noreferrer">
                         <Eye className="mr-2 h-4 w-4" /> {analyzeWithoutReport ? "View Issues Report" : "View Public Report"}
                       </a>
                     </Button>

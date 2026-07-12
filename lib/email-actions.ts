@@ -168,7 +168,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
     let status = "Sent";
     let errorMsg = null;
     
-    const reportUrl = absoluteUrl(baseUrl, analyzeWithoutReport ? `/report/${leadId}/issues` : `/report/${leadId}`);
+    const reportUrl = absoluteUrl(baseUrl, analyzeWithoutReport ? `/report/${leadId}?format=issues` : `/report/${leadId}`);
 
     const htmlBody = professionalEmailHtml({
       body: customBody,
