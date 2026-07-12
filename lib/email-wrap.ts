@@ -132,9 +132,14 @@ export function compileEmailHtml(bodyContent: string, settings: any, agency: any
     <div class="container">
       <div class="header-bar"></div>
       <div class="header">
-        ${settings.companyLogo 
+        ${settings.companyLogo && settings.companyLogo !== "https://coreweblabs.com/logo.png"
           ? `<img src="${settings.companyLogo}" alt="${settings.companyName || "CoreWebLabs"}" style="max-height: 40px;" />`
-          : `<a href="${settings.website || "#"}" class="logo">${settings.companyName || "CoreWebLabs"}</a>`
+          : `<table role="presentation" align="center" cellspacing="0" cellpadding="0" style="margin:0 auto;">
+              <tr>
+                <td style="width:40px;height:40px;background-color:#2563eb;border-radius:12px;text-align:center;vertical-align:middle;color:#ffffff;font-size:20px;font-weight:900;line-height:40px;">C</td>
+                <td style="padding-left:12px;font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-0.5px;vertical-align:middle;">CoreWeb<span style="color:#2563eb;">Labs</span></td>
+              </tr>
+            </table>`
         }
       </div>
       <div class="content">

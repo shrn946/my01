@@ -11,6 +11,20 @@ export async function updateProposalContent(id: string, headline: string, intro:
   });
 }
 
+export async function toggleEmailProposalOption(emailId: string, currentValue: boolean) {
+  try {
+    const prisma = getPrisma();
+    const emailObj = await prisma.agencyEmail.update({
+      where: { id: emailId },
+      data: { includeProposal: !currentValue }
+    });
+    revalidatePath(`/agency/agencies/${emailObj.agencyId}`);
+    return { success: true, email: emailObj };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function createCustomEmail(agencyId: string, subject: string, bodyHtml: string, templateId?: string, includeProposal: boolean = true) {
   try {
     const res = await saveAgencyEmailDraft({

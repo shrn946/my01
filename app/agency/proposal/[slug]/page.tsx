@@ -302,74 +302,23 @@ export default async function AgencyProposalPage({ params }: { params: Promise<{
       </section>
 
       {/* Portfolio Section */}
-      {sortedProjects.length > 0 && (
-        <section className="py-20 bg-slate-50 border-t border-b border-slate-200">
-          <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-200 pb-6">
-              <div>
-                <h2 className="text-3xl font-black text-slate-900">Our Website Development Services Portfolio</h2>
-                <p className="text-slate-600 mt-1 max-w-xl">
-                  Explore custom corporate, professional, and e-commerce websites engineered to support agency capacity and pass rigorous QA checks.
-                </p>
-              </div>
-              {settings.portfolioUrl && (
-                <Button asChild variant="outline" className="border-slate-200 bg-white text-slate-700 h-9 font-semibold">
-                  <a href={settings.portfolioUrl} target="_blank" rel="noreferrer">
-                    Portfolio site <ArrowUpRight className="w-4 h-4 ml-1 text-slate-400" />
-                  </a>
-                </Button>
-              )}
+      <section className="py-20 bg-slate-50 border-t border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pb-6">
+            <div>
+              <h2 className="text-3xl font-black text-slate-900 text-center md:text-left">Our Website Development Services Portfolio</h2>
+              <p className="text-slate-650 mt-1 max-w-xl text-center md:text-left">
+                Explore custom corporate, professional, and e-commerce websites engineered to support agency capacity and pass rigorous QA checks.
+              </p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {sortedProjects.map((project) => (
-                <div key={project.id} className="rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow flex flex-col justify-between group">
-                  <div>
-                    {project.image && (
-                      <div className="w-full h-48 overflow-hidden relative border-b border-slate-100">
-                        <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-350 group-hover:scale-105" />
-                      </div>
-                    )}
-                    <div className="p-6 space-y-3">
-                      <h3 className="font-bold text-slate-900 text-base">{project.title}</h3>
-                      <p className="text-slate-600 text-xs leading-relaxed line-clamp-3">{project.description}</p>
-                    </div>
-                  </div>
-                  <div className="p-6 pt-0 flex flex-wrap gap-1">
-                    {project.tools.slice(0, 3).map((t) => (
-                      <span key={t} className="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] px-2 py-0.5 rounded font-semibold">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {settings.portfolioUrl && (
+              <Button asChild variant="outline" className="border-slate-200 bg-white text-slate-700 h-9 font-semibold">
+                <a href={settings.portfolioUrl} target="_blank" rel="noreferrer">
+                  View Our Portfolio <ArrowUpRight className="w-4 h-4 ml-1 text-slate-400" />
+                </a>
+              </Button>
+            )}
           </div>
-        </section>
-      )}
-
-      {/* FAQ Section */}
-      <section className="py-20 max-w-3xl mx-auto px-6 space-y-12">
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-extrabold text-slate-900">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-slate-600">Everything you need to know about our development collaboration.</p>
-        </div>
-
-        <div className="space-y-6">
-          {[
-            { q: "Do you sign Non-Disclosure Agreements (NDAs)?", a: "Yes. We operate fully behind the scenes under your brand. We sign NDAs before receiving any project specifications." },
-            { q: "What is your development process?", a: "We work from your design files (Figma, Adobe XD, etc.) and convert them into clean, high-performance, and responsive code, keeping you updated at every milestone." },
-            { q: "How do we handle client communications?", a: "We operate as a silent partner. All deliverables are white-labeled under your brand, and we never contact your clients directly." },
-            { q: "Do you support maintenance and updates?", a: "Yes. We offer white-label monthly support and maintenance plans representing your agency." }
-          ].map((item, idx) => (
-            <div key={idx} className="p-6 rounded-xl border border-slate-200 bg-white shadow-sm space-y-2">
-              <h4 className="font-bold text-slate-900 text-sm">{item.q}</h4>
-              <p className="text-slate-650 text-xs leading-relaxed">{item.a}</p>
-            </div>
-          ))}
         </div>
       </section>
 

@@ -46,7 +46,8 @@ import {
   createAgencyDetailFollowup, 
   toggleFollowupStatus,
   deleteAgencyDetailFollowup,
-  getCompiledEmailPreviewAction
+  getCompiledEmailPreviewAction,
+  toggleEmailProposalOption
 } from "./actions";
 import EmailPreviewModal from "@/components/EmailPreviewModal";
 
@@ -231,6 +232,16 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
     }
   };
 
+  const handleToggleProposalOption = async (emailId: string, currentVal: boolean) => {
+    const res = await toggleEmailProposalOption(emailId, currentVal);
+    if (res.success) {
+      toast({ title: `Proposal link ${!currentVal ? 'included' : 'excluded'}` });
+      router.refresh();
+    } else {
+      toast({ title: "Error", description: res.error, variant: "destructive" });
+    }
+  };
+
   const handleCreateFollowup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!followupDate) return;
@@ -304,6 +315,12 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
               ))}
             </SelectContent>
           </Select>
+
+          <Button asChild variant="outline" className="border-slate-200 hover:bg-slate-50 text-slate-700 bg-white">
+            <Link href={`/agency/agencies/${agency.id}/edit`}>
+              <Settings className="w-4 h-4 mr-2 text-indigo-650" /> Edit Agency
+            </Link>
+          </Button>
 
           <Button asChild variant="outline" className="border-slate-200 hover:bg-slate-50 text-slate-700 bg-white">
             <a href={publicProposalUrl} target="_blank" rel="noreferrer">
@@ -564,6 +581,16 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
               <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
                 <h3 className="font-bold text-slate-800 text-base">New Custom Outreach Email (Draft)</h3>
                 
+                <div className="bg-indigo-50/50 border border-indigo-100 p-3 rounded-lg flex items-start gap-2.5 text-xs text-slate-650">
+                  <FileText className="w-4 h-4 text-indigo-650 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="font-bold text-slate-800">Proposal URL:</span>{" "}
+                    <a href={`https://www.coreweblabs.com/agency/proposal/${agency.slug}`} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-mono">
+                      https://www.coreweblabs.com/agency/proposal/${agency.slug}
+                    </a>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="emailSubject">Subject Line</Label>
                   <Input 
@@ -654,6 +681,28 @@ export default function AgencyDetailsClient({ agency }: { agency: AgencyDetail }
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-t border-b border-slate-100 py-2.5">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                        <FileText className="w-3.5 h-3.5 text-indigo-650 flex-shrink-0" />
+                        <span className="font-semibold">Proposal URL:</span>
+                        <a href={`https://www.coreweblabs.com/agency/proposal/${agency.slug}`} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-mono">
+                          https://www.coreweblabs.com/agency/proposal/${agency.slug}
+                        </a>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`excludeProposal-${email.id}`}
+                          checked={email.includeProposal}
+                          onChange={() => handleToggleProposalOption(email.id, email.includeProposal)}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <label htmlFor={`excludeProposal-${email.id}`} className="text-xs text-slate-650 font-medium cursor-pointer select-none">
+                          Include Proposal Link
+                        </label>
                       </div>
                     </div>
 
