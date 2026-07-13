@@ -59,16 +59,10 @@ function professionalEmailHtml({
   let buttonText = "View Full Audit Report";
 
   if (analyzeWithoutReport) {
-    if (media && media.length > 0) {
-      headerTitle = "Website Issues Report";
-      showFindings = true;
-      showReportButton = true;
-      buttonText = "View Website Issues Report";
-    } else {
-      headerTitle = "Website Feedback & Recommendations";
-      showFindings = false;
-      showReportButton = false;
-    }
+    headerTitle = "Website Issues Report";
+    showFindings = true;
+    showReportButton = true;
+    buttonText = "View Issues Report";
   }
 
   const findingsTitle = analyzeWithoutReport ? "Observed Website Issues" : "Key Observations";
@@ -97,9 +91,9 @@ function professionalEmailHtml({
           <tr><td class="email-pad" style="padding:40px 40px 20px;background-color:#ffffff;">
             <div style="color:#334155;font-size:16px;line-height:26px;">
               ${body.replace(/\n/g, "<br>")}
-              ${analyzeWithoutReport && media && media.length > 0 ? `
+              ${analyzeWithoutReport ? `
                 <p style="margin-top:20px;color:#334155;font-size:16px;line-height:26px;font-weight:600;">
-                  I've identified a few issues with your website. Please review the <a href="${reportUrl}" style="color:#2563eb;text-decoration:underline;">Issues Report</a> for screenshots and more details.
+                  I've identified a few issues with your website. Please review the <a href="${reportUrl}" style="color:#2563eb;text-decoration:underline;">Issues Report</a> for more details.
                 </p>
               ` : ""}
             </div>
@@ -190,7 +184,7 @@ export async function sendLeadEmail(leadId: string, templateId: string | null, c
           to: toEmail.split(",").map((e) => e.trim()).filter(Boolean),
           subject: subject,
           html: htmlBody,
-          text: customBody.replace(/<[^>]*>?/gm, '') + (analyzeWithoutReport ? (reportMedia.length > 0 ? `\n\nI've identified a few issues with your website. Please review the Issues Report for screenshots and more details: ${reportUrl}` : "") : `\n\nView Full Audit Report: ${reportUrl}`), // Plain text fallback
+          text: customBody.replace(/<[^>]*>?/gm, '') + (analyzeWithoutReport ? `\n\nI've identified a few issues with your website. Please review the Issues Report for more details: ${reportUrl}` : `\n\nView Full Audit Report: ${reportUrl}`), // Plain text fallback
           tags: [
             { name: "lead_id", value: leadId }
           ]

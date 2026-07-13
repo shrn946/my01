@@ -1141,16 +1141,16 @@ export default function DashboardClient({
                         <details className="rounded-xl border">
                           <summary className="cursor-pointer p-3 text-sm font-bold">View preserved original AI comments</summary>
                           <div className="border-t p-4 space-y-3">
-                            {result.aiAnalysis?.developer_comments?.map((comment: any) => (
-                              <p key={comment.heading} className="text-sm text-muted-foreground"><strong>{comment.heading}:</strong> {comment.finding}</p>
+                            {result.aiAnalysis?.developer_comments?.map((comment: any, idx: number) => (
+                              <p key={`${comment.category}-${comment.heading}-${idx}`} className="text-sm text-muted-foreground"><strong>{comment.heading}:</strong> {comment.finding}</p>
                             ))}
                           </div>
                         </details>
                       </div>
                     ) : result.aiAnalysis?.developer_comments?.length ? (
                       <div className="space-y-4">
-                        {result.aiAnalysis.developer_comments.map((comment: any) => (
-                          <div key={`${comment.category}-${comment.heading}`} className="rounded-2xl border bg-slate-50 p-5">
+                        {result.aiAnalysis.developer_comments.map((comment: any, idx: number) => (
+                          <div key={`${comment.category}-${comment.heading}-${idx}`} className="rounded-2xl border bg-slate-50 p-5">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <Badge variant="outline">{comment.category}</Badge>
                               <Badge className={
@@ -1546,8 +1546,8 @@ export default function DashboardClient({
                       <h3 className="font-black">{result.aiAnalysis.proposal_content?.title}</h3>
                       <p className="text-sm text-muted-foreground">{result.aiAnalysis.proposal_content?.executive_pitch}</p>
                       <ul className="space-y-2">
-                        {result.aiAnalysis.proposal_content?.scope?.map((item: string) => (
-                          <li key={item} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
+                        {result.aiAnalysis.proposal_content?.scope?.map((item: string, idx: number) => (
+                          <li key={`${item}-${idx}`} className="text-sm flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{item}</li>
                         ))}
                       </ul>
                     </>

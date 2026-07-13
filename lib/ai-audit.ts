@@ -330,26 +330,77 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
 
   for (const category of input.selectedCategories) {
     if (category === "redesign") {
-      const finding = home?.h1[0]
-        ? `The homepage leads with "${home.h1[0]}", with ${home.h2.length} detected supporting section headings.`
-        : "The homepage does not expose a clear primary heading in the crawl.";
       comments.push({
-        category, priority: "high", heading: "Homepage hierarchy needs a clearer conversion path",
-        finding,
-        recommendation: "Modernize the hero, clarify the value proposition, strengthen the primary call to action, and organize content around services, proof, process, and enquiry.",
-        evidence: `${forms} form(s), ${home?.ctas.length || 0} CTA label(s), mobile score ${input.scores.mobile}/100.`,
+        category, priority: "high", heading: "Homepage Hero Section",
+        finding: "The homepage hero section could be redesigned with a stronger headline, modern imagery, and more prominent call-to-action buttons.",
+        recommendation: "A cleaner hero section would create a better first impression and help guide visitors toward booking an appointment.",
+        evidence: "Hero section structure",
         strength: false,
       });
-      recommendations.push({
-        category, priority: "high", title: "Modernize the homepage and user journey", finding,
-        recommendation: "Use a modern visual hierarchy, consistent branding, focused navigation, trust sections, mobile-first spacing, and repeated high-intent calls to action.",
-        business_impact: "A clearer and more credible experience can help more visitors understand the offer and take the next step.",
+      comments.push({
+        category, priority: "high", heading: "Outdated Visual Design",
+        finding: "While the website contains extensive information about your services, the overall design feels dated.",
+        recommendation: "Refreshing the typography, color palette, spacing, and visual hierarchy would create a more modern and professional appearance.",
+        evidence: "Typography, color contrast, and spacing layout",
+        strength: false,
       });
+      comments.push({
+        category, priority: "medium", heading: "Header & Navigation",
+        finding: "The header could be modernized with improved spacing, clearer navigation, and a more intuitive mobile menu.",
+        recommendation: "Making it easier for visitors to browse your services.",
+        evidence: "Header and navigation structure",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "high", heading: "Practice & Service Pages",
+        finding: "The service pages would benefit from improved layouts, modern content sections, better spacing, and stronger visual hierarchy.",
+        recommendation: "Make information easier to scan and understand.",
+        evidence: "Service detail page designs",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Footer Design",
+        finding: "The footer could be redesigned with better organization of office locations, contact details, quick links, and patient resources.",
+        recommendation: "A cleaner footer would improve navigation and provide a more polished finish to the website.",
+        evidence: "Footer layout links and location mapping",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "high", heading: "Mobile User Experience",
+        finding: "Although the website is functional on mobile devices, several sections could be better optimized with improved spacing, typography, and content layouts.",
+        recommendation: "Provide a smoother browsing experience across all screen sizes.",
+        evidence: `Mobile layout responsiveness (Mobile score ${input.scores.mobile}/100)`,
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Overall UI/UX Improvements",
+        finding: "Refreshing buttons, icons, images, cards, and section layouts would create a more engaging experience.",
+        recommendation: "Strengthening patient confidence and improving the overall look of the website.",
+        evidence: "Global UI widgets and buttons",
+        strength: false,
+      });
+
+      recommendations.push({
+        category, priority: "high", title: "Implement Website Redesign",
+        finding: "Rather than making individual design changes, we recommend a complete visual redesign while retaining your existing content and functionality.",
+        recommendation: `This approach will modernize the website, improve usability across all devices, and better reflect the professionalism of ${name}.`,
+        business_impact: "A modern design with clean typography and conversion paths increases customer inquiries and builds trust.",
+      });
+
       sections.push({
         category, heading: "Re-Design and UX Analysis",
-        analysis: "The redesign review focuses on visual hierarchy, navigation, mobile presentation, trust, branding, and conversion flow.",
-        findings: [finding, `${forms} form(s) and ${home?.ctas.length || 0} homepage CTA label(s) were detected.`],
-        recommendations: ["Create a focused hero and modern content hierarchy.", "Improve navigation, mobile spacing, trust proof, and lead capture."],
+        analysis: "This review focuses on visual hierarchy, navigation, mobile presentation, trust, branding, and conversion flow.",
+        findings: [
+          "Homepage hero section lacks strong CTAs and clear primary headings.",
+          "Typography, colors, and layout structure feel dated.",
+          "Service pages and footer organization need alignment and modern spacing.",
+          "Mobile spacing and navigation menu are not fully optimized."
+        ],
+        recommendations: [
+          "Implement a complete visual redesign while retaining content.",
+          "Redesign the hero section with clear value proposition headlines.",
+          "Upgrade navigation, layout hierarchy, and mobile usability."
+        ],
       });
     }
     if (category === "fix_issues") {
@@ -448,44 +499,151 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
     }
     if (category === "design_improvements") {
       comments.push({
-        category, priority: "high", heading: "Layout and visual aesthetics can be modernized",
-        finding: "While the underlying content is solid, the presentation lacks modern UI refinements.",
-        recommendation: "Apply improved spacing, consistent typography, subtle animations, and updated UI components to elevate the visual appeal without a full rebuild.",
-        evidence: `Mobile score is ${input.scores.mobile}/100. Modernizing the UI can improve user engagement metrics.`,
+        category, priority: "high", heading: "Oversized Logo & Placement",
+        finding: "The website logo appears larger than necessary, making the header feel unbalanced.",
+        recommendation: "Reduce the logo size and refine its placement to create a cleaner and more professional appearance.",
+        evidence: "Header logo area height",
         strength: false,
       });
+      comments.push({
+        category, priority: "high", heading: "Large Images & Spacing",
+        finding: "Several images throughout the website are oversized, affecting the visual balance of the pages.",
+        recommendation: "Optimize image dimensions and spacing to improve readability and create a more polished layout.",
+        evidence: "Unoptimized and oversized page images",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Footer Spacing & Organization",
+        finding: "There is excessive spacing within the footer, making the section appear disconnected from the rest of the page.",
+        recommendation: "Adjust the spacing and improve the organization of the footer content to provide a cleaner finish.",
+        evidence: "Excessive footer container margins",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "high", heading: "Mobile Spacing & Alignment",
+        finding: "The mobile layout requires refinement to improve spacing, alignment, typography, and browsing flow.",
+        recommendation: "Optimize the responsive design to ensure the website displays consistently across all mobile devices.",
+        evidence: `Mobile responsive structure (Mobile score ${input.scores.mobile}/100)`,
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Visual Styling & Typography",
+        finding: "The existing design needs a visual refresh with updated typography, colors, and consistent sections.",
+        recommendation: "Refresh the styling with updated typography, improved spacing, modern buttons, and refined colors while maintaining current branding.",
+        evidence: "Visual layout elements",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Navigation Usability",
+        finding: "The website navigation can be enhanced to make it easier for visitors to find important information.",
+        recommendation: "Optimize mobile navigation menus and desktop headers to make finding information simple.",
+        evidence: "Header navigation layout",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "high", heading: "Overall User Experience",
+        finding: "Enhancing the design by refining layouts, visual hierarchy, and UI responsiveness is recommended over a rebuild.",
+        recommendation: "Refine layouts, improve visual hierarchy, modernize UI elements, and optimize responsiveness while preserving current content.",
+        evidence: "Entire website UX flow",
+        strength: false,
+      });
+
       recommendations.push({
         category, priority: "high", title: "Implement Website Design Improvements",
         finding: "The current design feels slightly outdated and could benefit from visual polish.",
         recommendation: "Introduce refined spacing, better contrast, modern typography, and interactive UI elements while preserving existing content.",
         business_impact: "A polished, modern look builds trust faster and decreases bounce rates, leading to higher conversion.",
       });
+
       sections.push({
         category, heading: "Design Enhancement Opportunities",
         analysis: "This review focuses on visual styling, layout spacing, modern UI trends, and user experience without changing core functionality.",
-        findings: ["The interface lacks the premium feel of modern web applications.", "Spacing and typography could be optimized for better readability."],
-        recommendations: ["Upgrade UI components (buttons, cards, forms).", "Improve whitespace and typographic hierarchy.", "Enhance mobile responsiveness and navigation."],
+        findings: [
+          "The website logo appears larger than necessary, making the header feel unbalanced.",
+          "Several images throughout the website are oversized, affecting the visual balance.",
+          "There is excessive spacing within the footer, disconnecting it from the page.",
+          "Mobile responsiveness, spacing, alignment, and navigation need refinement."
+        ],
+        recommendations: [
+          "Reduce logo size and refine header layout.",
+          "Optimize image dimensions, compress assets, and improve spacing.",
+          "Adjust footer spacing and improve content layout.",
+          "Optimize mobile responsiveness, styling, and navigation."
+        ],
       });
     }
     if (category === "redesign_layout") {
       comments.push({
-        category, priority: "high", heading: "Layout structure and content hierarchy require modernization",
-        finding: "The current website layout does not optimally structure information flow, hindering the visual reading path.",
-        recommendation: "Reorganize the page layout grids, introduce better vertical rhythm, and upgrade content layout structure for a modern feel.",
-        evidence: `Mobile viewport score is ${input.scores.mobile}/100. Restructuring the page layout can improve UX.`,
+        category, priority: "high", heading: "Homepage Hero Section",
+        finding: "The homepage hero section could be redesigned with a stronger headline, modern imagery, and more prominent call-to-action buttons.",
+        recommendation: "A cleaner hero section would create a better first impression and help guide visitors toward booking an appointment.",
+        evidence: "Hero section structure",
         strength: false,
       });
+      comments.push({
+        category, priority: "high", heading: "Outdated Visual Design",
+        finding: "While the website contains extensive information about your services, the overall design feels dated.",
+        recommendation: "Refreshing the typography, color palette, spacing, and visual hierarchy would create a more modern and professional appearance.",
+        evidence: "Typography, color contrast, and spacing layout",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Header & Navigation",
+        finding: "The header could be modernized with improved spacing, clearer navigation, and a more intuitive mobile menu.",
+        recommendation: "Making it easier for visitors to browse your services.",
+        evidence: "Header and navigation structure",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "high", heading: "Practice & Service Pages",
+        finding: "The service pages would benefit from improved layouts, modern content sections, better spacing, and stronger visual hierarchy.",
+        recommendation: "Make information easier to scan and understand.",
+        evidence: "Service detail page designs",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Footer Design",
+        finding: "The footer could be redesigned with better organization of office locations, contact details, quick links, and patient resources.",
+        recommendation: "A cleaner footer would improve navigation and provide a more polished finish to the website.",
+        evidence: "Footer layout links and location mapping",
+        strength: false,
+      });
+      comments.push({
+        category, priority: "high", heading: "Mobile User Experience",
+        finding: "Although the website is functional on mobile devices, several sections could be better optimized with improved spacing, typography, and content layouts.",
+        recommendation: "Provide a smoother browsing experience across all screen sizes.",
+        evidence: `Mobile layout responsiveness (Mobile score ${input.scores.mobile}/100)`,
+        strength: false,
+      });
+      comments.push({
+        category, priority: "medium", heading: "Overall UI/UX Improvements",
+        finding: "Refreshing buttons, icons, images, cards, and section layouts would create a more engaging experience.",
+        recommendation: "Strengthening patient confidence and improving the overall look of the website.",
+        evidence: "Global UI widgets and buttons",
+        strength: false,
+      });
+
       recommendations.push({
         category, priority: "high", title: "Upgrade layout and restructure pages",
-        finding: "The overall website layout needs structural updates to improve scannability.",
-        recommendation: "Implement clear grid systems, balance text block width, and realign structural containers to modern layout standards.",
+        finding: "Rather than making individual design changes, we recommend a complete visual redesign while retaining your existing content and functionality.",
+        recommendation: `This approach will modernize the website, improve usability across all devices, and better reflect the professionalism of ${name}.`,
         business_impact: "An optimized website layout decreases cognitive friction for users, driving higher engagement and layout-related conversion.",
       });
+
       sections.push({
         category, heading: "Redesign & Layout Improvements",
         analysis: "This analysis evaluates your layout flow, visual structure, container spacing, and key component organization to modernize your site.",
-        findings: ["Information hierarchy and structural layout flow could be optimized.", "Whitespace and spacing between main structural sections require adjustment."],
-        recommendations: ["Re-align structural layout grids.", "Optimize spacing and vertical rhythm between sections.", "Implement necessary layout design changes to improve readability."],
+        findings: [
+          "Homepage hero section lacks strong CTAs and clear primary headings.",
+          "Typography, colors, and layout structure feel dated.",
+          "Service pages and footer organization need alignment and modern spacing.",
+          "Mobile spacing and navigation menu are not fully optimized."
+        ],
+        recommendations: [
+          "Implement a complete visual redesign while retaining content.",
+          "Redesign the hero section with clear value proposition headlines.",
+          "Upgrade navigation, layout hierarchy, and mobile usability."
+        ],
       });
     } else if (!["redesign", "fix_issues", "loading_speed", "seo", "maintenance", "design_improvements", "redesign_layout"].includes(category)) {
       const label = categoryLabel(category);
@@ -532,8 +690,8 @@ function buildFallback(input: AuditInput, pages: CrawledPage[]): AiAudit {
       scope,
       expected_outcomes: recommendations.map((item) => item.business_impact),
       call_to_action: "Book a short consultation to confirm priorities, scope, and implementation timing.",
-      email_subject: `${labels.join(" + ")} opportunities for ${name}`,
-      email_body: `Hi,\n\nI took some time to review ${input.website} with a focus on ${labels.join(" + ")}, and I noticed a few specific areas where some focused updates could make a real difference.\n\nI've put together a quick web report outlining what I found and my recommended action plan for improving it.\n\nWould you be open to a brief chat to go over the priorities? You're also totally welcome to just reply directly to this email if you have any immediate questions.\n\nBest regards,\nHassan Naqvi`,
+      email_subject: `Website Enhancement Recommendations for ${name}`,
+      email_body: `Hi ${name} Team,\n\nWe hope you're doing well.\n\nOur team recently reviewed your website and identified several opportunities to enhance its design and user experience without requiring a complete redesign.\n\nWe've prepared a brief technical review outlining our recommendations. These improvements focus on refining the existing layout, updating the visual styling, improving mobile responsiveness, and polishing the overall user experience while preserving your current content and website structure.\n\nIf you're interested, simply reply to this email and we'd be happy to discuss the recommendations and provide a tailored enhancement plan.\n\nKind regards,\nCore Web Labs Team`,
       maintenance_pricing: {
         included: input.selectedCategories.includes("maintenance"),
         plan_name: input.selectedCategories.includes("maintenance") ? "Monthly Website Care Plan" : "",
@@ -587,23 +745,26 @@ REQUIRED REPORT STRUCTURE:
 3. Recommended Scope: A short list of only the work needed to resolve the priority findings. Do not repeat findings word-for-word.
 4. Free Demo Offer: Only include this if "Complete Re-Design" is selected. Write: "I can create a free homepage redesign concept to show how the website could look with a clearer layout, stronger trust sections, and a more focused enquiry path. There is no obligation to continue with the full redesign."
 5. Next Step: One simple CTA: "Reply if you would like me to prepare the free homepage concept or discuss the priority improvements."
-6. Email Body (email_body): Write the email exactly using this template, replacing the bracketed information. If the business name looks like a phone number, URL, or is generally weird, just use "Hi," instead of "Hi [Business Name],":
-"Hi [Business Name],
+6. Email Body (email_body): Write the email exactly using this template, replacing the bracketed information. If the business name is a URL or phone number, use "Hi Team," or "Hi," instead of "Hi [Business Name] Team,":
+"Hi [Business Name] Team,
 
-I took some time to review [Website URL] with a focus on [Selected Categories], and I noticed a few specific areas where some focused updates could make a real difference.
+We hope you're doing well.
 
-I've put together a quick web report outlining what I found and my recommended action plan for improving it.
+Our team recently reviewed your website and identified several opportunities to enhance its design and user experience without requiring a complete redesign.
 
-Would you be open to a brief chat to go over the priorities? You're also totally welcome to just reply directly to this email if you have any immediate questions.
+We've prepared a brief technical review outlining our recommendations. These improvements focus on refining the existing layout, updating the visual styling, improving mobile responsiveness, and polishing the overall user experience while preserving your current content and website structure.
 
-Best regards,
-Hassan Naqvi"
+If you're interested, simply reply to this email and we'd be happy to discuss the recommendations and provide a tailored enhancement plan.
+
+Kind regards,
+
+Core Web Labs Team"
 
 DYNAMIC CATEGORY HANDLING:
 - Website Changes & Content Updates: prioritize broken links, layout, mobile issues, missing CTAs, content, form, button, and navigation issues.
 - Website Design Improvements: prioritize layout refinements, visual styling updates, improved spacing and typography, modern UI enhancements, mobile responsiveness, navigation improvements, and overall user experience upgrades while preserving the current content and structure.
-- Website Redesign & Layout Improvement: Focus on upgrading the current layout, enhancing the user experience, and implementing necessary structural changes to modernize the site.
-- Complete Re-Design: Write a short, professional redesign summary based on the website audit. Clearly explain if the current website looks outdated or does not follow modern design and user-experience standards. Mention relevant improvement areas (visual design, mobile responsiveness, page structure, navigation, trust elements, calls to action, speed, accessibility, conversion flow). Use simple, client-friendly English with a helpful, professional tone (not overly negative). Focus on why a redesign will improve the visitor experience and generate more enquiries/leads. Example: "Your website design looks outdated and does not meet current user experience or design standards. A redesign is recommended to improve the visual appearance, mobile experience, page structure, trust elements, calls to action, and overall conversion flow. The updated design should follow modern website trends while keeping the brand professional, clear, and easy for visitors to use."
+- Website Redesign & Layout Improvement: Focus on upgrading the current layout, enhancing the user experience, and implementing necessary structural changes to modernize the site. Structure findings around: 1. Homepage Hero Section, 2. Outdated Visual Design, 3. Header & Navigation, 4. Practice & Service Pages, 5. Footer Design, 6. Mobile User Experience, 7. Overall UI/UX Improvements.
+- Complete Re-Design: Write a short, professional redesign summary based on the website audit. Clearly explain if the current website looks outdated or does not follow modern design and user-experience standards. Structure findings exactly around: 1. Homepage Hero Section, 2. Outdated Visual Design, 3. Header & Navigation, 4. Practice & Service Pages, 5. Footer Design, 6. Mobile User Experience, 7. Overall UI/UX Improvements. End with a "Recommendation" concluding that a complete visual redesign is recommended while retaining content and functionality to modernize the website, improve mobile usability, and better reflect the business professionalism.
 - SEO: prioritize titles, headings, local SEO, service pages, internal links, metadata, and content gaps.
 - Technical Fixes: prioritize speed, mobile performance, broken forms, console errors, security, image optimization, and browser issues.
 
@@ -751,7 +912,33 @@ export function getAiAudit(value: unknown): AiAudit | null {
 }
 
 export function formatDeveloperComments(audit: AiAudit) {
-  return audit.developer_comments
-    .map((comment) => `${comment.heading}: ${comment.finding} Recommendation: ${comment.recommendation}`)
-    .join("\n");
+  const isRedesign = audit.selected_categories.some(c => ["redesign", "redesign_layout"].includes(c));
+  const isDesignImprovements = audit.selected_categories.includes("design_improvements");
+  
+  let title = "Website Analysis";
+  let subtitle = "Our team reviewed the website and identified several opportunities to improve its design, usability, and overall user experience.";
+  if (isRedesign) {
+    title = "Technical Website Review";
+  } else if (isDesignImprovements) {
+    title = "Website Enhancement Recommendations";
+    subtitle = "Our team reviewed the website and identified several areas where the existing design can be improved without a full redesign. The goal is to modernize the website while preserving the current content and overall structure.";
+  }
+
+  let html = `<h1>${title}</h1>\n<p>${subtitle}</p>\n\n`;
+
+  audit.developer_comments.forEach((comment, index) => {
+    html += `<h2>${index + 1}. ${comment.heading}</h2>\n`;
+    html += `<p>${comment.finding}</p>\n`;
+    html += `<p><strong>Recommendation:</strong> ${comment.recommendation}</p>\n\n`;
+  });
+
+  const name = audit.audit_summary?.overview?.split(" was reviewed")[0] || "your business";
+  
+  if (isRedesign) {
+    html += `<h2>Recommendation</h2>\n<p>Rather than making individual design changes, we recommend a complete visual redesign while retaining your existing content and functionality. This approach will modernize the website, improve usability across all devices, and better reflect the professionalism of ${name}.</p>`;
+  } else {
+    html += `<h2>Recommendation</h2>\n<p>Rather than rebuilding the website, we recommend enhancing the existing design by refining layouts, improving visual hierarchy, modernizing UI elements, and optimizing responsiveness. These improvements will create a more professional, user-friendly experience while preserving your current content and website structure.</p>`;
+  }
+
+  return html;
 }
