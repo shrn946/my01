@@ -153,8 +153,77 @@ export const projects = [
     ],
     liveUrl: 'https://www.manordentalcentre.co.uk/',
     featured: true
+  },
+  {
+    title: "Electrical Repair & Services (erepair)",
+    slug: "electrical-repair-services-erepair",
+    category: "Business Website",
+    description: "A premium, modern service website template designed for electricians and electrical repair businesses. It features detailed service pages, interactive pricing structures, diagnostic service details, and responsive scheduling options.",
+    overview: "A complete digital platform for electrical contractors featuring appointment booking and diagnostic pricing.",
+    problem: "Electrical service providers need a way to build trust, showcase transparent diagnostic rates, and capture scheduled bookings seamlessly.",
+    solution: "I developed a modern, high-performance website template with custom scheduling integrations and interactive pricing calculators.",
+    result: "Improved lead generation, clear service transparency, and a streamlined online scheduling experience.",
+    tools: ["WordPress", "Tailwind CSS", "Next.js", "React"],
+    image: "/uploads/electrical.png",
+    gallery: [
+      "/uploads/electrical.png"
+    ],
+    liveUrl: "https://services-websites-rw1g.vercel.app/",
+    featured: true
+  },
+  {
+    title: "Plumbing Services (Pipepro)",
+    slug: "plumbing-services-pipepro",
+    category: "Business Website",
+    description: "A clean, professional website template tailored for plumbers, handyman services, and piping professionals. Features customizable service layouts, FAQ sections, request-a-quote forms, and a responsive layout.",
+    overview: "A conversion-optimized layout for plumbing and piping contractors seeking quote requests.",
+    problem: "Plumbers and handyman businesses need a responsive interface with clear request-a-quote pipelines and easy-to-browse FAQs.",
+    solution: "I designed a clean, user-friendly template with modular service layouts and custom-built multi-step quote forms.",
+    result: "Higher quote submission rates, improved mobile usability, and reduced support inquiries due to clear FAQ sections.",
+    tools: ["WordPress", "React", "Tailwind CSS", "Framer Motion"],
+    image: "/uploads/plumbing.png",
+    gallery: [
+      "/uploads/plumbing.png"
+    ],
+    liveUrl: "https://services-websites-rw1g.vercel.app/services-01",
+    featured: true
+  },
+  {
+    title: "Cleaning Services (Cleanon)",
+    slug: "cleaning-services-cleanon",
+    category: "Business Website",
+    description: "A sleek and vibrant design for residential, commercial, office, and window cleaning services. It incorporates pricing packages, team spotlights, service detail pages, and custom booking inquiry forms.",
+    overview: "A vibrant booking-centric template for cleaning service companies.",
+    problem: "Residential and commercial cleaners require booking systems that handle varying pricing packages and showcase team reliability.",
+    solution: "Created a highly visual, modern layout featuring animated pricing tables, custom inquiry wizards, and dynamic team spotlight elements.",
+    result: "Increased user engagement, higher booking inquiries, and a professional brand representation.",
+    tools: ["Next.js", "React", "Tailwind CSS", "Framer Motion"],
+    image: "/uploads/cleaning.png",
+    gallery: [
+      "/uploads/cleaning.png"
+    ],
+    liveUrl: "https://services-websites-rw1g.vercel.app/services-02",
+    featured: true
+  },
+  {
+    title: "Pet Services & Adoption (Woof!)",
+    slug: "pet-services-adoption-woof",
+    category: "Business Website",
+    description: "A warm and welcoming design for pet care, pet services, and pet adoption platforms. Features pet profiles (adoption listings), galleries, services, and adoption application workflow sections.",
+    overview: "An interactive web template for animal shelters, pet adoption organizations, and pet care providers.",
+    problem: "Pet adoption and care sites need organized profile listings, clear application steps, and high-quality galleries to connect pets with owners.",
+    solution: "I designed and developed a heartwarming template with interactive adoption listing filters, application steps, and gallery highlights.",
+    result: "Streamlined adoption application workflows and enhanced community engagement for pet caretakers.",
+    tools: ["Next.js", "React", "Tailwind CSS", "Framer Motion"],
+    image: "/uploads/pets.png",
+    gallery: [
+      "/uploads/pets.png"
+    ],
+    liveUrl: "https://services-websites-rw1g.vercel.app/services-03",
+    featured: true
   }
 ];
+
 
 export const heroSlides = [
   {
