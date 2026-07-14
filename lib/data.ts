@@ -191,7 +191,11 @@ export async function getProjects(featured = false): Promise<ProjectItem[]> {
           include: { category: true },
           orderBy: { createdAt: "desc" }
         });
-        return data.length ? data.map(normalizeProject) : projects.map(normalizeProject);
+        const dbProjects = data.map(normalizeProject);
+        const seedProjects = projects.filter((project) => !featured || project.featured).map(normalizeProject);
+        const dbSlugs = new Set(dbProjects.map(p => p.slug));
+        const missingSeed = seedProjects.filter(p => !dbSlugs.has(p.slug));
+        return [...dbProjects, ...missingSeed];
       } catch {
         return projects.filter((project) => !featured || project.featured).map(normalizeProject);
       }
@@ -211,7 +215,13 @@ export async function getProjectsByCategory(categoryName: string): Promise<Proje
           include: { category: true },
           orderBy: { createdAt: "desc" }
         });
-        return data.map(normalizeProject);
+        const dbProjects = data.map(normalizeProject);
+        const seedProjects = projects
+          .filter(p => normalizeCategory(p.category).toLowerCase() === categoryName.toLowerCase())
+          .map(normalizeProject);
+        const dbSlugs = new Set(dbProjects.map(p => p.slug));
+        const missingSeed = seedProjects.filter(p => !dbSlugs.has(p.slug));
+        return [...dbProjects, ...missingSeed];
       } catch {
         return projects.filter(p => normalizeCategory(p.category).toLowerCase() === categoryName.toLowerCase()).map(normalizeProject);
       }
