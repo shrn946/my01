@@ -168,7 +168,7 @@ export const projects = [
     gallery: [
       "/uploads/electrical.png"
     ],
-    liveUrl: "https://services-websites-rw1g.vercel.app/",
+    liveUrl: "https://services.coreweblabs.com/",
     featured: true
   },
   {
@@ -185,7 +185,7 @@ export const projects = [
     gallery: [
       "/uploads/plumbing.png"
     ],
-    liveUrl: "https://services-websites-rw1g.vercel.app/services-01",
+    liveUrl: "https://services.coreweblabs.com/services-01",
     featured: true
   },
   {
@@ -202,7 +202,7 @@ export const projects = [
     gallery: [
       "/uploads/cleaning.png"
     ],
-    liveUrl: "https://services-websites-rw1g.vercel.app/services-02",
+    liveUrl: "https://services.coreweblabs.com/services-02",
     featured: true
   },
   {
@@ -219,7 +219,7 @@ export const projects = [
     gallery: [
       "/uploads/pets.png"
     ],
-    liveUrl: "https://services-websites-rw1g.vercel.app/services-03",
+    liveUrl: "https://services.coreweblabs.com/services-03",
     featured: true
   }
 ];
