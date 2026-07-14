@@ -2,6 +2,14 @@ import { getPrisma } from "@/lib/prisma";
 import { heroSlides, posts, projects, reviews } from "@/lib/seed-data";
 import { unstable_cache } from "next/cache";
 
+function cacheBypass<T>(fn: () => Promise<T>, key: string[], options: { tags: string[], revalidate: number }): Promise<T> {
+  if (process.env.NODE_ENV === 'development') {
+    return fn();
+  }
+  return unstable_cache(fn, key, options)();
+}
+
+
 type CategoryLike = string | { name: string } | null | undefined;
 
 type ProjectInput = {
@@ -182,7 +190,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostItem | nu
 }
 
 export async function getProjects(featured = false): Promise<ProjectItem[]> {
-  return unstable_cache(
+  return cacheBypass(
     async () => {
       try {
         const prisma = getPrisma();
@@ -202,11 +210,11 @@ export async function getProjects(featured = false): Promise<ProjectItem[]> {
     },
     [`projects-${featured}`],
     { tags: ["projects"], revalidate: 604800 }
-  )();
+  );
 }
 
 export async function getProjectsByCategory(categoryName: string): Promise<ProjectItem[]> {
-  return unstable_cache(
+  return cacheBypass(
     async () => {
       try {
         const prisma = getPrisma();
@@ -228,11 +236,11 @@ export async function getProjectsByCategory(categoryName: string): Promise<Proje
     },
     [`projects-category-${categoryName}`],
     { tags: ["projects"], revalidate: 604800 }
-  )();
+  );
 }
 
 export async function getRelatedProjects(currentSlug: string, categoryName: string, limit = 3): Promise<ProjectItem[]> {
-  return unstable_cache(
+  return cacheBypass(
     async () => {
       try {
         const prisma = getPrisma();
@@ -267,11 +275,11 @@ export async function getRelatedProjects(currentSlug: string, categoryName: stri
     },
     [`related-projects-${currentSlug}`],
     { tags: ["projects"], revalidate: 604800 }
-  )();
+  );
 }
 
 export async function getProjectBySlug(slug: string): Promise<ProjectItem | null> {
-  return unstable_cache(
+  return cacheBypass(
     async () => {
       try {
         const prisma = getPrisma();
@@ -283,7 +291,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectItem | null
     },
     [`project-${slug}`],
     { tags: ["projects"], revalidate: 604800 }
-  )();
+  );
 }
 
 export async function getReviews(featured = false): Promise<ReviewItem[]> {
